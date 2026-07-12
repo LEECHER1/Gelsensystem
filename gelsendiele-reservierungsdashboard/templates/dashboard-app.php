@@ -28,13 +28,6 @@ $manifest_url = add_query_arg( 'gd-pwa-manifest', '1', home_url( '/' ) );
 <main id="gd-app-root" class="gd-app-root">
     <?php echo do_shortcode( '[gelsendiele_reservierungen]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 </main>
-<?php
-$gd_app_section = isset( $_GET['gd-section'] ) ? sanitize_key( wp_unslash( $_GET['gd-section'] ) ) : 'reservations';
-if ( in_array( $gd_app_section, array( 'settings', 'users' ), true ) ) :
-	?><script src="<?php echo esc_url( GELSENDIELE_URL . 'admin/assets/settings.js?ver=' . GELSENDIELE_VERSION ); ?>"></script>
-	<script src="<?php echo esc_url( GELSENDIELE_URL . 'assets/dashboard.js?ver=' . GELSENDIELE_VERSION ); ?>"></script><?php
-endif;
-?>
 <?php wp_footer(); ?>
 </body>
 </html>
