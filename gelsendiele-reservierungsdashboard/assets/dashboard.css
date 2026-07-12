@@ -1918,6 +1918,72 @@ html[data-gd-theme="dark"] .gd-table-picker-clear:focus-visible { background:#20
   .gd-table-number-button { border-radius:13px; font-size:15px; }
   .gd-table-count-setting { grid-template-columns:90px minmax(0,1fr); }
 }
+
+/* ==========================================================
+   Version 2.4.0 – zentrale Gelsensystem-App
+   ========================================================== */
+.gelsensystem-sidebar { display:none; }
+.gd-central-mobile-header { display:none; }
+.gd-central-content { min-width:0; }
+.gelsensystem-section-heading { display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin:0 0 24px; }
+.gelsensystem-section-heading span { color:var(--gd-green);font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase; }
+.gelsensystem-section-heading h1,.gelsensystem-app-settings>h1 { margin:5px 0 7px;font-size:clamp(30px,4vw,46px);letter-spacing:-1.2px; }
+.gelsensystem-section-heading p { margin:0;color:var(--gd-muted); }
+.gelsensystem-user-list { display:grid;gap:12px; }
+.gelsensystem-user-card { display:grid;grid-template-columns:minmax(240px,1fr) minmax(280px,1.3fr) auto;align-items:center;gap:24px;padding:18px 20px;border:1px solid var(--gd-border);border-radius:18px;background:#fff;box-shadow:0 6px 22px rgba(24,40,24,.04); }
+.gelsensystem-user-identity { display:flex;align-items:center;gap:12px;min-width:0; }
+.gelsensystem-user-identity>span { display:grid;place-items:center;width:44px;height:44px;flex:0 0 44px;border-radius:14px;color:#fff;background:var(--gd-green);font-weight:800; }
+.gelsensystem-user-identity strong,.gelsensystem-user-identity small { display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.gelsensystem-user-identity small,.gelsensystem-user-card label small { color:var(--gd-muted); }
+.gelsensystem-user-card label { display:grid;gap:5px; }
+.gelsensystem-user-card label>span { font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px; }
+.gelsensystem-user-card select { width:100%;min-height:42px;border:1px solid var(--gd-border);border-radius:10px;background:#fff;padding:0 10px; }
+.gelsensystem-user-card .button,.gelsensystem-app-settings .button { display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 15px;border:1px solid var(--gd-border);border-radius:10px;color:var(--gd-text);background:#fff;text-decoration:none;font-weight:700;cursor:pointer; }
+.gelsensystem-user-card .button-primary,.gelsensystem-app-settings .button-primary { color:#fff;border-color:var(--gd-green);background:var(--gd-green); }
+.gelsensystem-app-settings .nav-tab-wrapper { display:flex;gap:7px;overflow:auto;padding:0 0 12px;white-space:nowrap;scrollbar-width:thin; }
+.gelsensystem-app-settings .nav-tab { display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border:1px solid var(--gd-border);border-radius:999px;color:var(--gd-muted);background:#fff;text-decoration:none;font-size:13px;font-weight:750; }
+.gelsensystem-app-settings .nav-tab-active { color:#fff;border-color:var(--gd-green);background:var(--gd-green); }
+.gelsensystem-app-settings .notice { margin:12px 0;padding:12px 15px;border:1px solid var(--gd-border);border-left:4px solid var(--gd-green);border-radius:10px;background:#fff; }
+.gelsensystem-app-settings .notice p { margin:0; }
+.gelsensystem-app-settings input,.gelsensystem-app-settings select,.gelsensystem-app-settings textarea { font:inherit; }
+.gelsensystem-app-settings .submit { margin:18px 0; }
+
+@media (min-width:1025px) {
+  .gd-dashboard-shell.gd-has-central-nav { max-width:none;margin:0;padding-left:286px;padding-right:36px; }
+  .gd-dashboard-shell.gd-has-central-nav>.gd-dashboard-header,
+  .gd-dashboard-shell.gd-has-central-nav>.gd-tabs,
+  .gd-dashboard-shell.gd-has-central-nav>.gd-automation-panel,
+  .gd-dashboard-shell.gd-has-central-nav>.gd-toolbar,
+  .gd-dashboard-shell.gd-has-central-nav>.gd-main-content { width:min(100%,1380px);margin-left:auto;margin-right:auto; }
+  .gelsensystem-sidebar { position:fixed;inset:0 auto 0 0;z-index:900;display:flex;width:250px;padding:24px 16px 18px;flex-direction:column;color:#e8f0e9;background:linear-gradient(180deg,#101b13,#08110b);box-shadow:12px 0 40px rgba(8,17,11,.13); }
+  .gelsensystem-sidebar-brand { display:flex;align-items:center;gap:11px;margin:0 4px 28px;color:#fff;text-decoration:none; }
+  .gelsensystem-sidebar-brand>span { display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px;border-radius:13px;color:#102114;background:#c9e6c5;font-size:13px;font-weight:900;letter-spacing:.5px; }
+  .gelsensystem-sidebar-brand strong,.gelsensystem-sidebar-brand small { display:block; }
+  .gelsensystem-sidebar-brand strong { font-size:17px; }
+  .gelsensystem-sidebar-brand small { max-width:158px;margin-top:2px;overflow:hidden;color:#91a496;font-size:11px;text-overflow:ellipsis;white-space:nowrap; }
+  .gelsensystem-sidebar nav { display:grid;gap:4px; }
+  .gelsensystem-sidebar nav a { display:flex;align-items:center;gap:11px;min-height:44px;padding:0 11px;border-radius:11px;color:#b6c4b8;text-decoration:none;font-size:13px;font-weight:700;transition:.16s ease; }
+  .gelsensystem-sidebar nav a:hover { color:#fff;background:rgba(255,255,255,.07); }
+  .gelsensystem-sidebar nav a.is-active { color:#fff;background:linear-gradient(135deg,#315b2d,#234b24);box-shadow:0 7px 18px rgba(0,0,0,.15); }
+  .gelsensystem-sidebar nav a>span { display:grid;place-items:center;width:25px;height:25px;flex:0 0 25px;border-radius:8px;color:#cce4c9;background:rgba(255,255,255,.08);font-size:11px;font-weight:900; }
+  .gelsensystem-sidebar-footer { display:grid;gap:3px;margin-top:auto;padding:15px 12px 0;border-top:1px solid rgba(255,255,255,.09); }
+  .gelsensystem-sidebar-footer small { color:#829087; }
+  .gelsensystem-sidebar-footer strong { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+  .gelsensystem-sidebar-footer a { margin-top:4px;color:#b7c8b9;font-size:12px;text-decoration:none; }
+  .gd-central-section-shell { min-height:100vh; }
+  .gd-central-content { width:min(100%,1380px);margin:0 auto;padding:8px 0 70px; }
+}
+
+@media (max-width:1024px) {
+  .gd-central-section-shell { padding:0 18px 50px; }
+  .gd-central-mobile-header { position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:15px;margin:0 -18px 22px;padding:12px 18px;border-bottom:1px solid var(--gd-border);background:rgba(248,250,248,.94);backdrop-filter:blur(16px); }
+  .gd-central-mobile-header small,.gd-central-mobile-header strong { display:block; }
+  .gd-central-mobile-header small { color:var(--gd-green);font-size:10px;font-weight:850;letter-spacing:1.2px;text-transform:uppercase; }
+  .gd-central-mobile-header a { color:var(--gd-green);font-size:13px;font-weight:750;text-decoration:none; }
+  .gelsensystem-user-card { grid-template-columns:1fr;gap:14px; }
+  .gelsensystem-user-card .button { width:100%; }
+  .gelsensystem-app-settings .gelsendiele-settings-card { padding:18px; }
+}
 .gd-form-preferences{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:8px}.gd-form-preferences span{display:inline-flex;padding:7px 10px;border-radius:9px;background:rgba(23,155,87,.08);line-height:1.35}.gd-form-preferences strong{margin-right:4px}
 
 /* ==========================================================

@@ -1487,7 +1487,7 @@
     if (manualTitle) manualTitle.textContent = editing ? 'Reservierung bearbeiten' : 'Reservierung hinzufügen';
     if (manualDescription) manualDescription.textContent = editing
       ? 'Alle vorhandenen Daten sind bereits eingetragen. Ändern Sie nur die gewünschten Angaben.'
-      : 'Der Eintrag wird direkt mit Gelsendiele-System und WordPress synchronisiert.';
+      : 'Der Eintrag wird direkt mit Gelsensystem und WordPress synchronisiert.';
     if (manualSubmit) manualSubmit.textContent = editing ? 'Änderungen speichern' : 'Reservierung speichern';
   }
 

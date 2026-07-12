@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.0 – 2026-07-12
+- Sichtbare Produktmarke auf Gelsensystem umgestellt, der konfigurierte Gastronomiebetrieb wird als Kunde angezeigt.
+- Navigation verbindet Reservierungen, Arbeitsbereiche und zentrale Einstellungen.
+
 ## 2.3.3 – 2026-07-12
 - Öffentliches Reservierungsformular kompakter gestaltet und Hinweisleiste durch schlichten Text ersetzt.
 - Automatische Folgeupdates aus den offiziellen Gelsensystem-GitHub-Releases ergänzt.

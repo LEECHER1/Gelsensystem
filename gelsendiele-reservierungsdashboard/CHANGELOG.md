@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.4.0
+- Backend-Marke, Rollenbezeichnungen, PWA-Name und Arbeitsbereiche heißen nun Gelsensystem; der Betriebsname bleibt als Kundendatensatz erhalten.
+- Die Reservierungs-App besitzt auf Desktop eine zentrale Navigation zu allen freigegebenen Modulen.
+- Alle vorhandenen WordPress-Einstellungen sind auch innerhalb der eigenständigen App erreichbar.
+- Administratoren können Benutzerrollen und Bereichszugriffe direkt in der App verwalten.
+- Bestehende technische Slugs, Optionen und Tabellen bleiben zur verlustfreien Datenmigration kompatibel.
+- Der automatische Updater verwendet das umbenannte GitHub-Repository `LEECHER1/Gelsensystem`.
+
 ## 2.3.3
 - Das öffentliche Reservierungsformular benötigt durch kleinere Abstände und Feldhöhen deutlich weniger Bildschirmhöhe.
 - Der Verfügbarkeitshinweis wird als schlichter Sternchen-Text ausgegeben; die leere gelbe Hinweisleiste wurde entfernt.

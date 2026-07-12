@@ -26,7 +26,7 @@ final class GDG_App {
 
 		if ( ! is_user_logged_in() ) {
 			ob_start();
-			echo '<div class="gdg-login-wrap"><h2>Anmeldung erforderlich</h2><p>Dieser Bereich ist nur für Mitarbeiter der Gelsendiele zugänglich.</p>';
+			echo '<div class="gdg-login-wrap"><h2>Anmeldung erforderlich</h2><p>Dieser Bereich ist nur für berechtigte Gelsensystem-Benutzer zugänglich.</p>';
 			wp_login_form( array( 'redirect' => get_permalink() ) );
 			echo '</div>';
 			return (string) ob_get_clean();
@@ -44,6 +44,8 @@ final class GDG_App {
 			'checkout' => 'Kasse',
 		);
 		$urls = self::get_app_urls();
+		$dashboard_page_id = (int) get_option( 'gd_reservierungsdashboard_page_id', 0 );
+		$dashboard_url     = $dashboard_page_id ? get_permalink( $dashboard_page_id ) : home_url( '/reservierungsverwaltung/' );
 		$business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
 		$branding      = Gelsendiele_Settings::get( 'branding', null, array() );
 		$logo_url      = $branding['logo_url'];
@@ -58,14 +60,16 @@ final class GDG_App {
 			<header class="gdg-topbar">
 				<div class="gdg-brand">
 					<span class="gdg-brand-mark"><?php if ( $logo_url ) : ?><img src="<?php echo esc_url( $logo_url ); ?>" alt=""><?php else : ?>G<?php endif; ?></span>
-					<div><strong><?php echo esc_html( $business_name ); ?></strong><span><?php echo esc_html( $labels[ $view ] ); ?></span></div>
+					<div><strong>Gelsensystem</strong><span><?php echo esc_html( $business_name . ' · ' . $labels[ $view ] ); ?></span></div>
 				</div>
 				<nav class="gdg-nav" aria-label="Arbeitsbereiche">
+					<?php if ( current_user_can( 'manage_bookings' ) ) : ?><a href="<?php echo esc_url( add_query_arg( 'gd-section', 'reservations', $dashboard_url ) ); ?>">Reservierungen</a><?php endif; ?>
 					<?php foreach ( $labels as $nav_view => $label ) : ?>
 						<?php if ( self::can_view( $nav_view ) && ! empty( $urls[ $nav_view ] ) ) : ?>
 							<a class="<?php echo $nav_view === $view ? 'is-active' : ''; ?>" href="<?php echo esc_url( $urls[ $nav_view ] ); ?>"><?php echo esc_html( $label ); ?></a>
 						<?php endif; ?>
 					<?php endforeach; ?>
+					<?php if ( current_user_can( 'gelsendiele_manage_settings' ) ) : ?><a href="<?php echo esc_url( add_query_arg( 'gd-section', 'settings', $dashboard_url ) ); ?>">Einstellungen</a><?php endif; ?>
 				</nav>
 				<div class="gdg-top-actions">
 					<span class="gdg-connection" title="Verbindungsstatus"><i></i><span>Online</span></span>

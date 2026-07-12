@@ -40,8 +40,23 @@ if ! grep -Fq '.gdrf-theme-light' "$PLUGIN/assets/reservation-form.css"; then
   exit 1
 fi
 
-if ! grep -Fq 'api.github.com/repos/LEECHER1/Gelsendiele/releases/latest' "$PLUGIN/includes/class-gelsendiele-github-updater.php"; then
+if ! grep -Fq 'api.github.com/repos/LEECHER1/Gelsensystem/releases/latest' "$PLUGIN/includes/class-gelsendiele-github-updater.php"; then
   echo "Die vertrauenswürdige GitHub-Releasequelle fehlt." >&2
+  exit 1
+fi
+
+if ! grep -Fq "render_app_settings" "$PLUGIN/includes/class-gelsendiele-admin.php" || ! grep -Fq "render_app_users" "$PLUGIN/includes/class-gelsendiele-admin.php"; then
+  echo "App-interne Einstellungen oder Benutzerverwaltung fehlen." >&2
+  exit 1
+fi
+
+if ! grep -Fq 'gelsensystem-sidebar' "$PLUGIN/assets/dashboard.css"; then
+  echo "Die zentrale Desktop-Navigation fehlt." >&2
+  exit 1
+fi
+
+if grep -RqsE 'Gelsendiele (Betriebsleitung|Service|Küche|Schank|Reservierungsmitarbeiter)' "$PLUGIN"; then
+  echo "Historische Gelsendiele-Rollenbezeichnungen sind noch sichtbar." >&2
   exit 1
 fi
 

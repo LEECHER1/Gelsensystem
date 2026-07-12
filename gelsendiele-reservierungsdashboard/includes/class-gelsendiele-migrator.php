@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Führt idempotente Updates auch bei bereits aktivem Plugin aus. */
 final class Gelsendiele_Migrator {
 	const VERSION_OPTION = 'gelsendiele_migration_version';
-	const TARGET_VERSION = '2.3.3';
+	const TARGET_VERSION = '2.4.0';
 	const ERROR_OPTION   = 'gelsendiele_last_migration_error';
 
 	public static function bootstrap() {
@@ -36,6 +36,7 @@ final class Gelsendiele_Migrator {
 			}
 
 			self::ensure_professional_roles();
+			self::rename_backend_entities();
 			update_option( self::VERSION_OPTION, self::TARGET_VERSION, false );
 			delete_option( self::ERROR_OPTION );
 			return true;
@@ -65,7 +66,7 @@ final class Gelsendiele_Migrator {
 
 		$manager = get_role( 'gelsendiele_manager' );
 		if ( ! $manager ) {
-			$manager = add_role( 'gelsendiele_manager', 'Gelsendiele Betriebsleitung', $manager_caps );
+			$manager = add_role( 'gelsendiele_manager', 'Gelsensystem Betriebsleitung', $manager_caps );
 		}
 		if ( $manager ) {
 			foreach ( $manager_caps as $capability => $grant ) {
@@ -82,7 +83,7 @@ final class Gelsendiele_Migrator {
 		);
 		$reservation = get_role( 'gelsendiele_reservation_staff' );
 		if ( ! $reservation ) {
-			$reservation = add_role( 'gelsendiele_reservation_staff', 'Gelsendiele Reservierungsmitarbeiter', $reservation_caps );
+			$reservation = add_role( 'gelsendiele_reservation_staff', 'Gelsensystem Reservierungen', $reservation_caps );
 		}
 		if ( $reservation ) {
 			foreach ( $reservation_caps as $capability => $grant ) {
@@ -95,6 +96,35 @@ final class Gelsendiele_Migrator {
 			foreach ( array_keys( $manager_caps ) as $capability ) {
 				$administrator->add_cap( $capability );
 			}
+		}
+	}
+
+	/** Ändert ausschließlich sichtbare Backend-Bezeichnungen; technische Schlüssel bleiben kompatibel. */
+	private static function rename_backend_entities() {
+		$page_id = (int) get_option( 'gd_reservierungsdashboard_page_id', 0 );
+		if ( $page_id && 'Gelsensystem' !== get_the_title( $page_id ) ) {
+			wp_update_post( array( 'ID' => $page_id, 'post_title' => 'Gelsensystem' ) );
+		}
+
+		$labels = array(
+			'gelsendiele_manager'           => 'Gelsensystem Betriebsleitung',
+			'gelsendiele_reservation_staff' => 'Gelsensystem Reservierungen',
+			'gd_reservation_manager'        => 'Gelsensystem Reservierungen',
+			'gdg_service'                   => 'Gelsensystem Service',
+			'gdg_kitchen'                   => 'Gelsensystem Küche',
+			'gdg_bar'                       => 'Gelsensystem Schank',
+		);
+		$wp_roles = wp_roles();
+		$changed  = false;
+		foreach ( $labels as $slug => $label ) {
+			if ( isset( $wp_roles->roles[ $slug ] ) && $wp_roles->roles[ $slug ]['name'] !== $label ) {
+				$wp_roles->roles[ $slug ]['name'] = $label;
+				$wp_roles->role_names[ $slug ]    = $label;
+				$changed = true;
+			}
+		}
+		if ( $changed && $wp_roles->use_db ) {
+			update_option( $wp_roles->role_key, $wp_roles->roles );
 		}
 	}
 }
