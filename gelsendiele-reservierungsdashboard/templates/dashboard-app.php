@@ -14,12 +14,12 @@ $manifest_url = add_query_arg( 'gd-pwa-manifest', '1', home_url( '/' ) );
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Reservierungen">
+    <meta name="apple-mobile-web-app-title" content="Gelsensystem">
     <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
     <link rel="manifest" href="<?php echo esc_url( $manifest_url ); ?>">
     <link rel="apple-touch-icon" sizes="192x192" href="<?php echo esc_url( add_query_arg( 'ver', Gelsendiele_Reservierungsdashboard::VERSION, plugins_url( '../assets/gelsendiele-app-icon-192.png', __FILE__ ) ) ); ?>">
     <link rel="icon" type="image/png" sizes="192x192" href="<?php echo esc_url( add_query_arg( 'ver', Gelsendiele_Reservierungsdashboard::VERSION, plugins_url( '../assets/gelsendiele-app-icon-192.png', __FILE__ ) ) ); ?>">
-    <title><?php echo esc_html( 'Reservierungen – ' . get_bloginfo( 'name' ) ); ?></title>
+    <title><?php echo esc_html( 'Gelsensystem – ' . get_bloginfo( 'name' ) ); ?></title>
     <?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
