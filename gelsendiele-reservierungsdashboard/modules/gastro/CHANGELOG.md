@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.2 – 2026-07-12
+
+- Gemeinsame responsive Korrektur für Smartphone- und Tablet-Breiten.
+
 ## 2.7.1 – 2026-07-12
 
 - URL-Migration mit der sicheren WordPress-Initialisierungsphase synchronisiert.
