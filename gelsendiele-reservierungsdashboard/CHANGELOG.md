@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.7.2
+
+- Theme-Mindestbreiten werden in der eigenständigen App bei Smartphone- und Tablet-Breiten überschrieben.
+- Horizontale Überbreite bleibt auf die vorgesehene Touch-Navigation begrenzt.
+
 ## 2.7.1
 
 - URL- und Seitenmigration läuft erst in der sicheren WordPress-`init`-Phase.
