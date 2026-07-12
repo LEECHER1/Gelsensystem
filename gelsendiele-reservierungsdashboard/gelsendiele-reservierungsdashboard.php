@@ -1,10 +1,10 @@
 <?php
 /**
  * Plugin Name: Gelsensystem
- * Plugin URI: https://github.com/LEECHER1/Gelsendiele
- * Description: Eigenständiges Reservierungs-, Service-, Küchen- und Kassensystem für die Gelsendiele.
- * Version: 2.3.3
- * Author: Andreas Schwarz / Gelsendiele
+ * Plugin URI: https://github.com/LEECHER1/Gelsensystem
+ * Description: Zentrales Reservierungs-, Service-, Küchen- und Kassensystem für Gastronomiebetriebe.
+ * Version: 2.4.0
+ * Author: Andreas Schwarz / Gelsensystem
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
  * Requires PHP: 7.4
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.3.3' );
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.4.0' );
 defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
 defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );
@@ -97,7 +97,7 @@ final class Gelsendiele_Reservierungsdashboard {
         add_action( 'manage_' . $this->booking_post_type() . '_posts_custom_column', array( $this, 'render_table_admin_column' ), 10, 2 );
         add_filter( 'login_redirect', array( $this, 'login_redirect' ), 10, 3 );
 
-        // Eigenständiger App-Modus nur für die Reservierungsverwaltung.
+        // Eigenständiger App-Modus für die zentrale Gelsensystem-Oberfläche.
         add_filter( 'show_admin_bar', array( $this, 'hide_admin_bar_on_dashboard' ) );
         add_filter( 'template_include', array( $this, 'use_standalone_dashboard_template' ), 999 );
         add_filter( 'body_class', array( $this, 'add_dashboard_body_class' ) );
@@ -129,7 +129,7 @@ final class Gelsendiele_Reservierungsdashboard {
         }
 
         $page_id = wp_insert_post( array(
-            'post_title'   => 'Reservierungsverwaltung',
+            'post_title'   => 'Gelsensystem',
             'post_name'    => 'reservierungsverwaltung',
             'post_status'  => 'publish',
             'post_type'    => 'page',
@@ -204,9 +204,9 @@ final class Gelsendiele_Reservierungsdashboard {
 
         echo wp_json_encode( array(
             'id'               => trailingslashit( (string) wp_parse_url( $this->dashboard_url(), PHP_URL_PATH ) ),
-            'name'             => $business_name . ' Reservierungen',
-            'short_name'       => 'Reservierungen',
-            'description'      => 'Reservierungen von ' . $business_name . ' verwalten',
+            'name'             => 'Gelsensystem · ' . $business_name,
+            'short_name'       => 'Gelsensystem',
+            'description'      => 'Gastronomiebetrieb ' . $business_name . ' verwalten',
             'start_url'        => $this->dashboard_url(),
             'scope'            => trailingslashit( (string) wp_parse_url( $this->dashboard_url(), PHP_URL_PATH ) ),
             'display'          => 'standalone',
@@ -318,6 +318,13 @@ final class Gelsendiele_Reservierungsdashboard {
             self::VERSION
         );
 
+        $app_section = isset( $_GET['gd-section'] ) ? sanitize_key( wp_unslash( $_GET['gd-section'] ) ) : 'reservations';
+        if ( in_array( $app_section, array( 'settings', 'users' ), true ) ) {
+            wp_enqueue_style( 'gelsendiele-admin', GELSENDIELE_URL . 'admin/assets/settings.css', array( 'gd-reservierungsdashboard' ), self::VERSION );
+            wp_enqueue_media();
+            wp_enqueue_script( 'gelsendiele-settings', GELSENDIELE_URL . 'admin/assets/settings.js', array(), self::VERSION, true );
+        }
+
         wp_enqueue_script(
             'gd-reservierungsdashboard',
             plugin_dir_url( __FILE__ ) . 'assets/dashboard.js',
@@ -360,8 +367,17 @@ final class Gelsendiele_Reservierungsdashboard {
             return $this->render_login();
         }
 
-        if ( ! current_user_can( 'manage_bookings' ) ) {
-            return '<div class="gd-dashboard-shell"><div class="gd-notice gd-notice-error"><strong>Kein Zugriff.</strong><br>Dieses Benutzerkonto darf keine Reservierungen verwalten.</div></div>';
+        $app_section = isset( $_GET['gd-section'] ) ? sanitize_key( wp_unslash( $_GET['gd-section'] ) ) : 'reservations';
+        if ( ! in_array( $app_section, array( 'reservations', 'settings', 'users' ), true ) ) {
+            $app_section = 'reservations';
+        }
+        $section_capability = 'settings' === $app_section ? 'gelsendiele_manage_settings' : ( 'users' === $app_section ? 'manage_options' : 'manage_bookings' );
+        if ( ! current_user_can( $section_capability ) ) {
+            return '<div class="gd-dashboard-shell"><div class="gd-notice gd-notice-error"><strong>Kein Zugriff.</strong><br>Dieses Benutzerkonto darf diesen Bereich des Gelsensystems nicht verwenden.</div></div>';
+        }
+
+        if ( 'reservations' !== $app_section ) {
+            return $this->render_central_app_section( $app_section );
         }
 
         if ( ! $this->booking_post_type_exists() ) {
@@ -384,14 +400,15 @@ final class Gelsendiele_Reservierungsdashboard {
             . '--gd-bg:' . $branding['surface_color'] . ';';
         ob_start();
         ?>
-        <div class="gd-dashboard-shell" data-default-view="<?php echo esc_attr( $default_view ); ?>" style="<?php echo esc_attr( $brand_style ); ?>">
+        <div class="gd-dashboard-shell gd-has-central-nav" data-default-view="<?php echo esc_attr( $default_view ); ?>" data-app-section="reservations" style="<?php echo esc_attr( $brand_style ); ?>">
             <div id="gd-network-banner" class="gd-network-banner" hidden aria-live="polite">Keine Internetverbindung</div>
+            <?php $this->render_central_navigation( 'reservations' ); ?>
 
             <header class="gd-mobile-appbar">
                 <div class="gd-mobile-brand">
                     <?php echo $this->render_brand_logo( 'gd-mobile-logo', 'G', $business_name ); ?>
                     <div>
-                        <small><?php echo esc_html( $business_name ); ?></small>
+                        <small>Gelsensystem · <?php echo esc_html( $business_name ); ?></small>
                         <strong id="gd-mobile-title">Reservierungen</strong>
                     </div>
                 </div>
@@ -414,7 +431,7 @@ final class Gelsendiele_Reservierungsdashboard {
 
             <header class="gd-dashboard-header">
                 <div>
-                    <span class="gd-eyebrow"><?php echo esc_html( $business_name ); ?></span>
+                    <span class="gd-eyebrow">Gelsensystem · <?php echo esc_html( $business_name ); ?></span>
                     <h1>Reservierungen</h1>
                     <p>Anfragen schnell prüfen, bestätigen oder ablehnen.</p>
                 </div>
@@ -654,6 +671,13 @@ final class Gelsendiele_Reservierungsdashboard {
                         <p class="gd-ios-install-hint" hidden>Auf iPhone/iPad: Teilen antippen und „Zum Home-Bildschirm“ wählen.</p>
                     </section>
 
+                    <?php if ( current_user_can( 'gelsendiele_manage_settings' ) || current_user_can( 'manage_options' ) ) : ?>
+                    <section class="gd-sheet-section">
+                        <?php if ( current_user_can( 'gelsendiele_manage_settings' ) ) : ?><a class="gd-sheet-row" href="<?php echo esc_url( add_query_arg( 'gd-section', 'settings', $this->dashboard_url() ) ); ?>"><span class="gd-sheet-row-icon">E</span><span><strong>Gelsensystem Einstellungen</strong><small>Betrieb, Öffnungszeiten, E-Mails und Formular</small></span><span class="gd-row-chevron">›</span></a><?php endif; ?>
+                        <?php if ( current_user_can( 'manage_options' ) ) : ?><a class="gd-sheet-row" href="<?php echo esc_url( add_query_arg( 'gd-section', 'users', $this->dashboard_url() ) ); ?>"><span class="gd-sheet-row-icon">U</span><span><strong>Benutzer &amp; Rechte</strong><small>Zugriff auf die Arbeitsbereiche verwalten</small></span><span class="gd-row-chevron">›</span></a><?php endif; ?>
+                    </section>
+                    <?php endif; ?>
+
                     <section class="gd-sheet-section gd-account-section">
                         <div class="gd-account-row">
                             <span class="gd-user-avatar"><?php echo esc_html( strtoupper( mb_substr( $user->display_name, 0, 1 ) ) ); ?></span>
@@ -671,7 +695,7 @@ final class Gelsendiele_Reservierungsdashboard {
                         <div>
                             <span class="gd-eyebrow" data-manual-eyebrow>Telefonisch / persönlich</span>
                             <h2 id="gd-manual-title" data-manual-title>Reservierung hinzufügen</h2>
-                            <p data-manual-description>Der Eintrag wird direkt mit dem Gelsendiele-System und WordPress synchronisiert.</p>
+                            <p data-manual-description>Der Eintrag wird direkt mit dem Gelsensystem und WordPress synchronisiert.</p>
                         </div>
                         <button type="button" class="gd-table-picker-close" data-close-manual-booking aria-label="Schließen">×</button>
                     </header>
@@ -796,8 +820,8 @@ final class Gelsendiele_Reservierungsdashboard {
         <div class="gd-login-page" style="<?php echo esc_attr( $brand_style ); ?>">
             <section class="gd-login-card">
                 <?php echo $this->render_brand_logo( 'gd-login-logo', 'G', $business_name ); ?>
-                <span class="gd-eyebrow"><?php echo esc_html( $business_name ); ?></span>
-                <h1>Reservierungen verwalten</h1>
+                <span class="gd-eyebrow">Gelsensystem</span>
+                <h1><?php echo esc_html( $business_name ); ?> verwalten</h1>
                 <p>Melden Sie sich mit Ihren normalen WordPress-Zugangsdaten an.</p>
                 <form id="gd-loginform" method="post" novalidate>
                     <p>
@@ -1473,7 +1497,7 @@ final class Gelsendiele_Reservierungsdashboard {
                                 <input type="checkbox" name="gd_auto_confirm" value="1" <?php checked( $enabled ); ?>>
                                 Neue Reservierungsanfragen sofort auf „Bestätigt“ setzen
                             </label>
-                            <p class="description">Das Five-Star-Plugin kann dadurch seine Bestätigungs-E-Mail automatisch versenden. Bitte einmal mit einer Testreservierung prüfen.</p>
+                            <p class="description">Die konfigurierte Bestätigungs-E-Mail kann dadurch automatisch versendet werden. Bitte einmal mit einer Testreservierung prüfen.</p>
                         </td>
                     </tr>
                     <tr>
@@ -2463,6 +2487,54 @@ final class Gelsendiele_Reservierungsdashboard {
     private function dashboard_url() {
         $page_id = (int) get_option( self::PAGE_OPTION );
         return $page_id ? get_permalink( $page_id ) : home_url( '/reservierungsverwaltung/' );
+    }
+
+    private function render_central_app_section( $section ) {
+        $business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
+        $branding      = Gelsendiele_Settings::get( 'branding', null, array() );
+        $brand_style   = Gelsendiele_Settings::css_variables()
+            . '--gd-green:' . $branding['primary_color'] . ';'
+            . '--gd-green-dark:' . $branding['secondary_color'] . ';'
+            . '--gd-bg:' . $branding['surface_color'] . ';';
+        ob_start();
+        ?>
+        <div class="gd-dashboard-shell gd-has-central-nav gd-central-section-shell" data-app-section="<?php echo esc_attr( $section ); ?>" style="<?php echo esc_attr( $brand_style ); ?>">
+            <?php $this->render_central_navigation( $section ); ?>
+            <header class="gd-central-mobile-header"><div><small>Gelsensystem</small><strong><?php echo esc_html( $business_name ); ?></strong></div><a href="<?php echo esc_url( add_query_arg( 'gd-section', 'reservations', $this->dashboard_url() ) ); ?>">Reservierungen</a></header>
+            <main class="gd-central-content">
+                <?php if ( 'settings' === $section ) { Gelsendiele_Admin::render_app_settings( $this->dashboard_url() ); } else { Gelsendiele_Admin::render_app_users(); } ?>
+            </main>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    private function render_central_navigation( $active ) {
+        $dashboard = $this->dashboard_url();
+        $items = array(
+            array( 'reservations', 'Reservierungen', 'manage_bookings', add_query_arg( 'gd-section', 'reservations', $dashboard ), 'R' ),
+            array( 'service', 'Service', 'gdg_use_service', $this->workspace_url( 'service' ), 'S' ),
+            array( 'kitchen', 'Küche', 'gdg_use_kitchen', $this->workspace_url( 'kitchen' ), 'K' ),
+            array( 'bar', 'Schank', 'gdg_use_bar', $this->workspace_url( 'bar' ), 'B' ),
+            array( 'checkout', 'Kasse', 'gdg_use_checkout', $this->workspace_url( 'checkout' ), '€' ),
+            array( 'tables', 'Tische & Bereiche', 'gdg_manage', admin_url( 'admin.php?page=gdg-tables' ), 'T' ),
+            array( 'menu', 'Speisekarte', 'gdg_manage', admin_url( 'admin.php?page=gdg-menu' ), 'M' ),
+            array( 'settings', 'Einstellungen', 'gelsendiele_manage_settings', add_query_arg( 'gd-section', 'settings', $dashboard ), 'E' ),
+            array( 'users', 'Benutzer & Rechte', 'manage_options', add_query_arg( 'gd-section', 'users', $dashboard ), 'U' ),
+        );
+        $business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
+        ?>
+        <aside class="gelsensystem-sidebar" aria-label="Gelsensystem Bereiche">
+            <a class="gelsensystem-sidebar-brand" href="<?php echo esc_url( $dashboard ); ?>"><span>GS</span><div><strong>Gelsensystem</strong><small><?php echo esc_html( $business_name ); ?></small></div></a>
+            <nav><?php foreach ( $items as $item ) : if ( ! current_user_can( $item[2] ) || ! $item[3] ) { continue; } ?><a class="<?php echo $active === $item[0] ? 'is-active' : ''; ?>" href="<?php echo esc_url( $item[3] ); ?>"><span><?php echo esc_html( $item[4] ); ?></span><?php echo esc_html( $item[1] ); ?></a><?php endforeach; ?></nav>
+            <div class="gelsensystem-sidebar-footer"><small>Angemeldet als</small><strong><?php echo esc_html( wp_get_current_user()->display_name ); ?></strong><a href="<?php echo esc_url( wp_logout_url( $dashboard ) ); ?>">Abmelden</a></div>
+        </aside>
+        <?php
+    }
+
+    private function workspace_url( $view ) {
+        $page_id = (int) get_option( 'gdg_page_' . sanitize_key( $view ), 0 );
+        return $page_id ? get_permalink( $page_id ) : '';
     }
 }
 

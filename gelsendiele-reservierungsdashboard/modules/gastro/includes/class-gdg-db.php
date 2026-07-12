@@ -163,7 +163,7 @@ final class GDG_DB {
 	private static function create_roles(): void {
 		$roles = array(
 			'gdg_service' => array(
-				'label' => 'Gelsendiele Service',
+				'label' => 'Gelsensystem Service',
 				'caps'  => array(
 					'read' => true,
 					'gdg_use_service' => true,
@@ -171,14 +171,14 @@ final class GDG_DB {
 				),
 			),
 			'gdg_kitchen' => array(
-				'label' => 'Gelsendiele Küche',
+				'label' => 'Gelsensystem Küche',
 				'caps'  => array(
 					'read' => true,
 					'gdg_use_kitchen' => true,
 				),
 			),
 			'gdg_bar' => array(
-				'label' => 'Gelsendiele Schank',
+				'label' => 'Gelsensystem Schank',
 				'caps'  => array(
 					'read' => true,
 					'gdg_use_bar' => true,

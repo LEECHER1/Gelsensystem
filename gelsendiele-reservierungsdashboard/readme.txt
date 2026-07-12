@@ -2,12 +2,13 @@
 Contributors: Andreas Schwarz / OpenAI
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.3.3
+Stable tag: 2.4.0
 
-Eigenständiges Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für die Gelsendiele.
+Zentrales Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für Gastronomiebetriebe.
 
 == Enthalten ==
-* Zentrales Gelsendiele-Menü für Reservierung und Gastro-Module
+* Zentrale Gelsensystem-App für Reservierung und Gastro-Module
+* App-interne Einstellungen sowie Benutzer- und Rechteverwaltung
 * Versionierte, wiederholbare Migrationen bei Installation und Update
 * Flexible Betriebs-, Logo-, Farb- und Darstellungsoptionen
 * Mehrere Öffnungsblöcke pro Wochentag und Öffnungen über Mitternacht
@@ -37,6 +38,13 @@ Das Zahlungsmodul dokumentiert Bar- und Kartenzahlungen, ist aber noch keine RKS
 Installierbare ZIP-Dateien werden aus einem geprüften Git-Tag erstellt. Vor jedem Produktivupdate sind WordPress-Dateien und Datenbank vollständig zu sichern.
 
 == Changelog ==
+
+= 2.4.0 =
+* Backend-Produktname vollständig auf Gelsensystem umgestellt; der Betriebsname bleibt Kundendaten.
+* Neue zentrale Desktop-Navigation bei unverändert kompakter Smartphone-Bedienung.
+* WordPress-Einstellungen sind direkt in der App erreichbar und speicherbar.
+* Benutzerrollen können innerhalb der App verwaltet werden.
+* GitHub-Updater auf das Repository LEECHER1/Gelsensystem umgestellt.
 
 = 2.3.3 =
 * Das Reservierungsformular ist auf Desktop kompakter und benötigt deutlich weniger Bildschirmhöhe.

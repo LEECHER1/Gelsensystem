@@ -133,6 +133,16 @@ final class Gelsendiele_Admin {
 
 	public static function render_settings() {
 		self::guard( 'gelsendiele_manage_settings' );
+		self::render_settings_interface( 'admin' );
+	}
+
+	/** Rendert dieselben Einstellungen innerhalb der eigenständigen Gelsensystem-App. */
+	public static function render_app_settings( $dashboard_url ) {
+		self::guard( 'gelsendiele_manage_settings' );
+		self::render_settings_interface( 'app', $dashboard_url );
+	}
+
+	private static function render_settings_interface( $context = 'admin', $dashboard_url = '' ) {
 		$tabs = array(
 			'general'       => 'Allgemein',
 			'opening-hours' => 'Öffnungszeiten',
@@ -145,7 +155,8 @@ final class Gelsendiele_Admin {
 			'roles'         => 'Benutzerrollen',
 			'system-status' => 'Systemstatus',
 		);
-		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'general';
+		$tab_key = 'app' === $context ? 'gd-settings-tab' : 'tab';
+		$tab = isset( $_GET[ $tab_key ] ) ? sanitize_key( wp_unslash( $_GET[ $tab_key ] ) ) : 'general';
 		if ( ! isset( $tabs[ $tab ] ) ) {
 			$tab = 'general';
 		}
@@ -175,12 +186,13 @@ final class Gelsendiele_Admin {
 
 		$settings = Gelsendiele_Settings::get_all();
 		?>
-		<div class="wrap gelsendiele-admin-wrap">
+		<div class="<?php echo 'app' === $context ? 'gelsensystem-app-settings' : 'wrap gelsendiele-admin-wrap'; ?>">
 			<h1>Gelsensystem Einstellungen</h1>
 			<?php if ( $notice_message ) : ?><div class="notice notice-<?php echo esc_attr( $notice_type ); ?> is-dismissible"><p><?php echo esc_html( $notice_message ); ?></p></div><?php endif; ?>
 			<nav class="nav-tab-wrapper gelsendiele-settings-tabs" aria-label="Einstellungsbereiche">
 				<?php foreach ( $tabs as $slug => $label ) : ?>
-					<a class="nav-tab <?php echo $slug === $tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url( admin_url( 'admin.php?page=' . self::SETTINGS_SLUG . '&tab=' . $slug ) ); ?>"><?php echo esc_html( $label ); ?></a>
+					<?php $tab_url = 'app' === $context ? add_query_arg( array( 'gd-section' => 'settings', 'gd-settings-tab' => $slug ), $dashboard_url ) : admin_url( 'admin.php?page=' . self::SETTINGS_SLUG . '&tab=' . $slug ); ?>
+					<a class="nav-tab <?php echo $slug === $tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url( $tab_url ); ?>"><?php echo esc_html( $label ); ?></a>
 				<?php endforeach; ?>
 			</nav>
 			<div class="gelsendiele-settings-panel">
@@ -197,6 +209,55 @@ final class Gelsendiele_Admin {
 					default: self::render_settings_placeholder( $tabs[ $tab ] ); break;
 				}
 				?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/** Benutzer und ihre vordefinierten Gelsensystem-Rechte verwalten. */
+	public static function render_app_users() {
+		self::guard( 'manage_options' );
+		$message = '';
+		if ( isset( $_POST['gelsensystem_user_action'] ) && 'update_role' === sanitize_key( wp_unslash( $_POST['gelsensystem_user_action'] ) ) ) {
+			check_admin_referer( 'gelsensystem_update_user_role', 'gelsensystem_user_nonce' );
+			$user_id = isset( $_POST['gelsensystem_user_id'] ) ? absint( $_POST['gelsensystem_user_id'] ) : 0;
+			$role    = isset( $_POST['gelsensystem_user_role'] ) ? sanitize_key( wp_unslash( $_POST['gelsensystem_user_role'] ) ) : '';
+			$allowed = array( 'administrator', 'gelsendiele_manager', 'gelsendiele_reservation_staff', 'gdg_service', 'gdg_kitchen', 'gdg_bar', 'subscriber' );
+			$target  = get_user_by( 'id', $user_id );
+			if ( $target && in_array( $role, $allowed, true ) && ! ( get_current_user_id() === $user_id && 'administrator' !== $role ) ) {
+				$target->set_role( $role );
+				$message = 'Benutzerrechte wurden aktualisiert.';
+			} else {
+				$message = 'Die Benutzerrechte konnten nicht geändert werden. Das eigene Administratorkonto ist geschützt.';
+			}
+		}
+
+		$roles = array(
+			'administrator'                   => array( 'Administrator', 'Vollzugriff einschließlich Benutzerverwaltung' ),
+			'gelsendiele_manager'             => array( 'Gelsensystem Betriebsleitung', 'Alle Betriebsbereiche und Einstellungen' ),
+			'gelsendiele_reservation_staff'   => array( 'Gelsensystem Reservierungen', 'Reservierungen erstellen und bearbeiten' ),
+			'gdg_service'                     => array( 'Gelsensystem Service', 'Service und Kasse' ),
+			'gdg_kitchen'                     => array( 'Gelsensystem Küche', 'Küchenmonitor' ),
+			'gdg_bar'                         => array( 'Gelsensystem Schank', 'Schankmonitor' ),
+			'subscriber'                      => array( 'Kein Systemzugriff', 'Nur normales WordPress-Benutzerkonto' ),
+		);
+		?>
+		<div class="gelsensystem-users">
+			<div class="gelsensystem-section-heading"><div><span>Administration</span><h1>Benutzer &amp; Rechte</h1><p>Lege pro Benutzer fest, welche Bereiche des Gelsensystems sichtbar und bedienbar sind.</p></div></div>
+			<?php if ( $message ) : ?><div class="gd-notice"><strong><?php echo esc_html( $message ); ?></strong></div><?php endif; ?>
+			<div class="gelsensystem-user-list">
+				<?php foreach ( get_users( array( 'orderby' => 'display_name' ) ) as $account ) :
+					$current_role = ! empty( $account->roles ) ? (string) reset( $account->roles ) : 'subscriber';
+					if ( ! isset( $roles[ $current_role ] ) ) { $current_role = 'subscriber'; }
+				?>
+				<form method="post" class="gelsensystem-user-card">
+					<?php wp_nonce_field( 'gelsensystem_update_user_role', 'gelsensystem_user_nonce' ); ?>
+					<input type="hidden" name="gelsensystem_user_action" value="update_role"><input type="hidden" name="gelsensystem_user_id" value="<?php echo esc_attr( $account->ID ); ?>">
+					<div class="gelsensystem-user-identity"><span><?php echo esc_html( strtoupper( mb_substr( $account->display_name, 0, 1 ) ) ); ?></span><div><strong><?php echo esc_html( $account->display_name ); ?></strong><small><?php echo esc_html( $account->user_email ); ?></small></div></div>
+					<label><span>Zugriffsprofil</span><select name="gelsensystem_user_role" <?php disabled( get_current_user_id() === (int) $account->ID ); ?>><?php foreach ( $roles as $slug => $role_data ) : ?><option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $current_role, $slug ); ?>><?php echo esc_html( $role_data[0] ); ?></option><?php endforeach; ?></select><small><?php echo esc_html( $roles[ $current_role ][1] ); ?></small></label>
+					<button type="submit" class="button button-primary" <?php disabled( get_current_user_id() === (int) $account->ID ); ?>>Rechte speichern</button>
+				</form>
+				<?php endforeach; ?>
 			</div>
 		</div>
 		<?php
@@ -410,7 +471,7 @@ final class Gelsendiele_Admin {
 			<input type="hidden" name="gelsendiele_settings_action" value="save">
 			<section class="gelsendiele-settings-card">
 				<h2>E-Mail-Vorlagen</h2>
-				<p>Alle Benachrichtigungen werden vom Gelsensystem selbst verwaltet. Solange Five Star aktiv ist, bleiben dessen Statusbenachrichtigungen maßgeblich, damit keine doppelten E-Mails entstehen.</p>
+				<p>Alle Benachrichtigungen werden zentral vom Gelsensystem verwaltet.</p>
 				<div class="gelsendiele-field-grid">
 					<label><span>Erinnerung vor dem Termin</span><input type="number" min="1" max="336" name="gelsendiele_settings[emails][reminder_hours]" value="<?php echo esc_attr( $emails['reminder_hours'] ); ?>"><small>Stunden vor dem Termin; die Erinnerung muss zusätzlich in ihrer Vorlage aktiviert sein.</small></label>
 					<label><span>Empfänger für Test-E-Mails</span><input type="email" name="gelsensystem_test_recipient" value="<?php echo esc_attr( $test_email ); ?>"></label>
@@ -492,11 +553,11 @@ final class Gelsendiele_Admin {
 	private static function render_roles_tab() {
 		$roles = array(
 			'Administrator' => 'Vollständiger Zugriff',
-			'Gelsendiele Betriebsleitung' => 'Reservierungen, Gastro-Module, Statistiken und Einstellungen',
-			'Gelsendiele Service' => 'Service und Kasse',
-			'Gelsendiele Küche' => 'Küchenmonitor',
-			'Gelsendiele Schank' => 'Schankmonitor',
-			'Gelsendiele Reservierungsmitarbeiter' => 'Reservierungen erstellen und bearbeiten',
+			'Gelsensystem Betriebsleitung' => 'Reservierungen, Gastro-Module, Statistiken und Einstellungen',
+			'Gelsensystem Service' => 'Service und Kasse',
+			'Gelsensystem Küche' => 'Küchenmonitor',
+			'Gelsensystem Schank' => 'Schankmonitor',
+			'Gelsensystem Reservierungen' => 'Reservierungen erstellen und bearbeiten',
 		);
 		echo '<section class="gelsendiele-settings-card"><h2>Rollenmodell</h2><div class="gelsendiele-status-list">';
 		foreach ( $roles as $role => $description ) {
@@ -525,7 +586,6 @@ final class Gelsendiele_Admin {
 			'PHP' => PHP_VERSION,
 			'Zeitzone' => wp_timezone_string(),
 			'Datenbanktabellen' => $db_ok ? 'Vollständig' : 'Unvollständig',
-			'Five Star' => defined( 'RTB_PLUGIN_DIR' ) ? 'Aktiv – Kompatibilitätsmodus' : 'Nicht aktiv – eigenständiger Modus',
 			'Reservierungen' => (string) $booking_total,
 			'Letzter Migrationsfehler' => get_option( Gelsendiele_Migrator::ERROR_OPTION, 'Keiner' ),
 		);

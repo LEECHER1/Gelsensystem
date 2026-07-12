@@ -9,8 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 final class Gelsendiele_GitHub_Updater {
 	const SLUG       = 'gelsendiele-reservierungsdashboard';
-	const REPOSITORY = 'LEECHER1/Gelsendiele';
-	const API_URL    = 'https://api.github.com/repos/LEECHER1/Gelsendiele/releases/latest';
+	const REPOSITORY = 'LEECHER1/Gelsensystem';
+	const API_URL    = 'https://api.github.com/repos/LEECHER1/Gelsensystem/releases/latest';
 	const CACHE_KEY  = 'gelsendiele_github_release';
 
 	/**
@@ -83,7 +83,7 @@ final class Gelsendiele_GitHub_Updater {
 			'requires'      => '6.0',
 			'requires_php'  => '7.4',
 			'sections'      => array(
-				'description' => 'Eigenständiges Reservierungs-, Service-, Küchen- und Kassensystem für die Gelsendiele.',
+				'description' => 'Zentrales Reservierungs-, Service-, Küchen- und Kassensystem für Gastronomiebetriebe.',
 				'changelog'   => nl2br( esc_html( $release['notes'] ) ),
 			),
 		);
@@ -170,7 +170,7 @@ final class Gelsendiele_GitHub_Updater {
 
 		$package_host = wp_parse_url( $package, PHP_URL_HOST );
 		$package_path = wp_parse_url( $package, PHP_URL_PATH );
-		$trusted_path = '/LEECHER1/Gelsendiele/releases/download/';
+		$trusted_path = '/LEECHER1/Gelsensystem/releases/download/';
 		if ( 'github.com' !== $package_host || 0 !== strpos( (string) $package_path, $trusted_path ) ) {
 			set_site_transient( self::CACHE_KEY, array( 'unavailable' => true ), 10 * MINUTE_IN_SECONDS );
 			return false;

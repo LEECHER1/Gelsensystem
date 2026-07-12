@@ -55,6 +55,18 @@
     });
   }
 
+  const centralSectionShell = document.querySelector('.gd-dashboard-shell[data-app-section]:not([data-default-view])');
+  if (centralSectionShell) {
+    let centralTheme = '';
+    try { centralTheme = window.localStorage.getItem('gd-dashboard-theme') || ''; } catch (error) {}
+    if (centralTheme !== 'dark' && centralTheme !== 'light') {
+      centralTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.dataset.gdTheme = centralTheme;
+    const centralThemeColor = document.getElementById('gd-theme-color');
+    if (centralThemeColor) centralThemeColor.content = centralTheme === 'dark' ? '#111713' : '#315b2d';
+  }
+
   const shell = document.querySelector('.gd-dashboard-shell[data-default-view]');
   if (!shell || typeof GDReservations === 'undefined') return;
 
@@ -1487,7 +1499,7 @@
     if (manualTitle) manualTitle.textContent = editing ? 'Reservierung bearbeiten' : 'Reservierung hinzufügen';
     if (manualDescription) manualDescription.textContent = editing
       ? 'Alle vorhandenen Daten sind bereits eingetragen. Ändern Sie nur die gewünschten Angaben.'
-      : 'Der Eintrag wird direkt mit Gelsendiele-System und WordPress synchronisiert.';
+      : 'Der Eintrag wird direkt mit Gelsensystem und WordPress synchronisiert.';
     if (manualSubmit) manualSubmit.textContent = editing ? 'Änderungen speichern' : 'Reservierung speichern';
   }
 

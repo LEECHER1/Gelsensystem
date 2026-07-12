@@ -108,7 +108,7 @@ final class GD_Reservation_Engine {
         foreach ( array('administrator','editor') as $role_name ) {
             $role = get_role($role_name); if($role){ foreach(array('manage_bookings','edit_booking','read_booking','delete_booking') as $cap){$role->add_cap($cap);} }
         }
-        if ( ! get_role('gd_reservation_manager') ) add_role('gd_reservation_manager','Reservierungsverwaltung',array('read'=>true,'manage_bookings'=>true,'edit_booking'=>true,'read_booking'=>true,'delete_booking'=>true));
+        if ( ! get_role('gd_reservation_manager') ) add_role('gd_reservation_manager','Gelsensystem Reservierungen',array('read'=>true,'manage_bookings'=>true,'edit_booking'=>true,'read_booking'=>true,'delete_booking'=>true));
     }
 
     public function bootstrap_compatibility_controller() {
