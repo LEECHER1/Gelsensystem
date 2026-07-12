@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.3
+- App-Skripte werden vor `wp_footer()` ausgegeben und funktionieren damit auch bei Footer-Hooks, die die nachfolgende Template-Ausgabe beenden.
+- Build-Prüfung schützt die für das aktive Website-Theme notwendige Ausgabereihenfolge.
+
 ## 2.4.2
 - Explizite, themeunabhängige Script-Ausgabe in app-internen Einstellungs- und Benutzerbereichen.
 - Idempotente Initialisierung verhindert doppelte Event-Handler, falls ein Theme registrierte Skripte doch ausgibt.

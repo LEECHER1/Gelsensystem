@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.4.3 – 2026-07-12
+- Gemeinsame Patchversion mit der korrigierten Footer-Ausgabereihenfolge.
+
 ## 2.4.2 – 2026-07-12
 - Gemeinsame Patchversion mit der themeunabhängigen zentralen App-Initialisierung.
 
