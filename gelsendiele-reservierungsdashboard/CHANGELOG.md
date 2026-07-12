@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.5.0
+
+- Speisekartenverwaltung in die zentrale Gelsensystem-App übernommen.
+- Kategorien und Artikel lassen sich mit Preis, Ausgabestation, Reihenfolge und Sichtbarkeit direkt pflegen.
+- Eigenständige, responsive Desktop- und Mobile-Oberfläche mit Light-/Dark-Mode ergänzt.
+- Bestehende Gastro-Tabellen bleiben die gemeinsame Datenquelle für Service, Küche und Schank.
+
 ## 2.4.5
 - Kontextabhängiger Speichern-Button verhindert den Frontend-Aufruf der ausschließlich im WordPress-Admin verfügbaren Funktion `submit_button()`.
 - Alle sechs app-internen Einstellungsformulare werden dadurch vollständig und ohne PHP-Fehler gerendert.

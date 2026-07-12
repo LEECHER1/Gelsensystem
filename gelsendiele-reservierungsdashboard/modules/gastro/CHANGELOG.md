@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.5.0 – 2026-07-12
+
+- Speisekartenpflege direkt in der zentralen Gelsensystem-App.
+- Responsive Formulare und Bestandsübersicht für Kategorien, Speisen und Getränke.
+- Frontend-sichere Speicherung mit Berechtigungs- und Nonce-Prüfung.
+
 ## 2.4.5 – 2026-07-12
 - Gemeinsame Patchversion mit vollständig frontendkompatiblen Einstellungsformularen.
 
