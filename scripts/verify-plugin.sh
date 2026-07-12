@@ -18,12 +18,12 @@ if [[ -z "$VERSION" || "$VERSION" != "$CONSTANT_VERSION" ]]; then
   exit 1
 fi
 
-if ! rg -q '^ \* Plugin Name: Gelsensystem$' "$ENTRY"; then
+if ! grep -q '^ \* Plugin Name: Gelsensystem$' "$ENTRY"; then
   echo "Der sichtbare Pluginname muss Gelsensystem lauten." >&2
   exit 1
 fi
 
-if rg -q "class_exists\( 'GDG_Plugin', false \)" "$PLUGIN/modules/gastro/gelsendiele-gastro-system.php"; then
+if grep -Fq "class_exists( 'GDG_Plugin', false )" "$PLUGIN/modules/gastro/gelsendiele-gastro-system.php"; then
   echo "Das integrierte Gastro-Modul würde sich beim Laden selbst überspringen." >&2
   exit 1
 fi
@@ -43,7 +43,13 @@ if command -v node >/dev/null 2>&1; then
   done < <(find "$PLUGIN" -type f -name '*.js' -print0)
 fi
 
-if rg -n --hidden -g '!*.png' -g '!*.zip' 'BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|ghp_[A-Za-z0-9]+' "$ROOT"; then
+if command -v rg >/dev/null 2>&1; then
+  SECRET_MATCHES="$(rg -n --hidden -g '!*.png' -g '!*.zip' 'BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|ghp_[A-Za-z0-9]+' "$ROOT" || true)"
+else
+  SECRET_MATCHES="$(grep -RInE --exclude='*.png' --exclude='*.zip' --exclude-dir='.git' 'BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|ghp_[A-Za-z0-9]+' "$ROOT" || true)"
+fi
+if [[ -n "$SECRET_MATCHES" ]]; then
+  echo "$SECRET_MATCHES"
   echo "Mögliche Zugangsdaten im Repository gefunden." >&2
   exit 1
 fi
