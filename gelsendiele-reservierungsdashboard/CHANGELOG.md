@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.8.0
+
+- Tablet-Reservierungen zeigen eine eigene Statusleiste mit den Zählern für Offen, Heute, Kommend und Bestätigt.
+- Desktop-Hauptansicht auf Suche, neue Reservierung, Aktualisierung und Statusfilter konzentriert.
+- Automatisierung, Tischoptionen, WhatsApp-Vorlage sowie CSV-/Excel-Export in ein gemeinsames Einstellungs- und Werkzeugmenü verschoben.
+- Neues seitliches Einstellungsmenü für Desktop und klareres Zahnrad-Menü auf Tablets ergänzt.
+- Kontrast der inaktiven Statuszähler im Dark Mode korrigiert.
+
 ## 2.7.2
 
 - Theme-Mindestbreiten werden in der eigenständigen App bei Smartphone- und Tablet-Breiten überschrieben.

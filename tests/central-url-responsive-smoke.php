@@ -29,6 +29,13 @@ central_expect( false !== strpos( $css, '@media (min-width:700px) and (max-width
 central_expect( false !== strpos( $css, '@media (max-width:699px)' ), 'Smartphone-Breakpoint fehlt' );
 central_expect( false !== strpos( $css, '.gelsensystem-mobile-nav a { display:flex' ), 'Touch-Ziele der Navigation fehlen' );
 central_expect( false !== strpos( $css, 'html[data-gd-theme="dark"] .gelsensystem-mobile-nav' ), 'Dark Mode der mobilen Navigation fehlt' );
+central_expect( 1 === substr_count( $entry, 'data-export-csv' ), 'CSV-Export ist außerhalb des Werkzeugmenüs noch doppelt sichtbar' );
+central_expect( 1 === substr_count( $entry, 'data-export-xlsx' ), 'Excel-Export ist außerhalb des Werkzeugmenüs noch doppelt sichtbar' );
+central_expect( false !== strpos( $entry, 'class="gd-desktop-settings-button"' ), 'Desktop-Einstellungsmenü fehlt' );
+central_expect( false !== strpos( $entry, 'Einstellungen &amp; Werkzeuge' ), 'Werkzeugmenü ist nicht eindeutig benannt' );
+central_expect( false !== strpos( $css, '.gd-desktop-tabs { display:flex !important' ), 'Tablet-Statusleiste mit allen Zählern fehlt' );
+central_expect( false !== strpos( $css, '.gd-tab:not(.is-active) span[data-count]' ), 'Dark-Mode-Kontrast für inaktive Zähler fehlt' );
+central_expect( false !== strpos( $css, '@media (min-width:1025px)' ) && false !== strpos( $css, '.gd-sheet-layer.is-open' ), 'Desktop-Seitenmenü fehlt' );
 central_expect( false !== strpos( $js, "scope: GDReservations.pwaScope || '/gelsensystem/'" ), 'PWA-Fallback nutzt noch die alte URL' );
 
 echo "Zentrale-URL- und Responsive-Tests erfolgreich.\n";
