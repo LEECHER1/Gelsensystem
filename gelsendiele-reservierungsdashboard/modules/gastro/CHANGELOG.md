@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.7.0 – 2026-07-12
+
+- Arbeitsseiten auf die neue Zentrale unter `/gelsensystem/` umgestellt.
+- Bestehende Service-, Küchen-, Schank- und Kassenseiten werden automatisch neu zugeordnet.
+- Alte Arbeitsbereichs-URLs bleiben per Weiterleitung erreichbar.
+
 ## 2.6.0 – 2026-07-12
 
 - Tische und Bereiche direkt in der zentralen Gelsensystem-App verwaltbar.

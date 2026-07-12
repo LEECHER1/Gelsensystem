@@ -3,7 +3,7 @@ Contributors: Andreas Schwarz / Gelsendiele
 Tags: gastronomie, bestellung, küche, schank, tische, reservierung
 Requires at least: 6.4
 Requires PHP: 7.4
-Stable tag: 2.6.0
+Stable tag: 2.7.0
 
 Service-, Küchen-, Schank- und Zahlungsmodul des Gelsensystems.
 
@@ -33,7 +33,7 @@ Service-, Küchen-, Schank- und Zahlungsmodul des Gelsensystems.
 5. Die automatisch erstellten Seiten Service, Küche, Schank und Kasse öffnen.
 6. Mitarbeiter als WordPress-Benutzer anlegen und die passende Rolle zuweisen.
 
-Wenn die Seite /reservierungsverwaltung/ vorhanden ist, werden die Arbeitsseiten darunter angelegt. Ansonsten wird automatisch die Seite /gelsendiele-gastro/ erstellt.
+Die Zentrale liegt unter /gelsensystem/. Service, Küche, Schank und Kasse werden als Arbeitsseiten darunter angelegt. Alte Links unter /reservierungsverwaltung/ werden weitergeleitet.
 
 == Reservierungs-Integration ==
 

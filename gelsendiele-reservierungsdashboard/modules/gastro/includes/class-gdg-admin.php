@@ -41,7 +41,7 @@ final class GDG_Admin {
 				$section = 'menu';
 			}
 			$page_id       = (int) get_option( 'gd_reservierungsdashboard_page_id', 0 );
-			$dashboard_url = $page_id ? get_permalink( $page_id ) : home_url( '/reservierungsverwaltung/' );
+			$dashboard_url = $page_id ? get_permalink( $page_id ) : home_url( '/gelsensystem/' );
 			wp_safe_redirect(
 				add_query_arg(
 					array(
