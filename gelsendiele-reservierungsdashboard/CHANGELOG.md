@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.10.1
+
+- Fokusmodus auf Tablet-Queransichten erweitert und schmale Arbeitsflächen einspaltig optimiert.
+
 ## 2.10.0
 
 - Gemeinsame einklappbare Desktop-Seitenleiste auf Service, Küche, Schank und Kasse ergänzt.

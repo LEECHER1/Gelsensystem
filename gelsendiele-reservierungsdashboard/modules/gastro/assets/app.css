@@ -361,7 +361,7 @@ body.gdg-standalone-app .gdg-app {
 .gdg-error-state { text-align: center; color: var(--gd-muted); }
 .gdg-error-state strong { color: var(--gd-text); }
 
-@media (min-width: 1025px) {
+@media (min-width: 791px) {
   body.gdg-standalone-app .gdg-app { display: block; padding-left: 246px; transition: padding-left .2s ease; }
   body.gdg-standalone-app .gdg-topbar {
     position: fixed; inset: 0 auto 0 0; width: 246px; height: 100vh; height: 100dvh;
@@ -390,6 +390,11 @@ body.gdg-standalone-app .gdg-app {
   body.gdg-standalone-app .gdg-app.is-nav-collapsed .gdg-nav a { justify-content: center; padding-inline: 5px; }
   body.gdg-standalone-app .gdg-app.is-nav-collapsed .gdg-nav-toggle span { transform: rotate(180deg); }
   body.gdg-standalone-app .gdg-app.is-nav-collapsed .gdg-top-actions { flex-direction: column; }
+}
+
+@media (min-width: 791px) and (max-width: 900px) {
+  .gdg-service-layout, .gdg-checkout-layout { grid-template-columns: 1fr; }
+  .gdg-order-panel { grid-column: auto; }
 }
 
 .gdg-login-wrap, .gdg-access-denied { max-width: 520px; margin: 30px auto; padding: 24px; border: 1px solid #e2e6eb; border-radius: 16px; background: #fff; }
