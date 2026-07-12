@@ -29,6 +29,16 @@ if grep -Fq "class_exists( 'GDG_Plugin', false )" "$PLUGIN/modules/gastro/gelsen
   exit 1
 fi
 
+if grep -Fq 'gdrf-brand-logo' "$PLUGIN/includes/class-gd-reservation-engine.php"; then
+  echo "Das Reservierungsformular darf kein eigenes Markenlogo ausgeben." >&2
+  exit 1
+fi
+
+if ! grep -Fq '.gdrf-theme-light' "$PLUGIN/assets/reservation-form.css"; then
+  echo "Der explizite helle Formularstil fehlt." >&2
+  exit 1
+fi
+
 if command -v php >/dev/null 2>&1; then
   while IFS= read -r -d '' file; do
     php -l "$file" >/dev/null

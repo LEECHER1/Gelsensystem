@@ -143,7 +143,7 @@ final class GD_Reservation_Engine {
         $text_color      = ! empty( $form_settings['text_color'] ) ? $form_settings['text_color'] : ( 'dark' === $theme_mode ? '#f4f7f5' : '#17221b' );
         wp_add_inline_style(
             'gd-reservation-form',
-            '.gdrf-form{border-radius:var(--gelsendiele-radius,24px)}.gdrf-brand-logo{display:block;max-width:180px;max-height:96px;width:auto;height:auto;object-fit:contain;margin:0 0 16px}.gdrf-submit{background:linear-gradient(135deg,' . esc_attr( $brand_primary ) . ',' . esc_attr( $brand_secondary ) . ')}'
+            '.gdrf-form{border-radius:var(--gelsendiele-radius,24px)}.gdrf-submit{background:linear-gradient(135deg,' . esc_attr( $brand_primary ) . ',' . esc_attr( $brand_secondary ) . ')}'
         );
         wp_localize_script('gd-reservation-form','GDReservationForm',array(
             'ajaxUrl'=>admin_url('admin-ajax.php'),
@@ -158,10 +158,6 @@ final class GD_Reservation_Engine {
             )
         ));
         $form_style = '--gd-accent:' . $brand_primary . ';--gd-bg:' . $surface_color . ';--gd-text:' . $text_color . ';--gd-dark-bg:' . $branding['dark_surface_color'] . ';--gelsendiele-radius:' . absint( $branding['border_radius'] ) . 'px;max-width:' . absint( $form_settings['width'] ) . 'px;';
-        $logo_url      = $branding['logo_url'];
-        if ( ! $logo_url && ! empty( $branding['logo_attachment_id'] ) ) {
-            $logo_url = wp_get_attachment_image_url( absint( $branding['logo_attachment_id'] ), 'medium' );
-        }
         $areas = array();
         $tables = array();
         if ( class_exists( 'GDG_DB' ) ) {
@@ -189,7 +185,7 @@ final class GD_Reservation_Engine {
         $theme_class = 'dark' === $theme_mode ? ' gdrf-theme-dark' : ( 'light' === $theme_mode ? ' gdrf-theme-light' : ' gdrf-theme-auto' );
         ob_start(); ?>
         <div class="gdrf-shell<?php echo esc_attr( $theme_class ); ?>" style="<?php echo esc_attr( $form_style ); ?>"><form class="gdrf-form" data-gdrf-form novalidate>
-          <div class="gdrf-head"><?php if ( $logo_url ) : ?><img class="gdrf-brand-logo" src="<?php echo esc_url( $logo_url ); ?>" alt="<?php echo esc_attr( $business_name ); ?>"><?php endif; ?><span class="gdrf-eyebrow"><?php echo esc_html( $business_name ); ?></span><h2><?php echo esc_html( $form_settings['headline'] ); ?></h2><p><?php echo esc_html( $form_settings['intro'] ); ?></p></div>
+          <div class="gdrf-head"><span class="gdrf-eyebrow"><?php echo esc_html( $business_name ); ?></span><h2><?php echo esc_html( $form_settings['headline'] ); ?></h2><p><?php echo esc_html( $form_settings['intro'] ); ?></p></div>
           <div class="gdrf-grid">
             <label class="gdrf-date-field"><span><?php echo esc_html( $label( 'date' ) . $marker( 'date' ) ); ?></span>
               <input type="hidden" name="date" required>
