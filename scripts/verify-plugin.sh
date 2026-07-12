@@ -35,6 +35,7 @@ if command -v php >/dev/null 2>&1; then
   done < <(find "$PLUGIN" -type f -name '*.php' -print0)
   php "$ROOT/tests/availability-smoke.php" >/dev/null
   php "$ROOT/tests/email-template-smoke.php" >/dev/null
+  php "$ROOT/tests/gastro-fullscreen-smoke.php" >/dev/null
 else
   echo "Hinweis: PHP ist lokal nicht verfügbar; PHP-Lint wird in GitHub Actions ausgeführt." >&2
 fi

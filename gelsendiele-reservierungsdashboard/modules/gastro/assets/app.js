@@ -8,6 +8,10 @@
   const screen = app.querySelector('.gdg-screen');
   const loading = app.querySelector('.gdg-loading');
   const connection = app.querySelector('.gdg-connection');
+  const themeButton = app.querySelector('[data-gdg-theme-toggle]');
+  const themeColorMeta = document.getElementById('gdg-theme-color');
+  const systemDarkMode = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  let followsSystemTheme = false;
   const state = {
     bootstrap: null,
     selectedTableId: Number(config.prefill?.tableId || 0),
@@ -97,19 +101,69 @@
   }
 
   function setupTheme() {
-    let stored = config.themeMode || 'auto';
-    try { stored = localStorage.getItem('gdg-theme') || stored; } catch (_) {}
-    applyTheme(stored);
-    app.querySelector('[data-gdg-theme-toggle]')?.addEventListener('click', () => {
-      const current = app.dataset.theme || 'auto';
+    const stored = storedTheme();
+    followsSystemTheme = !stored && (config.themeMode || 'auto') === 'auto';
+    applyTheme(stored || configuredTheme());
+    themeButton?.addEventListener('click', () => {
+      const current = app.dataset.theme === 'dark' ? 'dark' : 'light';
       const next = current === 'dark' ? 'light' : 'dark';
-      try { localStorage.setItem('gdg-theme', next); } catch (_) {}
+      followsSystemTheme = false;
+      persistTheme(next);
       applyTheme(next);
     });
+    if (systemDarkMode) {
+      const syncSystemTheme = (event) => {
+        if (followsSystemTheme) applyTheme(event.matches ? 'dark' : 'light');
+      };
+      if (typeof systemDarkMode.addEventListener === 'function') {
+        systemDarkMode.addEventListener('change', syncSystemTheme);
+      } else if (typeof systemDarkMode.addListener === 'function') {
+        systemDarkMode.addListener(syncSystemTheme);
+      }
+    }
+  }
+
+  function storedTheme() {
+    try {
+      const shared = window.localStorage.getItem('gd-dashboard-theme');
+      if (shared === 'light' || shared === 'dark') return shared;
+      const legacy = window.localStorage.getItem('gdg-theme');
+      return legacy === 'light' || legacy === 'dark' ? legacy : '';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  function configuredTheme() {
+    if (config.themeMode === 'light' || config.themeMode === 'dark') return config.themeMode;
+    return systemDarkMode?.matches ? 'dark' : 'light';
+  }
+
+  function persistTheme(theme) {
+    try {
+      // Das Reservierungsdashboard verwendet denselben Schlüssel. Dadurch bleibt
+      // die Darstellung beim Wechsel zwischen allen Arbeitsbereichen konsistent.
+      window.localStorage.setItem('gd-dashboard-theme', theme);
+      window.localStorage.setItem('gdg-theme', theme);
+    } catch (_) {}
   }
 
   function applyTheme(theme) {
-    app.dataset.theme = theme;
+    const resolved = theme === 'dark' ? 'dark' : 'light';
+    app.dataset.theme = resolved;
+    document.documentElement.dataset.gdgTheme = resolved;
+    if (document.body) document.body.dataset.gdgTheme = resolved;
+    document.documentElement.style.colorScheme = resolved;
+    if (themeButton) {
+      themeButton.setAttribute('aria-pressed', resolved === 'dark' ? 'true' : 'false');
+      themeButton.setAttribute('aria-label', resolved === 'dark' ? 'Helle Darstellung aktivieren' : 'Dark Mode aktivieren');
+      themeButton.title = resolved === 'dark' ? 'Helle Darstellung aktivieren' : 'Dark Mode aktivieren';
+    }
+    if (themeColorMeta) {
+      themeColorMeta.content = resolved === 'dark'
+        ? (config.themeColors?.dark || '#08110b')
+        : (config.themeColors?.light || '#f3f5f7');
+    }
   }
 
   function getOrders() {

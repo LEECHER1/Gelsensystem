@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.3.1
+- Service, Küche, Schank und Kasse verwenden dasselbe eigenständige Vollbildprinzip wie die Reservierungsverwaltung.
+- Theme-Header, Theme-Footer, Adminleiste und Inhaltsbreiten des WordPress-Themes werden auf den internen Arbeitsseiten entfernt.
+- Hell-/Dunkelmodus setzt Dokument, App-Fläche, Browser-Themefarbe und native Formulare konsistent.
+- Die Darstellungswahl wird mit dem Reservierungsdashboard geteilt und über alle Gastro-Seiten beibehalten.
+- Überschriften, Karten, Formularfelder, Statusanzeigen und Platzhalter besitzen in beiden Modi belastbare Kontraste.
+- Versteckte Lade- und Inhaltsbereiche respektieren das `hidden`-Attribut wieder zuverlässig.
+
 ## 2.3.0
 - Sieben vollständig eigene E-Mail-Vorlagen für neue Anfragen, Eingang, Bestätigung, Ablehnung, Änderung, Stornierung und Erinnerung.
 - Vorlagen unterstützen Text oder HTML, Empfängersteuerung, Absender aus den Betriebseinstellungen und sichere Platzhalter.
