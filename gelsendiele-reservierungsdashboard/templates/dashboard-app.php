@@ -32,8 +32,8 @@ $manifest_url = add_query_arg( 'gd-pwa-manifest', '1', home_url( '/' ) );
 <?php
 $gd_app_section = isset( $_GET['gd-section'] ) ? sanitize_key( wp_unslash( $_GET['gd-section'] ) ) : 'reservations';
 if ( in_array( $gd_app_section, array( 'settings', 'users' ), true ) ) :
-	if ( ! wp_script_is( 'gelsendiele-settings', 'done' ) ) : ?><script src="<?php echo esc_url( GELSENDIELE_URL . 'admin/assets/settings.js?ver=' . GELSENDIELE_VERSION ); ?>"></script><?php endif;
-	if ( ! wp_script_is( 'gd-reservierungsdashboard', 'done' ) ) : ?><script src="<?php echo esc_url( GELSENDIELE_URL . 'assets/dashboard.js?ver=' . GELSENDIELE_VERSION ); ?>"></script><?php endif;
+	?><script src="<?php echo esc_url( GELSENDIELE_URL . 'admin/assets/settings.js?ver=' . GELSENDIELE_VERSION ); ?>"></script>
+	<script src="<?php echo esc_url( GELSENDIELE_URL . 'assets/dashboard.js?ver=' . GELSENDIELE_VERSION ); ?>"></script><?php
 endif;
 ?>
 </body>

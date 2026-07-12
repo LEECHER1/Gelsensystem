@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.4.2 – 2026-07-12
+- Gemeinsame Patchversion mit der themeunabhängigen zentralen App-Initialisierung.
+
 ## 2.4.1 – 2026-07-12
 - Gemeinsame Versions- und Theme-Initialisierung mit der zentralen Gelsensystem-App.
 
