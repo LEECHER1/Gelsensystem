@@ -5,6 +5,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class GDG_App {
+	private const VIEWS = array( 'service', 'kitchen', 'bar', 'checkout' );
+
 	public static function register_shortcode(): void {
 		add_shortcode( 'gelsendiele_gastro', array( __CLASS__, 'shortcode' ) );
 	}
@@ -18,7 +20,7 @@ final class GDG_App {
 			'gelsendiele_gastro'
 		);
 		$view = sanitize_key( $atts['view'] );
-		if ( ! in_array( $view, array( 'service', 'kitchen', 'bar', 'checkout' ), true ) ) {
+		if ( ! in_array( $view, self::VIEWS, true ) ) {
 			$view = 'service';
 		}
 
@@ -67,7 +69,10 @@ final class GDG_App {
 				</nav>
 				<div class="gdg-top-actions">
 					<span class="gdg-connection" title="Verbindungsstatus"><i></i><span>Online</span></span>
-					<button type="button" class="gdg-icon-button" data-gdg-theme-toggle aria-label="Darstellung wechseln">◐</button>
+					<button type="button" class="gdg-icon-button gdg-theme-button" data-gdg-theme-toggle aria-label="Darstellung wechseln" aria-pressed="false" title="Hell-/Dunkelmodus">
+						<svg class="gdg-theme-icon gdg-theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
+						<svg class="gdg-theme-icon gdg-theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+					</button>
 				</div>
 			</header>
 			<main class="gdg-main">
@@ -90,6 +95,10 @@ final class GDG_App {
 			'view' => $view,
 			'pollInterval' => max( 3, min( 30, (int) get_option( 'gdg_poll_interval', 5 ) ) ) * 1000,
 			'themeMode' => Gelsendiele_Settings::get( 'branding', 'theme_mode', 'auto' ),
+			'themeColors' => array(
+				'light' => '#f3f5f7',
+				'dark'  => Gelsendiele_Settings::get( 'branding', 'dark_surface_color', '#08110b' ),
+			),
 			'locale' => get_locale(),
 			'prefill' => array(
 				'reservationId' => isset( $_GET['reservation_id'] ) ? absint( $_GET['reservation_id'] ) : 0,
@@ -108,7 +117,7 @@ final class GDG_App {
 
 	public static function get_app_urls(): array {
 		$urls = array();
-		foreach ( array( 'service', 'kitchen', 'bar', 'checkout' ) as $view ) {
+		foreach ( self::VIEWS as $view ) {
 			$page_id = (int) get_option( 'gdg_page_' . $view, 0 );
 			$urls[ $view ] = $page_id ? get_permalink( $page_id ) : '';
 		}
@@ -133,14 +142,56 @@ final class GDG_App {
 	}
 
 	public static function disable_cache_on_app_pages(): void {
-		if ( is_admin() || ! is_singular( 'page' ) ) {
-			return;
-		}
-		$post_id = get_queried_object_id();
-		if ( ! $post_id || ! get_post_meta( $post_id, '_gdg_view', true ) ) {
+		if ( ! self::is_app_page() ) {
 			return;
 		}
 		nocache_headers();
 		header( 'X-Robots-Tag: noindex, nofollow', true );
+	}
+
+	/** Erkennt ausschließlich die automatisch angelegten Gastro-Arbeitsseiten. */
+	public static function is_app_page(): bool {
+		if ( is_admin() || ! is_singular( 'page' ) ) {
+			return false;
+		}
+		return '' !== self::current_view();
+	}
+
+	/** Liefert die validierte Ansicht der aktuell abgefragten Arbeitsseite. */
+	public static function current_view(): string {
+		$post_id = get_queried_object_id();
+		$view    = $post_id ? sanitize_key( (string) get_post_meta( $post_id, '_gdg_view', true ) ) : '';
+		return in_array( $view, self::VIEWS, true ) ? $view : '';
+	}
+
+	public static function hide_admin_bar_on_app_pages( $show ) {
+		return self::is_app_page() ? false : $show;
+	}
+
+	/**
+	 * Entfernt Theme-Header, Theme-Footer und deren Breitenbegrenzungen. Die
+	 * Arbeitsbereiche werden dadurch wie das Reservierungsdashboard als eigene
+	 * App ausgeliefert.
+	 */
+	public static function use_standalone_template( $template ) {
+		$view = self::current_view();
+		if ( '' === $view ) {
+			return $template;
+		}
+
+		// template_include läuft vor wp_head(); die Assets sind dadurch bereits
+		// für den Kopfbereich registriert und erscheinen ohne ungestylten Aufbau.
+		self::enqueue_assets( $view );
+		$app_template = GDG_DIR . 'templates/gastro-app.php';
+		return file_exists( $app_template ) ? $app_template : $template;
+	}
+
+	public static function add_standalone_body_class( array $classes ): array {
+		$view = self::current_view();
+		if ( '' !== $view ) {
+			$classes[] = 'gdg-standalone-app';
+			$classes[] = 'gdg-view-' . $view;
+		}
+		return $classes;
 	}
 }

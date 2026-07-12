@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.1 – 2026-07-12
+
+- Eigenständiges Vollbild-Template für Service, Küche, Schank und Kasse
+- Gemeinsamer, persistenter Hell-/Dunkelmodus mit korrekten Dokumentfarben
+- Korrigierte Kontraste für Texte, Status, Karten und Formulare
+- Lade-Layer wird nach erfolgreichem Start zuverlässig entfernt
+
 ## 2.3.0 – 2026-07-12
 
 - Gemeinsamer Versionsstand mit den neuen E-Mail- und Formulareinstellungen

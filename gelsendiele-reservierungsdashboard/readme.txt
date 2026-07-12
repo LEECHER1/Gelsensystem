@@ -2,7 +2,7 @@
 Contributors: Andreas Schwarz / OpenAI
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.3.0
+Stable tag: 2.3.1
 
 Eigenständiges Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für die Gelsendiele.
 
@@ -37,6 +37,12 @@ Das Zahlungsmodul dokumentiert Bar- und Kartenzahlungen, ist aber noch keine RKS
 Installierbare ZIP-Dateien werden aus einem geprüften Git-Tag erstellt. Vor jedem Produktivupdate sind WordPress-Dateien und Datenbank vollständig zu sichern.
 
 == Changelog ==
+
+= 2.3.1 =
+* Service, Küche, Schank und Kasse verwenden ein eigenständiges Vollbild-Template ohne Theme-Header, Footer oder Breitenbegrenzung.
+* Hell- und Dunkelmodus gelten für die vollständige Arbeitsoberfläche und bleiben beim Wechsel zwischen Reservierungen und Gastro-Modulen erhalten.
+* Farben von Überschriften, Tischen, Formularfeldern und Statusanzeigen sind in beiden Darstellungen kontraststark.
+* Der Ladebildschirm wird nach erfolgreichem Datenabruf zuverlässig ausgeblendet.
 
 = 2.3.0 =
 * Sieben eigene E-Mail-Vorlagen für Betrieb, Gast, Statusänderungen und Erinnerung.
