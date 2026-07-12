@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.2.0 – 2026-07-12
+
+- Sichtbarer Produktname auf Gelsensystem geändert
+- Typografisch verfälschte Shortcodes bestehender Service-, Küchen-, Schank- und Kassen-Seiten werden repariert
+
 ## 2.1.0 – 2026-07-12
 
 - Zentrale Update-Migration für Tabellen, Rollen und Arbeitsseiten

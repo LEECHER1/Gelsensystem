@@ -16,8 +16,8 @@ final class Gelsendiele_Admin {
 
 	public static function register_menu() {
 		add_menu_page(
-			'Gelsendiele Gastro System',
-			'Gelsendiele',
+			'Gelsensystem',
+			'Gelsensystem',
 			'read',
 			self::MENU_SLUG,
 			array( __CLASS__, 'render_dashboard' ),
@@ -60,7 +60,7 @@ final class Gelsendiele_Admin {
 		?>
 		<div class="wrap gelsendiele-admin-wrap">
 			<div class="gelsendiele-admin-hero" style="<?php echo esc_attr( Gelsendiele_Settings::css_variables() ); ?>">
-				<span>Gastro System</span>
+				<span>Gelsensystem</span>
 				<h1><?php echo esc_html( $business_name ); ?></h1>
 				<p>Reservierung, Service, Küche, Schank und Abrechnung in einem modularen WordPress-Plugin.</p>
 			</div>
@@ -159,7 +159,7 @@ final class Gelsendiele_Admin {
 		$settings = Gelsendiele_Settings::get_all();
 		?>
 		<div class="wrap gelsendiele-admin-wrap">
-			<h1>Gelsendiele Einstellungen</h1>
+			<h1>Gelsensystem Einstellungen</h1>
 			<?php if ( $saved ) : ?><div class="notice notice-success is-dismissible"><p>Einstellungen wurden gespeichert.</p></div><?php endif; ?>
 			<nav class="nav-tab-wrapper gelsendiele-settings-tabs" aria-label="Einstellungsbereiche">
 				<?php foreach ( $tabs as $slug => $label ) : ?>
@@ -172,6 +172,7 @@ final class Gelsendiele_Admin {
 					case 'general': self::render_general_tab( $settings ); break;
 					case 'opening-hours': self::render_opening_hours_tab( $settings ); break;
 					case 'reservations': self::render_reservations_tab( $settings ); break;
+					case 'availability': self::render_availability_tab( $settings ); break;
 					case 'system-status': self::render_system_status(); break;
 					case 'roles': self::render_roles_tab(); break;
 					default: self::render_settings_placeholder( $tabs[ $tab ] ); break;
@@ -199,6 +200,15 @@ final class Gelsendiele_Admin {
 		}
 		if ( 'reservations' === $tab ) {
 			Gelsendiele_Settings::save_sections( array( 'reservations' => isset( $input['reservations'] ) ? $input['reservations'] : array() ) );
+			return true;
+		}
+		if ( 'availability' === $tab ) {
+			Gelsendiele_Settings::save_sections( array(
+				'availability' => array(
+					'closed_dates' => array(),
+					'rules'        => isset( $input['availability']['rules'] ) && is_array( $input['availability']['rules'] ) ? $input['availability']['rules'] : array(),
+				),
+			) );
 			return true;
 		}
 		return false;
@@ -286,6 +296,78 @@ final class Gelsendiele_Admin {
 		<?php foreach ( $fields as $key => $field ) : ?><label><span><?php echo esc_html( $field[0] ); ?></span><input type="number" min="<?php echo esc_attr( $field[1] ); ?>" max="<?php echo esc_attr( $field[2] ); ?>" name="gelsendiele_settings[reservations][<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( $res[ $key ] ); ?>"></label><?php endforeach; ?>
 		</div></section><?php submit_button( 'Reservierungseinstellungen speichern' ); ?></form>
 		<?php
+	}
+
+	private static function render_availability_tab( $settings ) {
+		$rules = isset( $settings['availability']['rules'] ) && is_array( $settings['availability']['rules'] ) ? $settings['availability']['rules'] : array();
+		?>
+		<form method="post" class="gelsendiele-settings-form" data-gelsendiele-availability-form>
+			<?php wp_nonce_field( 'gelsendiele_save_settings', 'gelsendiele_settings_nonce' ); ?>
+			<input type="hidden" name="gelsendiele_settings_action" value="save">
+			<section class="gelsendiele-settings-card">
+				<h2>Sondertage & Verfügbarkeiten</h2>
+				<p>Regeln wirken sofort auf den öffentlichen Kalender und die verfügbaren Uhrzeiten. Interne Kommentare werden niemals öffentlich ausgegeben.</p>
+				<div class="gelsendiele-rule-summary">
+					<span><strong>Ganztägig:</strong> Schließtag oder Betriebsurlaub</span>
+					<span><strong>Zeitbezogen:</strong> Sonderöffnung oder gesperrter Zeitraum</span>
+					<span><strong>Kapazität:</strong> reduzierte Reservierungen oder Personen</span>
+				</div>
+			</section>
+			<div class="gelsendiele-availability-list" data-gelsendiele-availability-list data-next-index="<?php echo esc_attr( count( $rules ) ); ?>">
+				<?php foreach ( $rules as $index => $rule ) : ?>
+					<?php self::render_availability_rule( $rule, $index ); ?>
+				<?php endforeach; ?>
+			</div>
+			<div class="gelsendiele-empty-rules" data-gelsendiele-empty-rules <?php echo empty( $rules ) ? '' : 'hidden'; ?>>Noch keine Sonderregel angelegt.</div>
+			<p><button type="button" class="button button-secondary" data-gelsendiele-add-rule>Sonderregel hinzufügen</button></p>
+			<template data-gelsendiele-rule-template>
+				<?php self::render_availability_rule( self::empty_availability_rule(), '__RULE_INDEX__' ); ?>
+			</template>
+			<?php submit_button( 'Verfügbarkeiten speichern' ); ?>
+		</form>
+		<?php
+	}
+
+	private static function render_availability_rule( $rule, $index ) {
+		$rule  = wp_parse_args( is_array( $rule ) ? $rule : array(), self::empty_availability_rule() );
+		$name  = 'gelsendiele_settings[availability][rules][' . $index . ']';
+		$types = array(
+			'closed'      => 'Ganztägig geschlossen',
+			'vacation'    => 'Betriebsurlaub',
+			'special_open' => 'Sonderöffnung',
+			'blocked_time' => 'Uhrzeit sperren',
+			'capacity'    => 'Kapazität reduzieren',
+		);
+		?>
+		<section class="gelsendiele-day-card gelsendiele-availability-rule" data-gelsendiele-rule>
+			<input type="hidden" name="<?php echo esc_attr( $name ); ?>[id]" value="<?php echo esc_attr( $rule['id'] ); ?>" data-gelsendiele-rule-id>
+			<header>
+				<label class="gelsendiele-rule-type"><span>Art</span><select name="<?php echo esc_attr( $name ); ?>[type]" data-gelsendiele-rule-type><?php foreach ( $types as $value => $label ) : ?><option value="<?php echo esc_attr( $value ); ?>" <?php selected( $rule['type'], $value ); ?>><?php echo esc_html( $label ); ?></option><?php endforeach; ?></select></label>
+				<label><input type="hidden" name="<?php echo esc_attr( $name ); ?>[enabled]" value="0"><input type="checkbox" name="<?php echo esc_attr( $name ); ?>[enabled]" value="1" <?php checked( ! empty( $rule['enabled'] ) ); ?>> Aktiv</label>
+				<button type="button" class="button-link-delete" data-gelsendiele-remove-rule>Regel entfernen</button>
+			</header>
+			<div class="gelsendiele-field-grid">
+				<label><span>Von Datum</span><input type="date" name="<?php echo esc_attr( $name ); ?>[start_date]" value="<?php echo esc_attr( $rule['start_date'] ); ?>" required></label>
+				<label><span>Bis Datum</span><input type="date" name="<?php echo esc_attr( $name ); ?>[end_date]" value="<?php echo esc_attr( $rule['end_date'] ); ?>" required></label>
+				<label data-gelsendiele-rule-group="time"><span>Von Uhrzeit</span><input type="time" name="<?php echo esc_attr( $name ); ?>[start_time]" value="<?php echo esc_attr( $rule['start_time'] ); ?>"></label>
+				<label data-gelsendiele-rule-group="time"><span>Bis Uhrzeit</span><input type="time" name="<?php echo esc_attr( $name ); ?>[end_time]" value="<?php echo esc_attr( $rule['end_time'] ); ?>"></label>
+				<label data-gelsendiele-rule-group="capacity"><span>Max. gleichzeitige Reservierungen</span><input type="number" min="0" max="1000" name="<?php echo esc_attr( $name ); ?>[max_bookings]" value="<?php echo esc_attr( $rule['max_bookings'] ); ?>"><small>0 = allgemeine Grenze</small></label>
+				<label data-gelsendiele-rule-group="capacity"><span>Max. Personen</span><input type="number" min="0" max="10000" name="<?php echo esc_attr( $name ); ?>[max_people]" value="<?php echo esc_attr( $rule['max_people'] ); ?>"><small>0 = allgemeine Grenze</small></label>
+				<label class="gelsendiele-field-wide"><span>Nur diese Bereiche öffnen (optional)</span><input type="text" name="<?php echo esc_attr( $name ); ?>[areas]" value="<?php echo esc_attr( implode( ', ', (array) $rule['areas'] ) ); ?>" placeholder="Gastraum, Gastgarten"><small>Kommagetrennt; für die spätere bereichsbezogene Tischvergabe vorbereitet.</small></label>
+				<label class="gelsendiele-field-wide"><span>Interner Kommentar</span><textarea name="<?php echo esc_attr( $name ); ?>[comment]" rows="2"><?php echo esc_textarea( $rule['comment'] ); ?></textarea></label>
+				<label class="gelsendiele-field-wide"><span>Öffentliche Information (optional)</span><textarea name="<?php echo esc_attr( $name ); ?>[public_message]" rows="2" placeholder="Wird nach Auswahl des Datums im Formular angezeigt."><?php echo esc_textarea( $rule['public_message'] ); ?></textarea></label>
+			</div>
+		</section>
+		<?php
+	}
+
+	private static function empty_availability_rule() {
+		$today = wp_date( 'Y-m-d' );
+		return array(
+			'id' => '', 'enabled' => 1, 'type' => 'closed', 'start_date' => $today, 'end_date' => $today,
+			'start_time' => '11:00', 'end_time' => '22:00', 'max_bookings' => 0, 'max_people' => 0,
+			'areas' => array(), 'comment' => '', 'public_message' => '',
+		);
 	}
 
 	private static function render_roles_tab() {

@@ -31,6 +31,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: matrix.php == '8.2'
         with:
-          name: gelsendiele-plugin
+          name: gelsensystem-plugin
           path: dist/*.zip
           if-no-files-found: error

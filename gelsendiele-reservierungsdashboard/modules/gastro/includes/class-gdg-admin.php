@@ -142,7 +142,7 @@ final class GDG_Admin {
 		$queue_bar = GDG_DB::get_queue( 'bar' );
 		?>
 		<div class="wrap">
-			<h1>Gelsendiele Gastro</h1>
+			<h1>Gelsensystem Gastro</h1>
 			<?php self::notice(); ?>
 			<p>Gemeinsames System für Reservierung, Tischbelegung, Bestellungen, Küche, Schank und Abrechnung.</p>
 			<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;max-width:1000px;margin:24px 0;">

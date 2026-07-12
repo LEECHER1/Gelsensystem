@@ -1,4 +1,4 @@
-# Gelsendiele Gastro System
+# Gelsensystem
 
 Ein modulares WordPress-Gastronomiesystem für Reservierungen, Tischverwaltung, Service, Küche, Schank und Abrechnung. Das Plugin wird schrittweise von der historischen Five-Star-Kompatibilität zu einem vollständig eigenständigen, professionell releasebaren Produkt migriert.
 
@@ -29,7 +29,7 @@ scripts/                             Prüf- und Buildskripte
 ./scripts/build-plugin.sh
 ```
 
-Das Buildskript erzeugt `dist/gelsendiele-system-v<version>.zip` mit genau einem Plugin-Stammordner.
+Das Buildskript erzeugt `dist/gelsensystem-v<version>.zip` mit genau einem Plugin-Stammordner. Der bestehende technische Plugin-Ordner bleibt für verlustfreie WordPress-Updates unverändert.
 
 ## Sicherheit
 

@@ -1,9 +1,9 @@
-=== Gelsendiele Gastro System ===
+=== Gelsensystem Gastro ===
 Contributors: Andreas Schwarz / Gelsendiele
 Tags: gastronomie, bestellung, küche, schank, tische, reservierung
 Requires at least: 6.4
 Requires PHP: 7.4
-Stable tag: 2.1.0
+Stable tag: 2.2.0
 
 Service-, Küchen-, Schank- und Zahlungsmodul für die Gelsendiele.
 
@@ -28,8 +28,8 @@ Service-, Küchen-, Schank- und Zahlungsmodul für die Gelsendiele.
 
 1. ZIP in WordPress unter Plugins > Installieren > Plugin hochladen installieren.
 2. Plugin aktivieren.
-3. Unter Gelsendiele > Tischplan die tatsächlichen Tische einrichten.
-4. Unter Gelsendiele > Speisekarte die Artikel einrichten.
+3. Unter Gelsensystem > Tischplan die tatsächlichen Tische einrichten.
+4. Unter Gelsensystem > Speisekarte die Artikel einrichten.
 5. Die automatisch erstellten Seiten Service, Küche, Schank und Kasse öffnen.
 6. Mitarbeiter als WordPress-Benutzer anlegen und die passende Rolle zuweisen.
 
@@ -58,6 +58,10 @@ Die Version ersetzt noch keine österreichische Registrierkasse, erstellt keinen
 Die Arbeitsseiten sind nur für angemeldete WordPress-Benutzer mit passender Rolle sichtbar und werden mit No-Cache- sowie Noindex-Headern ausgeliefert.
 
 == Changelog ==
+
+= 2.2.0 =
+* Produktname auf Gelsensystem vereinheitlicht.
+* Bestehende Arbeitsseiten mit typografisch verfälschten Shortcodes werden automatisch repariert.
 
 = 2.1.0 =
 * Integration in das zentrale Gelsendiele-Menü und die versionierte Migration.

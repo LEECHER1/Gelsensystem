@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Gelsendiele Gastro System
+ * Plugin Name: Gelsensystem Gastro
  * Description: Service-, Küchen-, Schank- und Zahlungsmodul als Erweiterung für das Gelsendiele-Reservierungssystem.
- * Version: 2.1.0
+ * Version: 2.2.0
  * Author: Andreas Schwarz / Gelsendiele
  * Text Domain: gelsendiele-gastro
  */
@@ -16,11 +16,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Ist sie noch aktiv, sind ihre Klassen und Funktionen bereits geladen.
  * Das integrierte Modul darf sie dann nicht ein zweites Mal deklarieren.
  */
-if ( class_exists( 'GDG_Plugin', false ) || class_exists( 'GDG_DB', false ) ) {
+// GDG_Plugin wird weiter unten in derselben Datei deklariert und kann je nach
+// PHP-Ausführungsmodell bereits bei dieser Prüfung als vorhanden gelten. Als
+// belastbares Signal für eine separat geladene Altversion dient deshalb nur
+// die dort zwingend vorab eingebundene Datenbankklasse.
+if ( class_exists( 'GDG_DB', false ) ) {
 	return;
 }
 
-defined( 'GDG_VERSION' ) || define( 'GDG_VERSION', defined( 'GELSENDIELE_VERSION' ) ? GELSENDIELE_VERSION : '2.1.0' );
+defined( 'GDG_VERSION' ) || define( 'GDG_VERSION', defined( 'GELSENDIELE_VERSION' ) ? GELSENDIELE_VERSION : '2.2.0' );
 defined( 'GDG_FILE' ) || define( 'GDG_FILE', __FILE__ );
 defined( 'GDG_DIR' ) || define( 'GDG_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GDG_URL' ) || define( 'GDG_URL', plugin_dir_url( __FILE__ ) );

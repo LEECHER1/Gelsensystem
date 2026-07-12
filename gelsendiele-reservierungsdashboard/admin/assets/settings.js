@@ -22,6 +22,53 @@
     });
   });
 
+  const availabilityForm = document.querySelector('[data-gelsendiele-availability-form]');
+  if (availabilityForm) {
+    const list = availabilityForm.querySelector('[data-gelsendiele-availability-list]');
+    const template = availabilityForm.querySelector('[data-gelsendiele-rule-template]');
+    const add = availabilityForm.querySelector('[data-gelsendiele-add-rule]');
+    const empty = availabilityForm.querySelector('[data-gelsendiele-empty-rules]');
+
+    const updateEmpty = () => {
+      if (empty && list) empty.hidden = Boolean(list.querySelector('[data-gelsendiele-rule]'));
+    };
+    const updateRule = (rule) => {
+      const type = rule.querySelector('[data-gelsendiele-rule-type]')?.value || 'closed';
+      const showTime = ['special_open', 'blocked_time', 'capacity'].includes(type);
+      rule.querySelectorAll('[data-gelsendiele-rule-group="time"]').forEach((field) => { field.hidden = !showTime; });
+      rule.querySelectorAll('[data-gelsendiele-rule-group="capacity"]').forEach((field) => { field.hidden = type !== 'capacity'; });
+    };
+
+    list?.querySelectorAll('[data-gelsendiele-rule]').forEach(updateRule);
+    list?.addEventListener('change', (event) => {
+      if (!event.target.matches('[data-gelsendiele-rule-type]')) return;
+      const rule = event.target.closest('[data-gelsendiele-rule]');
+      if (rule) updateRule(rule);
+    });
+    list?.addEventListener('click', (event) => {
+      const remove = event.target.closest('[data-gelsendiele-remove-rule]');
+      if (!remove) return;
+      remove.closest('[data-gelsendiele-rule]')?.remove();
+      updateEmpty();
+    });
+    add?.addEventListener('click', () => {
+      if (!list || !template) return;
+      const index = Number.parseInt(list.dataset.nextIndex || '0', 10);
+      list.dataset.nextIndex = String(index + 1);
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = template.innerHTML.replaceAll('__RULE_INDEX__', String(index));
+      const rule = wrapper.querySelector('[data-gelsendiele-rule]');
+      if (!rule) return;
+      const id = rule.querySelector('[data-gelsendiele-rule-id]');
+      if (id) id.value = `rule-${Date.now().toString(36)}-${index}`;
+      list.appendChild(rule);
+      updateRule(rule);
+      updateEmpty();
+      rule.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    updateEmpty();
+  }
+
   const selectLogo = document.querySelector('[data-gelsendiele-select-logo]');
   const logoUrl = document.querySelector('[data-gelsendiele-logo-url]');
   const logoId = document.querySelector('[data-gelsendiele-logo-id]');

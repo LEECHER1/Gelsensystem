@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 final class Gelsendiele_Settings {
 	const OPTION         = 'gelsendiele_settings';
-	const SCHEMA_VERSION = 1;
+	const SCHEMA_VERSION = 2;
 
 	private static $cache = null;
 
@@ -59,6 +59,7 @@ final class Gelsendiele_Settings {
 			),
 			'availability'   => array(
 				'closed_dates' => array(),
+				'rules'        => array(),
 			),
 			'form'           => array(
 				'privacy_text' => 'Ich stimme der Verarbeitung meiner Angaben zur Bearbeitung der Reservierung zu.',
@@ -93,12 +94,50 @@ final class Gelsendiele_Settings {
 
 	public static function maybe_initialize() {
 		if ( false !== get_option( self::OPTION, false ) ) {
+			self::maybe_upgrade();
 			return;
 		}
 
 		$settings = self::sanitize( self::import_legacy_settings( self::defaults() ) );
 		add_option( self::OPTION, $settings, '', false );
 		self::synchronize_wordpress_runtime( $settings );
+		self::$cache = null;
+	}
+
+	/** Aktualisiert ausschließlich die versionierte Einstellungsstruktur. */
+	public static function maybe_upgrade() {
+		$stored = get_option( self::OPTION, array() );
+		if ( ! is_array( $stored ) ) {
+			$stored = array();
+		}
+		$version = isset( $stored['schema_version'] ) ? absint( $stored['schema_version'] ) : 0;
+		if ( $version >= self::SCHEMA_VERSION ) {
+			return;
+		}
+
+		if ( $version < 2 ) {
+			$availability = isset( $stored['availability'] ) && is_array( $stored['availability'] ) ? $stored['availability'] : array();
+			$rules        = isset( $availability['rules'] ) && is_array( $availability['rules'] ) ? $availability['rules'] : array();
+			foreach ( (array) ( isset( $availability['closed_dates'] ) ? $availability['closed_dates'] : array() ) as $date ) {
+				if ( self::valid_date_value( $date ) ) {
+					$rules[] = array(
+						'id'         => 'legacy-' . sanitize_key( $date ),
+						'enabled'    => 1,
+						'type'       => 'closed',
+						'start_date' => $date,
+						'end_date'   => $date,
+						'comment'    => 'Aus bisherigen geschlossenen Tagen übernommen',
+					);
+				}
+			}
+			$availability['rules']        = $rules;
+			$availability['closed_dates'] = array();
+			$stored['availability']       = $availability;
+		}
+
+		$stored['schema_version'] = self::SCHEMA_VERSION;
+		$stored                   = self::sanitize( $stored );
+		update_option( self::OPTION, $stored, false );
 		self::$cache = null;
 	}
 
@@ -146,6 +185,7 @@ final class Gelsendiele_Settings {
 			'admin_email'      => $general['internal_email'],
 			'opening_hours'    => $hours,
 			'closed_dates'     => $settings['availability']['closed_dates'],
+			'availability_rules' => $settings['availability']['rules'],
 			'privacy_text'     => $form['privacy_text'],
 			'success_text'     => $form['success_text'],
 		);
@@ -261,8 +301,8 @@ final class Gelsendiele_Settings {
 			return $blocks;
 		}
 
-		$start = isset( $value['start'] ) ? $value['start'] : ( isset( $value['from'] ) ? $value['from'] : '' );
-		$end   = isset( $value['end'] ) ? $value['end'] : ( isset( $value['to'] ) ? $value['to'] : '' );
+		$start = self::normalize_time( isset( $value['start'] ) ? $value['start'] : ( isset( $value['from'] ) ? $value['from'] : '' ) );
+		$end   = self::normalize_time( isset( $value['end'] ) ? $value['end'] : ( isset( $value['to'] ) ? $value['to'] : '' ) );
 		if ( self::valid_time( $start ) && self::valid_time( $end ) ) {
 			$blocks[] = array( 'start' => $start, 'end' => $end );
 		}
@@ -352,11 +392,22 @@ final class Gelsendiele_Settings {
 		$closed_dates = array();
 		foreach ( (array) $settings['availability']['closed_dates'] as $date ) {
 			$date = sanitize_text_field( $date );
-			if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) {
+			if ( self::valid_date_value( $date ) ) {
 				$closed_dates[] = $date;
 			}
 		}
-		$settings['availability']['closed_dates'] = array_values( array_unique( $closed_dates ) );
+		$rules = array();
+		foreach ( (array) $settings['availability']['rules'] as $rule ) {
+			$sanitized_rule = self::sanitize_availability_rule( $rule );
+			if ( $sanitized_rule ) {
+				$rules[] = $sanitized_rule;
+			}
+		}
+		usort( $rules, array( __CLASS__, 'sort_availability_rules' ) );
+		$settings['availability'] = array(
+			'closed_dates' => array_values( array_unique( $closed_dates ) ),
+			'rules'        => array_slice( $rules, 0, 500 ),
+		);
 
 		$form = $settings['form'];
 		$settings['form'] = array(
@@ -402,6 +453,107 @@ final class Gelsendiele_Settings {
 
 	private static function valid_time( $value ) {
 		return is_string( $value ) && preg_match( '/^(?:[01]\d|2[0-3]):[0-5]\d$/', $value );
+	}
+
+	/** Five Star speichert Zeiten je nach Format z. B. als "4:00 PM". */
+	private static function normalize_time( $value ) {
+		$value = is_scalar( $value ) ? trim( (string) $value ) : '';
+		if ( self::valid_time( $value ) ) {
+			return $value;
+		}
+		if ( '' === $value || 'undefined' === strtolower( $value ) ) {
+			return '';
+		}
+		try {
+			return ( new DateTimeImmutable( $value, wp_timezone() ) )->format( 'H:i' );
+		} catch ( Exception $error ) {
+			return '';
+		}
+	}
+
+	private static function valid_date_value( $value ) {
+		if ( ! is_string( $value ) || ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ) {
+			return false;
+		}
+		$date = DateTimeImmutable::createFromFormat( '!Y-m-d', $value, wp_timezone() );
+		return $date && $date->format( 'Y-m-d' ) === $value;
+	}
+
+	private static function sanitize_availability_rule( $rule ) {
+		if ( ! is_array( $rule ) ) {
+			return null;
+		}
+		$type = isset( $rule['type'] ) ? sanitize_key( $rule['type'] ) : '';
+		if ( ! in_array( $type, array( 'closed', 'vacation', 'special_open', 'blocked_time', 'capacity' ), true ) ) {
+			return null;
+		}
+
+		$start_date = isset( $rule['start_date'] ) ? sanitize_text_field( $rule['start_date'] ) : '';
+		$end_date   = isset( $rule['end_date'] ) ? sanitize_text_field( $rule['end_date'] ) : $start_date;
+		if ( ! self::valid_date_value( $start_date ) ) {
+			return null;
+		}
+		if ( ! self::valid_date_value( $end_date ) || $end_date < $start_date ) {
+			$end_date = $start_date;
+		}
+
+		$start_time = isset( $rule['start_time'] ) ? sanitize_text_field( $rule['start_time'] ) : '';
+		$end_time   = isset( $rule['end_time'] ) ? sanitize_text_field( $rule['end_time'] ) : '';
+		$needs_time = in_array( $type, array( 'special_open', 'blocked_time' ), true );
+		if ( $needs_time && ( ! self::valid_time( $start_time ) || ! self::valid_time( $end_time ) || $start_time === $end_time ) ) {
+			return null;
+		}
+		if ( 'capacity' === $type && ( ! self::valid_time( $start_time ) || ! self::valid_time( $end_time ) || $start_time === $end_time ) ) {
+			$start_time = '';
+			$end_time   = '';
+		}
+		if ( ! $needs_time && 'capacity' !== $type ) {
+			$start_time = '';
+			$end_time   = '';
+		}
+
+		$max_bookings = isset( $rule['max_bookings'] ) ? max( 0, min( 1000, absint( $rule['max_bookings'] ) ) ) : 0;
+		$max_people   = isset( $rule['max_people'] ) ? max( 0, min( 10000, absint( $rule['max_people'] ) ) ) : 0;
+		if ( 'capacity' === $type && 0 === $max_bookings && 0 === $max_people ) {
+			return null;
+		}
+
+		$areas = array();
+		$raw_areas = isset( $rule['areas'] ) ? $rule['areas'] : array();
+		if ( is_string( $raw_areas ) ) {
+			$raw_areas = preg_split( '/\s*,\s*/', $raw_areas, -1, PREG_SPLIT_NO_EMPTY );
+		}
+		foreach ( (array) $raw_areas as $area ) {
+			$area = sanitize_text_field( $area );
+			if ( '' !== $area ) {
+				$areas[] = $area;
+			}
+		}
+
+		$id = isset( $rule['id'] ) ? sanitize_key( $rule['id'] ) : '';
+		if ( '' === $id ) {
+			$id = 'rule-' . str_replace( '-', '', wp_generate_uuid4() );
+		}
+
+		return array(
+			'id'             => $id,
+			'enabled'        => ! empty( $rule['enabled'] ) ? 1 : 0,
+			'type'           => $type,
+			'start_date'     => $start_date,
+			'end_date'       => $end_date,
+			'start_time'     => $start_time,
+			'end_time'       => $end_time,
+			'max_bookings'   => $max_bookings,
+			'max_people'     => $max_people,
+			'areas'          => array_values( array_unique( $areas ) ),
+			'comment'        => isset( $rule['comment'] ) ? sanitize_textarea_field( $rule['comment'] ) : '',
+			'public_message' => isset( $rule['public_message'] ) ? sanitize_textarea_field( $rule['public_message'] ) : '',
+		);
+	}
+
+	private static function sort_availability_rules( $left, $right ) {
+		$by_date = strcmp( $left['start_date'], $right['start_date'] );
+		return 0 !== $by_date ? $by_date : strcmp( $left['id'], $right['id'] );
 	}
 
 	private static function unique_blocks( $blocks ) {

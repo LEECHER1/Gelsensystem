@@ -14,7 +14,7 @@ fi
 
 "$ROOT/scripts/verify-plugin.sh"
 mkdir -p "$OUTPUT_DIR"
-ARCHIVE="$OUTPUT_DIR/gelsendiele-system-v${VERSION}.zip"
+ARCHIVE="$OUTPUT_DIR/gelsensystem-v${VERSION}.zip"
 rm -f "$ARCHIVE"
 
 cd "$ROOT"

@@ -19,6 +19,8 @@ document.querySelectorAll('[data-gdrf-form]').forEach(form=>{
   const date=form.elements.date,time=form.elements.time,party=form.elements.party;
   const msg=form.querySelector('[data-gdrf-message]');
   const btn=form.querySelector('button[type=submit]');
+  const initialButtonText=btn.textContent;
+  const dateNotice=form.querySelector('[data-gdrf-date-notice]');
   const dateBtn=form.querySelector('[data-gdrf-date-button]');
   const dateLabel=form.querySelector('[data-gdrf-date-label]');
   const calendar=form.querySelector('[data-gdrf-calendar]');
@@ -50,9 +52,11 @@ document.querySelectorAll('[data-gdrf-form]').forEach(form=>{
       const r=await fetch(cfg.ajaxUrl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body,credentials:'same-origin',cache:'no-store'});
       const j=await readJsonResponse(r);
       const s=j.success&&j.data?j.data.slots:[];
+      const notice=j.success&&j.data?String(j.data.notice||''):'';
       time.innerHTML=s.length?'<option value="">Uhrzeit wählen</option>'+s.map(v=>`<option value="${v}">${v} Uhr</option>`).join(''):'<option value="">Keine Zeit verfügbar</option>';
       time.disabled=!s.length;
-    }catch(e){time.innerHTML='<option value="">Fehler beim Laden</option>';}
+      if(dateNotice){dateNotice.textContent=notice;dateNotice.hidden=!notice;}
+    }catch(e){time.innerHTML='<option value="">Fehler beim Laden</option>';if(dateNotice){dateNotice.textContent='';dateNotice.hidden=true;}}
   }
 
   async function loadMonth(){
@@ -130,7 +134,7 @@ document.querySelectorAll('[data-gdrf-form]').forEach(form=>{
     }catch(err){
       msg.textContent='Die Serverantwort konnte nicht verarbeitet werden. Bitte prüfen Sie, ob die Reservierung bereits eingegangen ist.';
       msg.classList.add('is-error');
-    }finally{btn.disabled=false;btn.textContent='Reservierung anfragen';}
+    }finally{btn.disabled=false;btn.textContent=initialButtonText;}
   });
   renderCalendar();
 });

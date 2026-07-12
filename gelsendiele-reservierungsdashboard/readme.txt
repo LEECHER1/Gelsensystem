@@ -1,8 +1,8 @@
-=== Gelsendiele System ===
+=== Gelsensystem ===
 Contributors: Andreas Schwarz / OpenAI
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.1.0
+Stable tag: 2.2.0
 
 Eigenständiges Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für die Gelsendiele.
 
@@ -16,6 +16,7 @@ Eigenständiges Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsys
 * Bestehendes Reservierungsdashboard mit manueller Anlage, Bearbeitung, Tischzuordnung, Export und PWA
 * Eigener Reservierungs-Datentyp und eigene Statusverwaltung
 * Öffnungszeiten, Zeitslots, Kapazitätskontrolle und geschlossene Tage
+* Sondertage, Betriebsurlaub, Sonderöffnungen, Uhrzeitsperren und reduzierte Tageskapazitäten
 * E-Mail an Betrieb und Gast
 * Service-, Küchen-, Schank- und Zahlungsmodul
 * Bestehende Five-Star-Reservierungen werden weiterverwendet, da Datentyp und Metadaten kompatibel bleiben
@@ -32,3 +33,13 @@ Das Zahlungsmodul dokumentiert Bar- und Kartenzahlungen, ist aber noch keine RKS
 
 == Aktualisierung ==
 Installierbare ZIP-Dateien werden aus einem geprüften Git-Tag erstellt. Vor jedem Produktivupdate sind WordPress-Dateien und Datenbank vollständig zu sichern.
+
+== Changelog ==
+
+= 2.2.0 =
+* Produktname in Gelsensystem geändert, ohne datenrelevante Slugs oder Präfixe umzubenennen.
+* Vollständige Verwaltung für Sondertage, Betriebsurlaub, Sonderöffnungen, Zeitsperren und Kapazitätsgrenzen.
+* Sonderregeln wirken unmittelbar auf öffentlichen Kalender und Zeitslots.
+* Fehlerhafte typografische Anführungszeichen auf bestehenden Gastro-Arbeitsseiten werden automatisch repariert.
+* Five-Star-Zeitangaben im 12-Stunden-Format werden beim einmaligen Import korrekt normalisiert.
+* Atomare Kurzzeitsperren verhindern doppelte oder konkurrierende Reservierungsübermittlungen.

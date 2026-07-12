@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Gelsendiele Reservierungs-Dashboard
+ * Plugin Name: Gelsensystem
  * Plugin URI: https://github.com/LEECHER1/Gelsendiele
  * Description: Eigenständiges Reservierungs-, Service-, Küchen- und Kassensystem für die Gelsendiele.
- * Version: 2.1.0
+ * Version: 2.2.0
  * Author: Andreas Schwarz / Gelsendiele
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
@@ -14,12 +14,13 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.1.0' );
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.2.0' );
 defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
 defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );
 
 require_once GELSENDIELE_DIR . 'includes/class-gelsendiele-settings.php';
+require_once GELSENDIELE_DIR . 'includes/class-gelsendiele-availability.php';
 require_once GELSENDIELE_DIR . 'includes/class-gelsendiele-migrator.php';
 require_once GELSENDIELE_DIR . 'includes/class-gelsendiele-admin.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-gd-reservation-engine.php';
@@ -360,7 +361,7 @@ final class Gelsendiele_Reservierungsdashboard {
         }
 
         if ( ! $this->booking_post_type_exists() ) {
-            return '<div class="gd-dashboard-shell"><div class="gd-notice gd-notice-error"><strong>Reservierungsmodul konnte nicht gestartet werden.</strong><br>Bitte das Gelsendiele-System erneut aktivieren.</div></div>';
+            return '<div class="gd-dashboard-shell"><div class="gd-notice gd-notice-error"><strong>Reservierungsmodul konnte nicht gestartet werden.</strong><br>Bitte Gelsensystem erneut aktivieren.</div></div>';
         }
 
         $allowed_views = array( 'pending', 'today', 'upcoming', 'confirmed', 'all', 'trash' );
@@ -1416,7 +1417,7 @@ final class Gelsendiele_Reservierungsdashboard {
     public function register_settings_page() {
         add_submenu_page(
             'edit.php?post_type=' . $this->booking_post_type(),
-            'Gelsendiele Dashboard',
+            'Gelsensystem Dashboard',
             'Dashboard-Einstellungen',
             'manage_bookings',
             'gd-dashboard-settings',
@@ -1457,7 +1458,7 @@ final class Gelsendiele_Reservierungsdashboard {
         $table_capacity_overrides = $this->format_table_capacity_overrides();
         ?>
         <div class="wrap">
-            <h1>Gelsendiele Dashboard</h1>
+            <h1>Gelsensystem Dashboard</h1>
             <form method="post">
                 <?php wp_nonce_field( 'gd_save_dashboard_settings', 'gd_settings_nonce' ); ?>
                 <table class="form-table" role="presentation">

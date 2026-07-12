@@ -7,6 +7,7 @@ ENTRY="$PLUGIN/gelsendiele-reservierungsdashboard.php"
 
 test -f "$ENTRY"
 test -f "$PLUGIN/includes/class-gelsendiele-settings.php"
+test -f "$PLUGIN/includes/class-gelsendiele-availability.php"
 test -f "$PLUGIN/includes/class-gelsendiele-migrator.php"
 test -f "$PLUGIN/includes/class-gelsendiele-admin.php"
 
@@ -17,10 +18,21 @@ if [[ -z "$VERSION" || "$VERSION" != "$CONSTANT_VERSION" ]]; then
   exit 1
 fi
 
+if ! rg -q '^ \* Plugin Name: Gelsensystem$' "$ENTRY"; then
+  echo "Der sichtbare Pluginname muss Gelsensystem lauten." >&2
+  exit 1
+fi
+
+if rg -q "class_exists\( 'GDG_Plugin', false \)" "$PLUGIN/modules/gastro/gelsendiele-gastro-system.php"; then
+  echo "Das integrierte Gastro-Modul würde sich beim Laden selbst überspringen." >&2
+  exit 1
+fi
+
 if command -v php >/dev/null 2>&1; then
   while IFS= read -r -d '' file; do
     php -l "$file" >/dev/null
   done < <(find "$PLUGIN" -type f -name '*.php' -print0)
+  php "$ROOT/tests/availability-smoke.php" >/dev/null
 else
   echo "Hinweis: PHP ist lokal nicht verfügbar; PHP-Lint wird in GitHub Actions ausgeführt." >&2
 fi
@@ -36,4 +48,4 @@ if rg -n --hidden -g '!*.png' -g '!*.zip' 'BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|gh
   exit 1
 fi
 
-echo "Gelsendiele Plugin $VERSION erfolgreich geprüft."
+echo "Gelsensystem $VERSION erfolgreich geprüft."

@@ -269,7 +269,7 @@ final class GDG_DB {
 		if ( ! $parent_id ) {
 			$parent_id = wp_insert_post(
 				array(
-					'post_title' => 'Gelsendiele Gastro',
+					'post_title' => 'Gelsensystem Gastro',
 					'post_name' => 'gelsendiele-gastro',
 					'post_status' => 'publish',
 					'post_type' => 'page',
@@ -291,7 +291,21 @@ final class GDG_DB {
 		$page_ids = array();
 		foreach ( $views as $view => $title ) {
 			$existing_id = (int) get_option( 'gdg_page_' . $view, 0 );
-			if ( $existing_id && get_post( $existing_id ) ) {
+			$expected_shortcode = '[gelsendiele_gastro view="' . esc_attr( $view ) . '"]';
+			$existing_page      = $existing_id ? get_post( $existing_id ) : null;
+			if ( $existing_page && 'page' === $existing_page->post_type ) {
+				// WordPress-Editoren können gerade Anführungszeichen in typografische
+				// Zeichen umwandeln. Das machte bestehende Arbeitsseiten sichtbar, aber
+				// den Shortcode wirkungslos. Reparatur ist idempotent und erhält weiteren
+				// Seiteninhalt, sofern ein gültiger Shortcode bereits vorhanden ist.
+				$content    = (string) $existing_page->post_content;
+				$normalized = str_replace( array( '“', '”', '„' ), '"', $content );
+				if ( ! self::has_gastro_shortcode( $content ) && self::has_gastro_shortcode( $normalized ) ) {
+					wp_update_post( array( 'ID' => $existing_id, 'post_content' => $normalized ) );
+				} elseif ( ! self::has_gastro_shortcode( $content ) ) {
+					wp_update_post( array( 'ID' => $existing_id, 'post_content' => trim( $content . "\n\n" . $expected_shortcode ) ) );
+				}
+				update_post_meta( $existing_id, '_gdg_view', $view );
 				$page_ids[ $view ] = $existing_id;
 				continue;
 			}
@@ -302,7 +316,7 @@ final class GDG_DB {
 					'post_status' => 'publish',
 					'post_type' => 'page',
 					'post_parent' => $parent_id,
-					'post_content' => '[gelsendiele_gastro view="' . esc_attr( $view ) . '"]',
+					'post_content' => $expected_shortcode,
 				),
 				true
 			);
@@ -314,6 +328,10 @@ final class GDG_DB {
 		}
 		update_option( 'gdg_parent_page', $parent_id );
 		update_option( 'gdg_app_pages', $page_ids );
+	}
+
+	private static function has_gastro_shortcode( $content ): bool {
+		return (bool) preg_match( '/\[gelsendiele_gastro(?:\s[^\]]*)?\]/', (string) $content );
 	}
 
 	public static function get_tables( bool $active_only = true ): array {

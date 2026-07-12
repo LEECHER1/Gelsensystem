@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.2.0
+- Sichtbarer Produkt- und Pluginname auf **Gelsensystem** geändert; technische Slugs und Datenpräfixe bleiben updatekompatibel.
+- Funktionale Verwaltung für einzelne Schließtage, Zeiträume, Betriebsurlaub, Sonderöffnungen, Uhrzeitsperren und reduzierte Kapazitäten.
+- Sonderregeln werden unmittelbar im öffentlichen Kalender und bei der Zeitslot-Ermittlung berücksichtigt.
+- Optionale öffentliche Tageshinweise werden ausschließlich nach Datumsauswahl angezeigt; interne Kommentare bleiben intern.
+- Bestehende Gastro-Arbeitsseiten mit typografischen Anführungszeichen im Shortcode werden idempotent repariert.
+- Five-Star-Zeitwerte wie `4:00 PM` werden beim einmaligen Import korrekt nach `16:00` normalisiert.
+- Der Formularbutton behält nach dem Absenden seinen frei konfigurierbaren Text.
+- Kurzzeitige, atomare Sperren verhindern doppelte Formularübermittlungen und Kapazitätsüberschreitungen durch parallele Anfragen.
+
 ## 2.1.0
 - Zentrale, versionierte Einstellungsarchitektur als gemeinsame Quelle für Formular und Dashboard.
 - Einheitliches Gelsendiele-Menü mit vorbereiteten Gastro-Modulen.
