@@ -2,7 +2,7 @@
 Contributors: Andreas Schwarz / OpenAI
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.4.0
+Stable tag: 2.4.1
 
 Zentrales Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für Gastronomiebetriebe.
 
@@ -38,6 +38,10 @@ Das Zahlungsmodul dokumentiert Bar- und Kartenzahlungen, ist aber noch keine RKS
 Installierbare ZIP-Dateien werden aus einem geprüften Git-Tag erstellt. Vor jedem Produktivupdate sind WordPress-Dateien und Datenbank vollständig zu sichern.
 
 == Changelog ==
+
+= 2.4.1 =
+* App-interne Einstellungen laden ihre dynamischen Skripte zuverlässig, auch wenn ein Theme die WordPress-Footer-Ausgabe verändert.
+* Hell-/Dunkelmodus wird bereits vor dem Aufbau der zentralen App gesetzt und bleibt beim Bereichswechsel erhalten.
 
 = 2.4.0 =
 * Backend-Produktname vollständig auf Gelsensystem umgestellt; der Betriebsname bleibt Kundendaten.

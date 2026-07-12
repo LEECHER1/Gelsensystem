@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.4.1
+- Robuste Script-Ausgabe für app-interne Einstellungen bei Themes mit veränderter Footer-Ausgabe.
+- Frühzeitige Theme-Initialisierung verhindert falsche Farben und erhält die Hell-/Dunkelwahl über alle App-Bereiche.
+- Der Mediathek-Button wird außerhalb des WordPress-Backends nur angezeigt, wenn die Medienbibliothek tatsächlich verfügbar ist.
+
 ## 2.4.0
 - Backend-Marke, Rollenbezeichnungen, PWA-Name und Arbeitsbereiche heißen nun Gelsensystem; der Betriebsname bleibt als Kundendatensatz erhalten.
 - Die Reservierungs-App besitzt auf Desktop eine zentrale Navigation zu allen freigegebenen Modulen.

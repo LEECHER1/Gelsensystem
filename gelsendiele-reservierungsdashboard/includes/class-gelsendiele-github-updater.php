@@ -77,7 +77,7 @@ final class Gelsendiele_GitHub_Updater {
 			'name'          => 'Gelsensystem',
 			'slug'          => self::SLUG,
 			'version'       => $release['version'],
-			'author'        => '<a href="https://github.com/LEECHER1">Andreas Schwarz / Gelsendiele</a>',
+			'author'        => '<a href="https://github.com/LEECHER1">Andreas Schwarz / Gelsensystem</a>',
 			'homepage'      => $release['html_url'],
 			'download_link' => $release['package'],
 			'requires'      => '6.0',

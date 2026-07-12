@@ -16,6 +16,7 @@ $manifest_url = add_query_arg( 'gd-pwa-manifest', '1', home_url( '/' ) );
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Gelsensystem">
     <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+    <script>(function(){try{var t=localStorage.getItem('gd-dashboard-theme');if(t!=='dark'&&t!=='light'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.gdTheme=t;}catch(e){}}());</script>
     <link rel="manifest" href="<?php echo esc_url( $manifest_url ); ?>">
     <link rel="apple-touch-icon" sizes="192x192" href="<?php echo esc_url( add_query_arg( 'ver', Gelsendiele_Reservierungsdashboard::VERSION, plugins_url( '../assets/gelsendiele-app-icon-192.png', __FILE__ ) ) ); ?>">
     <link rel="icon" type="image/png" sizes="192x192" href="<?php echo esc_url( add_query_arg( 'ver', Gelsendiele_Reservierungsdashboard::VERSION, plugins_url( '../assets/gelsendiele-app-icon-192.png', __FILE__ ) ) ); ?>">
@@ -28,5 +29,12 @@ $manifest_url = add_query_arg( 'gd-pwa-manifest', '1', home_url( '/' ) );
     <?php echo do_shortcode( '[gelsendiele_reservierungen]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 </main>
 <?php wp_footer(); ?>
+<?php
+$gd_app_section = isset( $_GET['gd-section'] ) ? sanitize_key( wp_unslash( $_GET['gd-section'] ) ) : 'reservations';
+if ( in_array( $gd_app_section, array( 'settings', 'users' ), true ) ) :
+	if ( ! wp_script_is( 'gelsendiele-settings', 'done' ) ) : ?><script src="<?php echo esc_url( GELSENDIELE_URL . 'admin/assets/settings.js?ver=' . GELSENDIELE_VERSION ); ?>"></script><?php endif;
+	if ( ! wp_script_is( 'gd-reservierungsdashboard', 'done' ) ) : ?><script src="<?php echo esc_url( GELSENDIELE_URL . 'assets/dashboard.js?ver=' . GELSENDIELE_VERSION ); ?>"></script><?php endif;
+endif;
+?>
 </body>
 </html>
