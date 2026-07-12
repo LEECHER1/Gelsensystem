@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.4.4 – 2026-07-12
+- Gemeinsame Patchversion mit WordPress-konformer Script-Strategie der zentralen App.
+
 ## 2.4.3 – 2026-07-12
 - Gemeinsame Patchversion mit der korrigierten Footer-Ausgabereihenfolge.
 

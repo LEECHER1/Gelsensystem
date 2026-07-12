@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.4
+- Zentrale App-Skripte werden in Einstellungs- und Benutzerbereichen registriert, mit `defer` versehen und im Dokumentkopf ausgegeben.
+- Direkte Script-Tags entfallen, damit Sicherheits- und Optimierungsfilter des aktiven Themes die Initialisierung nicht entfernen.
+
 ## 2.4.3
 - App-Skripte werden vor `wp_footer()` ausgegeben und funktionieren damit auch bei Footer-Hooks, die die nachfolgende Template-Ausgabe beenden.
 - Build-Prüfung schützt die für das aktive Website-Theme notwendige Ausgabereihenfolge.

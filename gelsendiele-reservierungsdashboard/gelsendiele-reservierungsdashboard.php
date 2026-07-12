@@ -3,7 +3,7 @@
  * Plugin Name: Gelsensystem
  * Plugin URI: https://github.com/LEECHER1/Gelsensystem
  * Description: Zentrales Reservierungs-, Service-, Küchen- und Kassensystem für Gastronomiebetriebe.
- * Version: 2.4.3
+ * Version: 2.4.4
  * Author: Andreas Schwarz / Gelsensystem
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.4.3' );
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.4.4' );
 defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
 defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );
@@ -319,9 +319,11 @@ final class Gelsendiele_Reservierungsdashboard {
         );
 
         $app_section = isset( $_GET['gd-section'] ) ? sanitize_key( wp_unslash( $_GET['gd-section'] ) ) : 'reservations';
-        if ( in_array( $app_section, array( 'settings', 'users' ), true ) ) {
+        $central_section = in_array( $app_section, array( 'settings', 'users' ), true );
+        if ( $central_section ) {
             wp_enqueue_style( 'gelsendiele-admin', GELSENDIELE_URL . 'admin/assets/settings.css', array( 'gd-reservierungsdashboard' ), self::VERSION );
-            wp_enqueue_script( 'gelsendiele-settings', GELSENDIELE_URL . 'admin/assets/settings.js', array(), self::VERSION, true );
+            wp_enqueue_script( 'gelsendiele-settings', GELSENDIELE_URL . 'admin/assets/settings.js', array(), self::VERSION, false );
+            wp_script_add_data( 'gelsendiele-settings', 'strategy', 'defer' );
         }
 
         wp_enqueue_script(
@@ -329,8 +331,11 @@ final class Gelsendiele_Reservierungsdashboard {
             plugin_dir_url( __FILE__ ) . 'assets/dashboard.js',
             array(),
             self::VERSION,
-            true
+            ! $central_section
         );
+        if ( $central_section ) {
+            wp_script_add_data( 'gd-reservierungsdashboard', 'strategy', 'defer' );
+        }
 
         wp_localize_script( 'gd-reservierungsdashboard', 'GDReservations', array(
             'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
