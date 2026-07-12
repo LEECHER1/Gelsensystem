@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Gelsensystem Gastro
  * Description: Service-, Küchen-, Schank- und Zahlungsmodul des Gelsensystems.
- * Version: 2.10.0
+ * Version: 2.10.1
  * Author: Andreas Schwarz / Gelsensystem
  * Text Domain: gelsendiele-gastro
  */
@@ -24,7 +24,7 @@ if ( class_exists( 'GDG_DB', false ) ) {
 	return;
 }
 
-defined( 'GDG_VERSION' ) || define( 'GDG_VERSION', defined( 'GELSENDIELE_VERSION' ) ? GELSENDIELE_VERSION : '2.10.0' );
+defined( 'GDG_VERSION' ) || define( 'GDG_VERSION', defined( 'GELSENDIELE_VERSION' ) ? GELSENDIELE_VERSION : '2.10.1' );
 defined( 'GDG_FILE' ) || define( 'GDG_FILE', __FILE__ );
 defined( 'GDG_DIR' ) || define( 'GDG_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GDG_URL' ) || define( 'GDG_URL', plugin_dir_url( __FILE__ ) );

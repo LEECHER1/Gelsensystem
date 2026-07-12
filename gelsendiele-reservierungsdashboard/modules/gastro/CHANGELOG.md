@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.10.1 – 2026-07-12
+
+- Einklappbare Seitenleiste und einspaltiges Arbeitslayout für Tablet-Queransichten korrigiert.
+
 ## 2.10.0 – 2026-07-12
 
 - Einklappbare Desktop-Seitenleiste für alle Gastro-Arbeitsbereiche ergänzt.
