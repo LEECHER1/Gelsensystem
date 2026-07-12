@@ -150,17 +150,34 @@ final class Gelsendiele_Admin {
 			$tab = 'general';
 		}
 
-		$saved = false;
+		$saved          = false;
+		$notice_type    = '';
+		$notice_message = '';
 		if ( isset( $_POST['gelsendiele_settings_action'] ) && 'save' === sanitize_key( wp_unslash( $_POST['gelsendiele_settings_action'] ) ) ) {
 			check_admin_referer( 'gelsendiele_save_settings', 'gelsendiele_settings_nonce' );
 			$saved = self::save_settings_tab( $tab );
+			if ( $saved && 'emails' === $tab && isset( $_POST['gelsensystem_test_template'] ) ) {
+				$slug      = sanitize_key( wp_unslash( $_POST['gelsensystem_test_template'] ) );
+				$recipient = isset( $_POST['gelsensystem_test_recipient'] ) ? sanitize_email( wp_unslash( $_POST['gelsensystem_test_recipient'] ) ) : '';
+				$result    = Gelsensystem_Email::send_test( $slug, $recipient );
+				if ( is_wp_error( $result ) || ! $result ) {
+					$notice_type    = 'error';
+					$notice_message = is_wp_error( $result ) ? $result->get_error_message() : 'Die Test-E-Mail konnte nicht versendet werden. Bitte SMTP-Protokoll prüfen.';
+				} else {
+					$notice_type    = 'success';
+					$notice_message = 'Einstellungen gespeichert und Test-E-Mail versendet.';
+				}
+			} elseif ( $saved ) {
+				$notice_type    = 'success';
+				$notice_message = 'Einstellungen wurden gespeichert.';
+			}
 		}
 
 		$settings = Gelsendiele_Settings::get_all();
 		?>
 		<div class="wrap gelsendiele-admin-wrap">
 			<h1>Gelsensystem Einstellungen</h1>
-			<?php if ( $saved ) : ?><div class="notice notice-success is-dismissible"><p>Einstellungen wurden gespeichert.</p></div><?php endif; ?>
+			<?php if ( $notice_message ) : ?><div class="notice notice-<?php echo esc_attr( $notice_type ); ?> is-dismissible"><p><?php echo esc_html( $notice_message ); ?></p></div><?php endif; ?>
 			<nav class="nav-tab-wrapper gelsendiele-settings-tabs" aria-label="Einstellungsbereiche">
 				<?php foreach ( $tabs as $slug => $label ) : ?>
 					<a class="nav-tab <?php echo $slug === $tab ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url( admin_url( 'admin.php?page=' . self::SETTINGS_SLUG . '&tab=' . $slug ) ); ?>"><?php echo esc_html( $label ); ?></a>
@@ -173,6 +190,8 @@ final class Gelsendiele_Admin {
 					case 'opening-hours': self::render_opening_hours_tab( $settings ); break;
 					case 'reservations': self::render_reservations_tab( $settings ); break;
 					case 'availability': self::render_availability_tab( $settings ); break;
+					case 'emails': self::render_emails_tab( $settings ); break;
+					case 'form': self::render_form_tab( $settings ); break;
 					case 'system-status': self::render_system_status(); break;
 					case 'roles': self::render_roles_tab(); break;
 					default: self::render_settings_placeholder( $tabs[ $tab ] ); break;
@@ -209,6 +228,15 @@ final class Gelsendiele_Admin {
 					'rules'        => isset( $input['availability']['rules'] ) && is_array( $input['availability']['rules'] ) ? $input['availability']['rules'] : array(),
 				),
 			) );
+			return true;
+		}
+		if ( 'emails' === $tab ) {
+			Gelsendiele_Settings::save_sections( array( 'emails' => isset( $input['emails'] ) ? $input['emails'] : array() ) );
+			Gelsensystem_Email::schedule_existing_reminders();
+			return true;
+		}
+		if ( 'form' === $tab ) {
+			Gelsendiele_Settings::save_sections( array( 'form' => isset( $input['form'] ) ? $input['form'] : array() ) );
 			return true;
 		}
 		return false;
@@ -368,6 +396,97 @@ final class Gelsendiele_Admin {
 			'start_time' => '11:00', 'end_time' => '22:00', 'max_bookings' => 0, 'max_people' => 0,
 			'areas' => array(), 'comment' => '', 'public_message' => '',
 		);
+	}
+
+	private static function render_emails_tab( $settings ) {
+		$emails     = $settings['emails'];
+		$templates  = $emails['templates'];
+		$current     = wp_get_current_user();
+		$test_email  = is_email( $current->user_email ) ? $current->user_email : $settings['general']['internal_email'];
+		$placeholders = array( 'guest_name', 'date', 'time', 'party', 'table', 'area', 'phone', 'email', 'message', 'allergies', 'highchair', 'dog', 'booking_id', 'business_name', 'cancellation_link' );
+		?>
+		<form method="post" class="gelsendiele-settings-form gelsensystem-email-settings" data-gelsensystem-email-settings>
+			<?php wp_nonce_field( 'gelsendiele_save_settings', 'gelsendiele_settings_nonce' ); ?>
+			<input type="hidden" name="gelsendiele_settings_action" value="save">
+			<section class="gelsendiele-settings-card">
+				<h2>E-Mail-Vorlagen</h2>
+				<p>Alle Benachrichtigungen werden vom Gelsensystem selbst verwaltet. Solange Five Star aktiv ist, bleiben dessen Statusbenachrichtigungen maßgeblich, damit keine doppelten E-Mails entstehen.</p>
+				<div class="gelsendiele-field-grid">
+					<label><span>Erinnerung vor dem Termin</span><input type="number" min="1" max="336" name="gelsendiele_settings[emails][reminder_hours]" value="<?php echo esc_attr( $emails['reminder_hours'] ); ?>"><small>Stunden vor dem Termin; die Erinnerung muss zusätzlich in ihrer Vorlage aktiviert sein.</small></label>
+					<label><span>Empfänger für Test-E-Mails</span><input type="email" name="gelsensystem_test_recipient" value="<?php echo esc_attr( $test_email ); ?>"></label>
+				</div>
+				<div class="gelsensystem-placeholder-list" aria-label="Verfügbare Platzhalter">
+					<?php foreach ( $placeholders as $placeholder ) : ?><code>{<?php echo esc_html( $placeholder ); ?>}</code><?php endforeach; ?>
+				</div>
+				<p class="description">Der Platzhalter {cancellation_link} bleibt leer, bis ein gesichertes Gast-Stornomodul aktiviert wird.</p>
+			</section>
+
+			<div class="gelsensystem-template-list">
+			<?php foreach ( $templates as $slug => $template ) : $name = 'gelsendiele_settings[emails][templates][' . $slug . ']'; ?>
+				<details class="gelsendiele-settings-card gelsensystem-email-template" <?php echo 'internal_new' === $slug ? 'open' : ''; ?>>
+					<summary><strong><?php echo esc_html( $template['label'] ); ?></strong><span><?php echo ! empty( $template['enabled'] ) ? 'Aktiv' : 'Deaktiviert'; ?></span></summary>
+					<input type="hidden" name="<?php echo esc_attr( $name ); ?>[label]" value="<?php echo esc_attr( $template['label'] ); ?>">
+					<div class="gelsendiele-field-grid gelsensystem-template-grid">
+						<label class="gelsensystem-inline-check"><input type="hidden" name="<?php echo esc_attr( $name ); ?>[enabled]" value="0"><input type="checkbox" name="<?php echo esc_attr( $name ); ?>[enabled]" value="1" <?php checked( ! empty( $template['enabled'] ) ); ?>> <span>Vorlage aktiv</span></label>
+						<label><span>Format</span><select name="<?php echo esc_attr( $name ); ?>[format]"><option value="text" <?php selected( $template['format'], 'text' ); ?>>Text</option><option value="html" <?php selected( $template['format'], 'html' ); ?>>HTML</option></select></label>
+						<label><span>Empfänger</span><select name="<?php echo esc_attr( $name ); ?>[recipient]" data-gelsensystem-recipient><option value="internal" <?php selected( $template['recipient'], 'internal' ); ?>>Interne Empfänger-E-Mail</option><option value="guest" <?php selected( $template['recipient'], 'guest' ); ?>>Gast-E-Mail</option><option value="custom" <?php selected( $template['recipient'], 'custom' ); ?>>Eigene Adresse</option></select></label>
+						<label><span>Eigene Empfängeradresse</span><input type="email" name="<?php echo esc_attr( $name ); ?>[custom_recipient]" value="<?php echo esc_attr( $template['custom_recipient'] ); ?>" placeholder="reservierung@example.at"></label>
+						<label class="gelsendiele-field-wide"><span>Betreff</span><input type="text" name="<?php echo esc_attr( $name ); ?>[subject]" value="<?php echo esc_attr( $template['subject'] ); ?>"></label>
+						<label class="gelsendiele-field-wide"><span>Inhalt</span><textarea name="<?php echo esc_attr( $name ); ?>[body]" rows="9"><?php echo esc_textarea( $template['body'] ); ?></textarea></label>
+					</div>
+					<p><button type="submit" class="button" name="gelsensystem_test_template" value="<?php echo esc_attr( $slug ); ?>">Diese Vorlage speichern & testen</button></p>
+				</details>
+			<?php endforeach; ?>
+			</div>
+			<?php submit_button( 'E-Mail-Einstellungen speichern' ); ?>
+		</form>
+		<?php
+	}
+
+	private static function render_form_tab( $settings ) {
+		$form   = $settings['form'];
+		$fields = $form['fields'];
+		?>
+		<form method="post" class="gelsendiele-settings-form" data-gelsensystem-form-settings>
+			<?php wp_nonce_field( 'gelsendiele_save_settings', 'gelsendiele_settings_nonce' ); ?>
+			<input type="hidden" name="gelsendiele_settings_action" value="save">
+			<section class="gelsendiele-settings-card">
+				<h2>Formulartexte & Darstellung</h2>
+				<div class="gelsendiele-field-grid">
+					<label><span>Überschrift</span><input type="text" name="gelsendiele_settings[form][headline]" value="<?php echo esc_attr( $form['headline'] ); ?>"></label>
+					<label><span>Buttontext</span><input type="text" name="gelsendiele_settings[form][button_text]" value="<?php echo esc_attr( $form['button_text'] ); ?>"></label>
+					<label class="gelsendiele-field-wide"><span>Einleitung</span><textarea name="gelsendiele_settings[form][intro]" rows="2"><?php echo esc_textarea( $form['intro'] ); ?></textarea></label>
+					<label class="gelsendiele-field-wide"><span>Erfolgsmeldung</span><textarea name="gelsendiele_settings[form][success_text]" rows="2"><?php echo esc_textarea( $form['success_text'] ); ?></textarea></label>
+					<label class="gelsendiele-field-wide"><span>Allgemeine Fehlermeldung</span><textarea name="gelsendiele_settings[form][error_text]" rows="2"><?php echo esc_textarea( $form['error_text'] ); ?></textarea></label>
+					<label class="gelsendiele-field-wide"><span>Datenschutztext</span><textarea name="gelsendiele_settings[form][privacy_text]" rows="3"><?php echo esc_textarea( $form['privacy_text'] ); ?></textarea></label>
+					<label><span>Maximale Formularbreite (px)</span><input type="number" min="320" max="1400" name="gelsendiele_settings[form][width]" value="<?php echo esc_attr( $form['width'] ); ?>"></label>
+					<label><span>Darstellung</span><select name="gelsendiele_settings[form][theme_mode]"><option value="inherit" <?php selected( $form['theme_mode'], 'inherit' ); ?>>Betriebseinstellung übernehmen</option><option value="light" <?php selected( $form['theme_mode'], 'light' ); ?>>Hell</option><option value="dark" <?php selected( $form['theme_mode'], 'dark' ); ?>>Dunkel</option></select></label>
+					<label><span>Optionale Primärfarbe</span><input type="text" pattern="#[0-9a-fA-F]{6}" name="gelsendiele_settings[form][primary_color]" value="<?php echo esc_attr( $form['primary_color'] ); ?>" placeholder="Markenfarbe übernehmen"></label>
+					<label><span>Optionale Flächenfarbe</span><input type="text" pattern="#[0-9a-fA-F]{6}" name="gelsendiele_settings[form][surface_color]" value="<?php echo esc_attr( $form['surface_color'] ); ?>" placeholder="Markenfarbe übernehmen"></label>
+					<label><span>Optionale Textfarbe</span><input type="text" pattern="#[0-9a-fA-F]{6}" name="gelsendiele_settings[form][text_color]" value="<?php echo esc_attr( $form['text_color'] ); ?>" placeholder="Automatisch"></label>
+				</div>
+			</section>
+
+			<section class="gelsendiele-settings-card">
+				<h2>Formularfelder</h2>
+				<p>Datum, Uhrzeit und Personenzahl sind für eine buchbare Reservierung technisch erforderlich und bleiben deshalb geschützt.</p>
+				<div class="gelsensystem-form-fields">
+					<div class="gelsensystem-form-field gelsensystem-form-field-head"><strong>Feld</strong><strong>Beschriftung</strong><strong>Anzeigen</strong><strong>Pflichtfeld</strong></div>
+					<?php foreach ( $fields as $slug => $field ) : $name = 'gelsendiele_settings[form][fields][' . $slug . ']'; $locked = ! empty( $field['locked'] ); ?>
+					<div class="gelsensystem-form-field" data-gelsensystem-form-field>
+						<strong><?php echo esc_html( $slug ); ?></strong>
+						<label><span class="screen-reader-text">Beschriftung <?php echo esc_html( $slug ); ?></span><input type="text" name="<?php echo esc_attr( $name ); ?>[label]" value="<?php echo esc_attr( $field['label'] ); ?>"></label>
+						<label><?php if ( $locked ) : ?><input type="hidden" name="<?php echo esc_attr( $name ); ?>[enabled]" value="1"><input type="checkbox" checked disabled><span>Fest</span><?php else : ?><input type="hidden" name="<?php echo esc_attr( $name ); ?>[enabled]" value="0"><input type="checkbox" name="<?php echo esc_attr( $name ); ?>[enabled]" value="1" <?php checked( ! empty( $field['enabled'] ) ); ?> data-gelsensystem-field-enabled><span>An</span><?php endif; ?></label>
+						<label><?php if ( $locked ) : ?><input type="hidden" name="<?php echo esc_attr( $name ); ?>[required]" value="1"><input type="checkbox" checked disabled><span>Fest</span><?php else : ?><input type="hidden" name="<?php echo esc_attr( $name ); ?>[required]" value="0"><input type="checkbox" name="<?php echo esc_attr( $name ); ?>[required]" value="1" <?php checked( ! empty( $field['required'] ) ); ?> data-gelsensystem-field-required><span>Pflicht</span><?php endif; ?></label>
+					</div>
+					<?php endforeach; ?>
+				</div>
+			</section>
+
+			<section class="gelsendiele-settings-card"><h2>Einbindung</h2><p>Bestehender Shortcode:</p><p><code>[gelsendiele_reservierungsformular]</code></p><p>Kompatibler Alias: <code>[booking-form]</code></p></section>
+			<?php submit_button( 'Formulareinstellungen speichern' ); ?>
+		</form>
+		<?php
 	}
 
 	private static function render_roles_tab() {

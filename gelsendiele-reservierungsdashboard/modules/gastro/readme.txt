@@ -3,7 +3,7 @@ Contributors: Andreas Schwarz / Gelsendiele
 Tags: gastronomie, bestellung, küche, schank, tische, reservierung
 Requires at least: 6.4
 Requires PHP: 7.4
-Stable tag: 2.2.0
+Stable tag: 2.3.0
 
 Service-, Küchen-, Schank- und Zahlungsmodul für die Gelsendiele.
 
@@ -58,6 +58,9 @@ Die Version ersetzt noch keine österreichische Registrierkasse, erstellt keinen
 Die Arbeitsseiten sind nur für angemeldete WordPress-Benutzer mit passender Rolle sichtbar und werden mit No-Cache- sowie Noindex-Headern ausgeliefert.
 
 == Changelog ==
+
+= 2.3.0 =
+* Gemeinsamer Versionsstand mit den neuen E-Mail- und Formulareinstellungen des Gelsensystems.
 
 = 2.2.0 =
 * Produktname auf Gelsensystem vereinheitlicht.

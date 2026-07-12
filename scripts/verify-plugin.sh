@@ -8,6 +8,7 @@ ENTRY="$PLUGIN/gelsendiele-reservierungsdashboard.php"
 test -f "$ENTRY"
 test -f "$PLUGIN/includes/class-gelsendiele-settings.php"
 test -f "$PLUGIN/includes/class-gelsendiele-availability.php"
+test -f "$PLUGIN/includes/class-gelsensystem-email.php"
 test -f "$PLUGIN/includes/class-gelsendiele-migrator.php"
 test -f "$PLUGIN/includes/class-gelsendiele-admin.php"
 
@@ -33,6 +34,7 @@ if command -v php >/dev/null 2>&1; then
     php -l "$file" >/dev/null
   done < <(find "$PLUGIN" -type f -name '*.php' -print0)
   php "$ROOT/tests/availability-smoke.php" >/dev/null
+  php "$ROOT/tests/email-template-smoke.php" >/dev/null
 else
   echo "Hinweis: PHP ist lokal nicht verfügbar; PHP-Lint wird in GitHub Actions ausgeführt." >&2
 fi

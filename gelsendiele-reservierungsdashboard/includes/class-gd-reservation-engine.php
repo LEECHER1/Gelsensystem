@@ -131,53 +131,89 @@ final class GD_Reservation_Engine {
 
     public function render_form() {
         wp_enqueue_style('gd-reservation-form'); wp_enqueue_script('gd-reservation-form');
-        $brand_primary   = Gelsendiele_Settings::get( 'branding', 'primary_color', '#179b57' );
-        $brand_secondary = Gelsendiele_Settings::get( 'branding', 'secondary_color', '#0b5d38' );
+        $s               = $this->settings();
+        $business_name   = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
+        $form_settings   = Gelsendiele_Settings::get( 'form', null, array() );
+        $branding        = Gelsendiele_Settings::get( 'branding', null, array() );
+        $fields          = isset( $form_settings['fields'] ) ? $form_settings['fields'] : Gelsendiele_Settings::form_field_defaults();
+        $brand_primary   = ! empty( $form_settings['primary_color'] ) ? $form_settings['primary_color'] : $branding['primary_color'];
+        $brand_secondary = $branding['secondary_color'];
+        $theme_mode      = 'inherit' === $form_settings['theme_mode'] ? $branding['theme_mode'] : $form_settings['theme_mode'];
+        $surface_color   = ! empty( $form_settings['surface_color'] ) ? $form_settings['surface_color'] : ( 'dark' === $theme_mode ? $branding['dark_surface_color'] : $branding['surface_color'] );
+        $text_color      = ! empty( $form_settings['text_color'] ) ? $form_settings['text_color'] : ( 'dark' === $theme_mode ? '#f4f7f5' : '#17221b' );
         wp_add_inline_style(
             'gd-reservation-form',
             '.gdrf-form{border-radius:var(--gelsendiele-radius,24px)}.gdrf-brand-logo{display:block;max-width:180px;max-height:96px;width:auto;height:auto;object-fit:contain;margin:0 0 16px}.gdrf-submit{background:linear-gradient(135deg,' . esc_attr( $brand_primary ) . ',' . esc_attr( $brand_secondary ) . ')}'
         );
-        $settings = $this->settings();
         wp_localize_script('gd-reservation-form','GDReservationForm',array(
             'ajaxUrl'=>admin_url('admin-ajax.php'),
             'nonce'=>wp_create_nonce('gd_public_reservation'),
             'today'=>wp_date('Y-m-d'),
-            'maxDate'=>wp_date('Y-m-d',time()+DAY_IN_SECONDS*absint($settings['advance_days'])),
+            'maxDate'=>wp_date('Y-m-d',time()+DAY_IN_SECONDS*absint($s['advance_days'])),
+            'buttonText'=>$form_settings['button_text'],
+            'errorText'=>$form_settings['error_text'],
             'locale'=>array(
                 'months'=>array('Jänner','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'),
                 'weekdays'=>array('Mo','Di','Mi','Do','Fr','Sa','So')
             )
         ));
-        $s             = $this->settings();
-        $business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
-        $form_settings = Gelsendiele_Settings::get( 'form', null, array() );
-        $branding      = Gelsendiele_Settings::get( 'branding', null, array() );
-        $form_style    = '--gd-accent:' . $branding['primary_color'] . ';--gd-bg:' . $branding['surface_color'] . ';--gelsendiele-radius:' . absint( $branding['border_radius'] ) . 'px;';
+        $form_style = '--gd-accent:' . $brand_primary . ';--gd-bg:' . $surface_color . ';--gd-text:' . $text_color . ';--gd-dark-bg:' . $branding['dark_surface_color'] . ';--gelsendiele-radius:' . absint( $branding['border_radius'] ) . 'px;max-width:' . absint( $form_settings['width'] ) . 'px;';
         $logo_url      = $branding['logo_url'];
         if ( ! $logo_url && ! empty( $branding['logo_attachment_id'] ) ) {
             $logo_url = wp_get_attachment_image_url( absint( $branding['logo_attachment_id'] ), 'medium' );
         }
+        $areas = array();
+        $tables = array();
+        if ( class_exists( 'GDG_DB' ) ) {
+            foreach ( GDG_DB::get_tables( true ) as $table ) {
+                $tables[] = $table['name'];
+                if ( '' !== trim( $table['area'] ) ) {
+                    $areas[] = $table['area'];
+                }
+            }
+        }
+        $areas  = array_values( array_unique( $areas ) );
+        $tables = array_values( array_unique( $tables ) );
+        $label = function( $slug ) use ( $fields ) {
+            return isset( $fields[ $slug ]['label'] ) ? $fields[ $slug ]['label'] : ucfirst( $slug );
+        };
+        $enabled = function( $slug ) use ( $fields ) {
+            return ! empty( $fields[ $slug ]['enabled'] );
+        };
+        $required = function( $slug ) use ( $fields ) {
+            return ! empty( $fields[ $slug ]['required'] );
+        };
+        $marker = function( $slug ) use ( $required ) {
+            return $required( $slug ) ? ' *' : '';
+        };
+        $theme_class = 'dark' === $theme_mode ? ' gdrf-theme-dark' : ( 'light' === $theme_mode ? ' gdrf-theme-light' : ' gdrf-theme-auto' );
         ob_start(); ?>
-        <div class="gdrf-shell" style="<?php echo esc_attr( $form_style ); ?>"><form class="gdrf-form" data-gdrf-form novalidate>
+        <div class="gdrf-shell<?php echo esc_attr( $theme_class ); ?>" style="<?php echo esc_attr( $form_style ); ?>"><form class="gdrf-form" data-gdrf-form novalidate>
           <div class="gdrf-head"><?php if ( $logo_url ) : ?><img class="gdrf-brand-logo" src="<?php echo esc_url( $logo_url ); ?>" alt="<?php echo esc_attr( $business_name ); ?>"><?php endif; ?><span class="gdrf-eyebrow"><?php echo esc_html( $business_name ); ?></span><h2><?php echo esc_html( $form_settings['headline'] ); ?></h2><p><?php echo esc_html( $form_settings['intro'] ); ?></p></div>
           <div class="gdrf-grid">
-            <label class="gdrf-date-field"><span>Datum *</span>
+            <label class="gdrf-date-field"><span><?php echo esc_html( $label( 'date' ) . $marker( 'date' ) ); ?></span>
               <input type="hidden" name="date" required>
-              <button type="button" class="gdrf-picker-button" data-gdrf-date-button aria-expanded="false"><span data-gdrf-date-label>Datum auswählen</span><span aria-hidden="true">▾</span></button>
+              <button type="button" class="gdrf-picker-button" data-gdrf-date-button aria-expanded="false"><span data-gdrf-date-label><?php echo esc_html( $label( 'date' ) ); ?> auswählen</span><span aria-hidden="true">▾</span></button>
               <div class="gdrf-calendar" data-gdrf-calendar hidden>
                 <div class="gdrf-calendar-head"><button type="button" data-gdrf-prev aria-label="Vorheriger Monat">‹</button><strong data-gdrf-month></strong><button type="button" data-gdrf-next aria-label="Nächster Monat">›</button></div>
                 <div class="gdrf-weekdays" data-gdrf-weekdays></div><div class="gdrf-days" data-gdrf-days></div>
                 <div class="gdrf-calendar-note">Ausgegraute Tage sind geschlossen oder nicht mehr verfügbar.</div>
               </div>
             </label>
-            <label><span>Uhrzeit *</span><select name="time" required disabled><option value="">Zuerst Datum wählen</option></select><small class="gdrf-field-note">Nicht verfügbare Zeiten werden nicht angezeigt.</small><small class="gdrf-field-note gdrf-date-notice" data-gdrf-date-notice hidden></small></label>
-            <label><span>Personen *</span><input type="number" name="party" min="<?php echo esc_attr($s['min_party']); ?>" max="<?php echo esc_attr($s['max_party']); ?>" value="2" required></label>
-            <label><span>Name *</span><input type="text" name="name" autocomplete="name" required></label>
-            <label><span>E-Mail *</span><input type="email" name="email" autocomplete="email" required></label>
-            <label><span>Telefon *</span><input type="tel" name="phone" autocomplete="tel" required></label>
-            <label class="gdrf-wide"><span>Nachricht</span><textarea name="message" rows="4" placeholder="Kinderstuhl, Allergien oder andere Wünsche"></textarea></label>
+            <label><span><?php echo esc_html( $label( 'time' ) . $marker( 'time' ) ); ?></span><select name="time" required disabled><option value="">Zuerst Datum wählen</option></select><small class="gdrf-field-note">Nicht verfügbare Zeiten werden nicht angezeigt.</small><small class="gdrf-field-note gdrf-date-notice" data-gdrf-date-notice hidden></small></label>
+            <label><span><?php echo esc_html( $label( 'party' ) . $marker( 'party' ) ); ?></span><input type="number" name="party" min="<?php echo esc_attr($s['min_party']); ?>" max="<?php echo esc_attr($s['max_party']); ?>" value="2" required></label>
+            <?php if ( $enabled( 'name' ) ) : ?><label><span><?php echo esc_html( $label( 'name' ) . $marker( 'name' ) ); ?></span><input type="text" name="name" maxlength="180" autocomplete="name" <?php echo $required( 'name' ) ? 'required' : ''; ?>></label><?php endif; ?>
+            <?php if ( $enabled( 'email' ) ) : ?><label><span><?php echo esc_html( $label( 'email' ) . $marker( 'email' ) ); ?></span><input type="email" name="email" maxlength="190" autocomplete="email" <?php echo $required( 'email' ) ? 'required' : ''; ?>></label><?php endif; ?>
+            <?php if ( $enabled( 'phone' ) ) : ?><label><span><?php echo esc_html( $label( 'phone' ) . $marker( 'phone' ) ); ?></span><input type="tel" name="phone" maxlength="100" autocomplete="tel" <?php echo $required( 'phone' ) ? 'required' : ''; ?>></label><?php endif; ?>
+            <?php if ( $enabled( 'area' ) ) : ?><label><span><?php echo esc_html( $label( 'area' ) . $marker( 'area' ) ); ?></span><?php if ( $areas ) : ?><select name="area" <?php echo $required( 'area' ) ? 'required' : ''; ?>><option value="">Keine Präferenz</option><?php foreach ( $areas as $area ) : ?><option value="<?php echo esc_attr( $area ); ?>"><?php echo esc_html( $area ); ?></option><?php endforeach; ?></select><?php else : ?><input type="text" name="area" <?php echo $required( 'area' ) ? 'required' : ''; ?>><?php endif; ?></label><?php endif; ?>
+            <?php if ( $enabled( 'table' ) ) : ?><label><span><?php echo esc_html( $label( 'table' ) . $marker( 'table' ) ); ?></span><?php if ( $tables ) : ?><select name="table" <?php echo $required( 'table' ) ? 'required' : ''; ?>><option value="">Keine Präferenz</option><?php foreach ( $tables as $table ) : ?><option value="<?php echo esc_attr( $table ); ?>"><?php echo esc_html( $table ); ?></option><?php endforeach; ?></select><?php else : ?><input type="text" name="table" <?php echo $required( 'table' ) ? 'required' : ''; ?>><?php endif; ?></label><?php endif; ?>
+            <?php if ( $enabled( 'message' ) ) : ?><label class="gdrf-wide"><span><?php echo esc_html( $label( 'message' ) . $marker( 'message' ) ); ?></span><textarea name="message" rows="4" maxlength="2000" <?php echo $required( 'message' ) ? 'required' : ''; ?>></textarea></label><?php endif; ?>
+            <?php if ( $enabled( 'allergies' ) ) : ?><label class="gdrf-wide"><span><?php echo esc_html( $label( 'allergies' ) . $marker( 'allergies' ) ); ?></span><textarea name="allergies" rows="3" maxlength="2000" <?php echo $required( 'allergies' ) ? 'required' : ''; ?>></textarea></label><?php endif; ?>
+            <?php if ( $enabled( 'highchair' ) ) : ?><label class="gdrf-option"><input type="checkbox" name="highchair" value="1" <?php echo $required( 'highchair' ) ? 'required' : ''; ?>><span><?php echo esc_html( $label( 'highchair' ) . $marker( 'highchair' ) ); ?></span></label><?php endif; ?>
+            <?php if ( $enabled( 'dog' ) ) : ?><label class="gdrf-option"><input type="checkbox" name="dog" value="1" <?php echo $required( 'dog' ) ? 'required' : ''; ?>><span><?php echo esc_html( $label( 'dog' ) . $marker( 'dog' ) ); ?></span></label><?php endif; ?>
           </div>
-          <label class="gdrf-consent"><input type="checkbox" name="consent" value="1" required><span><?php echo esc_html($s['privacy_text']); ?></span></label>
+          <?php if ( $enabled( 'privacy' ) ) : ?><label class="gdrf-consent"><input type="checkbox" name="consent" value="1" <?php echo $required( 'privacy' ) ? 'required' : ''; ?>><span><?php echo esc_html( $form_settings['privacy_text'] ); ?></span></label><?php endif; ?>
+          <input type="hidden" name="submission_token" value="<?php echo esc_attr( wp_generate_uuid4() ); ?>">
           <input type="text" name="website" class="gdrf-hp" tabindex="-1" autocomplete="off">
           <button type="submit" class="gdrf-submit"><?php echo esc_html( $form_settings['button_text'] ); ?></button>
           <div class="gdrf-message" data-gdrf-message aria-live="polite"></div>
@@ -217,10 +253,35 @@ final class GD_Reservation_Engine {
     public function ajax_create_booking() {
         check_ajax_referer('gd_public_reservation','nonce');
         if(!empty($_POST['website'])) $this->send_json(false,array('message'=>'Die Anfrage konnte nicht verarbeitet werden.'),400);
-        $data=array('date'=>sanitize_text_field(wp_unslash($_POST['date']??'')),'time'=>sanitize_text_field(wp_unslash($_POST['time']??'')),'party'=>absint($_POST['party']??0),'name'=>sanitize_text_field(wp_unslash($_POST['name']??'')),'email'=>sanitize_email(wp_unslash($_POST['email']??'')),'phone'=>sanitize_text_field(wp_unslash($_POST['phone']??'')),'message'=>sanitize_textarea_field(wp_unslash($_POST['message']??'')));
+        $form_settings = Gelsendiele_Settings::get( 'form', null, array() );
+        $fields        = isset( $form_settings['fields'] ) ? $form_settings['fields'] : Gelsendiele_Settings::form_field_defaults();
+        $data=array(
+            'date'=>sanitize_text_field(wp_unslash($_POST['date']??'')), 'time'=>sanitize_text_field(wp_unslash($_POST['time']??'')), 'party'=>absint($_POST['party']??0),
+            'name'=>sanitize_text_field(wp_unslash($_POST['name']??'')), 'email'=>sanitize_email(wp_unslash($_POST['email']??'')), 'phone'=>sanitize_text_field(wp_unslash($_POST['phone']??'')),
+            'message'=>sanitize_textarea_field(wp_unslash($_POST['message']??'')), 'area'=>sanitize_text_field(wp_unslash($_POST['area']??'')), 'table'=>sanitize_text_field(wp_unslash($_POST['table']??'')),
+            'highchair'=>!empty($_POST['highchair'])?1:0, 'dog'=>!empty($_POST['dog'])?1:0, 'allergies'=>sanitize_textarea_field(wp_unslash($_POST['allergies']??'')),
+            'submission_token'=>sanitize_key(wp_unslash($_POST['submission_token']??'')),
+        );
+        $data['name']=$this->limit_text($data['name'],180); $data['email']=$this->limit_text($data['email'],190); $data['phone']=$this->limit_text($data['phone'],100);
+        $data['message']=$this->limit_text($data['message'],2000); $data['allergies']=$this->limit_text($data['allergies'],2000); $data['area']=$this->limit_text($data['area'],120); $data['table']=$this->limit_text($data['table'],120);
         $settings = $this->settings();
-        if(empty($_POST['consent'])||!$this->valid_date($data['date'])||!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/',$data['time'])||$data['party']<absint($settings['min_party'])||$data['party']>absint($settings['max_party'])||!$data['name']||!is_email($data['email'])||!$data['phone']) $this->send_json(false,array('message'=>'Bitte füllen Sie alle Pflichtfelder korrekt aus.'),422);
-        $submission_lock = $this->booking_lock_key( 'submission', array( $data['date'], $data['time'], $data['party'], strtolower( $data['email'] ), preg_replace( '/\D+/', '', $data['phone'] ) ) );
+        $enabled = function( $slug ) use ( $fields ) { return ! empty( $fields[ $slug ]['enabled'] ); };
+        $required = function( $slug ) use ( $fields, $enabled ) { return $enabled( $slug ) && ! empty( $fields[ $slug ]['required'] ); };
+        $invalid = !$this->valid_date($data['date']) || !preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/',$data['time']) || $data['party']<absint($settings['min_party']) || $data['party']>absint($settings['max_party']);
+        $invalid = $invalid || ( $required('privacy') && empty($_POST['consent']) ) || ( $required('name') && !$data['name'] ) || ( $required('phone') && !$data['phone'] );
+        $invalid = $invalid || ( $required('email') && !is_email($data['email']) ) || ( $enabled('email') && $data['email'] && !is_email($data['email']) );
+        foreach ( array( 'message', 'area', 'table', 'allergies' ) as $required_text_field ) {
+            if ( $required( $required_text_field ) && '' === $data[ $required_text_field ] ) { $invalid = true; }
+        }
+        if ( ( $required('highchair') && !$data['highchair'] ) || ( $required('dog') && !$data['dog'] ) ) { $invalid = true; }
+        if ( $invalid ) $this->send_json(false,array('message'=>$form_settings['error_text']),422);
+        if ( ! $enabled( 'name' ) || '' === $data['name'] ) { $data['name'] = 'Online-Reservierung'; }
+        foreach ( array( 'email', 'phone', 'message', 'area', 'table', 'allergies' ) as $optional_field ) {
+            if ( ! $enabled( $optional_field ) ) { $data[ $optional_field ] = ''; }
+        }
+        if ( ! $enabled( 'highchair' ) ) { $data['highchair'] = 0; }
+        if ( ! $enabled( 'dog' ) ) { $data['dog'] = 0; }
+        $submission_lock = $this->booking_lock_key( 'submission', array( $data['submission_token'], $data['date'], $data['time'], $data['party'], strtolower( $data['email'] ), preg_replace( '/\D+/', '', $data['phone'] ), strtolower( $data['name'] ) ) );
         if ( ! $this->acquire_lock( $submission_lock, 10 * MINUTE_IN_SECONDS ) ) {
             $this->send_json(false,array('message'=>'Diese Reservierungsanfrage wurde bereits übermittelt. Bitte prüfen Sie Ihre Bestätigung oder wenden Sie sich an den Betrieb.'),409);
         }
@@ -256,6 +317,7 @@ final class GD_Reservation_Engine {
             $this->send_json(false,array('message'=>'Die Reservierung konnte nicht gespeichert werden.'),500);
         }
         update_post_meta($id,'rtb',array('party'=>$data['party'],'email'=>$data['email'],'phone'=>$data['phone']));
+        update_post_meta($id,'_gelsensystem_form_details',array('area'=>$data['area'],'table'=>$data['table'],'highchair'=>$data['highchair'],'dog'=>$data['dog'],'allergies'=>$data['allergies']));
         update_post_meta($id,'_gd_created_by_engine',self::VERSION);
         update_post_meta($id,'_gelsendiele_submission_fingerprint',substr($submission_lock,-32));
         update_option( $submission_lock, array( 'created' => time(), 'booking_id' => absint( $id ) ), false );
@@ -263,7 +325,7 @@ final class GD_Reservation_Engine {
         delete_option( $slot_lock );
         $this->send_new_booking_emails($id);
         do_action('gd_reservation_created',$id,$data);
-        $this->send_json(true,array('message'=>$this->settings()['success_text'],'bookingId'=>$id));
+        $this->send_json(true,array('message'=>$form_settings['success_text'],'bookingId'=>$id));
     }
 
     private function send_json($success,$data,$status=200) {
@@ -277,6 +339,12 @@ final class GD_Reservation_Engine {
 
     private function booking_lock_key( $type, $parts ) {
         return 'gelsendiele_booking_' . sanitize_key( $type ) . '_' . md5( implode( '|', array_map( 'strval', (array) $parts ) ) );
+    }
+
+    private function limit_text( $value, $length ) {
+        $value = (string) $value;
+        $length = max( 1, absint( $length ) );
+        return function_exists( 'mb_substr' ) ? mb_substr( $value, 0, $length ) : substr( $value, 0, $length );
     }
 
     private function acquire_lock( $key, $ttl ) {
@@ -389,59 +457,16 @@ final class GD_Reservation_Engine {
             return;
         }
         update_post_meta( $booking->ID, '_gd_last_emailed_status', $new );
-        if ( in_array( $new, array( 'confirmed', 'cancelled' ), true ) ) {
-            $this->send_guest_email( $booking->ID, $new );
+        if ( in_array( $new, array( 'confirmed', 'rejected', 'cancelled' ), true ) && class_exists( 'Gelsensystem_Email' ) ) {
+            Gelsensystem_Email::send_status( $booking->ID, $new );
         }
     }
 
     public function send_new_booking_emails( $id ) {
-        $post = get_post( $id );
-        if ( ! $post ) {
-            return;
-        }
-        $meta          = (array) get_post_meta( $id, 'rtb', true );
-        $settings      = $this->settings();
-        $business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
-        $admin         = sanitize_email( $settings['admin_email'] );
-        $guest_email   = isset( $meta['email'] ) ? sanitize_email( $meta['email'] ) : '';
-        $confirmed     = 'confirmed' === get_post_status( $id );
-        $date          = wp_date( 'd.m.Y H:i', strtotime( $post->post_date ) );
-        $party         = absint( isset( $meta['party'] ) ? $meta['party'] : 0 );
-
-        if ( is_email( $admin ) ) {
-            $this->deliver_mail(
-                $admin,
-                'Neue Reservierung: ' . $post->post_title,
-                "Neue Reservierung\n\nName: {$post->post_title}\nDatum: {$date}\nPersonen: {$party}\nTelefon: " . ( isset( $meta['phone'] ) ? $meta['phone'] : '' ) . "\nE-Mail: {$guest_email}"
-            );
-        }
-        if ( is_email( $guest_email ) ) {
-            $subject = $confirmed ? 'Ihre Reservierung ist bestätigt' : 'Ihre Reservierungsanfrage bei ' . $business_name;
-            $status  = $confirmed ? 'Ihre Reservierung wurde bestätigt.' : 'Vielen Dank für Ihre Anfrage. Wir melden uns mit der Bestätigung.';
-            $this->deliver_mail( $guest_email, $subject, "Hallo {$post->post_title},\n\n{$status}\n\nTermin: {$date} Uhr\nPersonen: {$party}\n\n{$business_name}" );
+        if ( class_exists( 'Gelsensystem_Email' ) ) {
+            Gelsensystem_Email::send_new_booking( $id );
         }
         update_post_meta( $id, '_gd_last_emailed_status', get_post_status( $id ) );
-    }
-
-    private function send_guest_email( $id, $status ) {
-        $post  = get_post( $id );
-        $meta  = (array) get_post_meta( $id, 'rtb', true );
-        $email = isset( $meta['email'] ) ? sanitize_email( $meta['email'] ) : '';
-        if ( ! $post || ! is_email( $email ) ) {
-            return;
-        }
-        $business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
-        $confirmed     = 'confirmed' === $status;
-        $subject       = $confirmed ? 'Ihre Reservierung ist bestätigt' : 'Ihre Reservierung wurde storniert';
-        $text          = $confirmed ? 'Ihre Reservierung wurde bestätigt.' : 'Leider wurde Ihre Reservierung storniert.';
-        $body          = "Hallo {$post->post_title},\n\n{$text}\n\nTermin: " . wp_date( 'd.m.Y \u\m H:i', strtotime( $post->post_date ) ) . " Uhr\nPersonen: " . absint( isset( $meta['party'] ) ? $meta['party'] : 0 ) . "\n\n{$business_name}";
-        $this->deliver_mail( $email, $subject, $body );
-    }
-
-    private function deliver_mail( $recipient, $subject, $body ) {
-        if ( ! wp_mail( $recipient, $subject, $body ) ) {
-            error_log( '[Gelsendiele] Eine Reservierungs-E-Mail konnte nicht versendet werden.' );
-        }
     }
 }
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.3.0
+- Sieben vollständig eigene E-Mail-Vorlagen für neue Anfragen, Eingang, Bestätigung, Ablehnung, Änderung, Stornierung und Erinnerung.
+- Vorlagen unterstützen Text oder HTML, Empfängersteuerung, Absender aus den Betriebseinstellungen und sichere Platzhalter.
+- Test-E-Mails können nach expliziter Benutzeraktion direkt aus der jeweiligen Vorlage versendet werden.
+- Bestätigte Reservierungen können über WordPress-Cron automatisch vor dem Termin erinnert werden.
+- Formularfelder für Kontakt, Nachricht, Bereichs-/Tischwunsch, Kinderstuhl, Hund, Allergien und Datenschutz sind aktivierbar und als Pflichtfeld konfigurierbar.
+- Beschriftungen, Einleitung, Erfolgs-/Fehlermeldungen, Buttontext, Breite, Farben und Hell-/Dunkelmodus sind zentral einstellbar.
+- Zusätzliche Formularangaben werden strukturiert an der Reservierung gespeichert und stehen E-Mail-Vorlagen zur Verfügung.
+- Datum, Uhrzeit und Personenzahl bleiben als technisch notwendige Kernfelder geschützt.
+
 ## 2.2.0
 - Sichtbarer Produkt- und Pluginname auf **Gelsensystem** geändert; technische Slugs und Datenpräfixe bleiben updatekompatibel.
 - Funktionale Verwaltung für einzelne Schließtage, Zeiträume, Betriebsurlaub, Sonderöffnungen, Uhrzeitsperren und reduzierte Kapazitäten.

@@ -457,6 +457,17 @@
   }
 
   function bookingCard(booking) {
+    const formDetails = booking.formDetails || {};
+    const preferenceItems = [
+      formDetails.area ? `<span><strong>Bereich:</strong> ${escapeHtml(formDetails.area)}</span>` : '',
+      formDetails.table ? `<span><strong>Tischwunsch:</strong> ${escapeHtml(formDetails.table)}</span>` : '',
+      formDetails.highchair ? '<span><strong>Kinderstuhl:</strong> Ja</span>' : '',
+      formDetails.dog ? '<span><strong>Hund:</strong> Ja</span>' : '',
+      formDetails.allergies ? `<span><strong>Allergien:</strong> ${escapeHtml(formDetails.allergies)}</span>` : ''
+    ].filter(Boolean);
+    const preferences = preferenceItems.length
+      ? `<div class="gd-message gd-guest-message"><div class="gd-message-heading"><span class="gd-guest-message-icon">${icon('note')}</span><strong>Zusätzliche Gastangaben</strong><span class="gd-source-badge">Formular</span></div><div class="gd-form-preferences">${preferenceItems.join('')}</div></div>`
+      : '';
     const message = booking.message
       ? `<div class="gd-message gd-guest-message"><div class="gd-message-heading"><span class="gd-guest-message-icon">${icon('chat')}</span><strong>Nachricht vom Gast</strong><span class="gd-source-badge">Gast</span></div><p>${escapeHtml(booking.message)}</p></div>`
       : '';
@@ -528,6 +539,7 @@
             </div>
           `}
 
+          ${preferences}
           ${message}
 
           <div class="gd-actions">

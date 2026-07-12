@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0 – 2026-07-12
+
+- Gemeinsamer Versionsstand mit den neuen E-Mail- und Formulareinstellungen
+
 ## 2.2.0 – 2026-07-12
 
 - Sichtbarer Produktname auf Gelsensystem geändert
