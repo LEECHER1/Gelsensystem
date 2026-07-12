@@ -2,7 +2,7 @@
 Contributors: Andreas Schwarz / OpenAI
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.5.0
+Stable tag: 2.6.0
 
 Zentrales Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für Gastronomiebetriebe.
 
@@ -38,6 +38,12 @@ Das Zahlungsmodul dokumentiert Bar- und Kartenzahlungen, ist aber noch keine RKS
 Installierbare ZIP-Dateien werden aus einem geprüften Git-Tag erstellt. Vor jedem Produktivupdate sind WordPress-Dateien und Datenbank vollständig zu sichern.
 
 == Changelog ==
+
+= 2.6.0 =
+* Tische und Bereiche vollständig in die zentrale Gelsensystem-App integriert.
+* Tischname, Sitzplätze, Bereich, Reihenfolge und Sichtbarkeit können direkt gepflegt werden.
+* Live-Belegungsstatus und Sitzplatzsummen pro Bereich ergänzt.
+* Responsive Desktop- und Smartphone-Darstellung sowie Dark-Mode-Stile ergänzt.
 
 = 2.5.0 =
 * Speisekartenverwaltung vollständig in die zentrale Gelsensystem-App integriert.

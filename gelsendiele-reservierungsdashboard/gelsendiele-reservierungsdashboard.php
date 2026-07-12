@@ -3,7 +3,7 @@
  * Plugin Name: Gelsensystem
  * Plugin URI: https://github.com/LEECHER1/Gelsensystem
  * Description: Zentrales Reservierungs-, Service-, Küchen- und Kassensystem für Gastronomiebetriebe.
- * Version: 2.5.0
+ * Version: 2.6.0
  * Author: Andreas Schwarz / Gelsensystem
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.5.0' );
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.6.0' );
 defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
 defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );
@@ -319,7 +319,7 @@ final class Gelsendiele_Reservierungsdashboard {
         );
 
         $app_section = isset( $_GET['gd-section'] ) ? sanitize_key( wp_unslash( $_GET['gd-section'] ) ) : 'reservations';
-        $central_section = in_array( $app_section, array( 'settings', 'users', 'menu' ), true );
+        $central_section = in_array( $app_section, array( 'settings', 'users', 'menu', 'tables' ), true );
         if ( $central_section ) {
             wp_enqueue_style( 'gelsendiele-admin', GELSENDIELE_URL . 'admin/assets/settings.css', array( 'gd-reservierungsdashboard' ), self::VERSION );
             wp_enqueue_script( 'gelsendiele-settings', GELSENDIELE_URL . 'admin/assets/settings.js', array(), self::VERSION, false );
@@ -372,7 +372,7 @@ final class Gelsendiele_Reservierungsdashboard {
         }
 
         $app_section = isset( $_GET['gd-section'] ) ? sanitize_key( wp_unslash( $_GET['gd-section'] ) ) : 'reservations';
-        if ( ! in_array( $app_section, array( 'reservations', 'settings', 'users', 'menu' ), true ) ) {
+        if ( ! in_array( $app_section, array( 'reservations', 'settings', 'users', 'menu', 'tables' ), true ) ) {
             $app_section = 'reservations';
         }
         $section_capabilities = array(
@@ -380,6 +380,7 @@ final class Gelsendiele_Reservierungsdashboard {
             'settings'     => 'gelsendiele_manage_settings',
             'users'        => 'manage_options',
             'menu'         => 'gdg_manage',
+            'tables'       => 'gdg_manage',
         );
         $section_capability = $section_capabilities[ $app_section ];
         if ( ! current_user_can( $section_capability ) ) {
@@ -2517,6 +2518,8 @@ final class Gelsendiele_Reservierungsdashboard {
                     Gelsendiele_Admin::render_app_settings( $this->dashboard_url() );
                 } elseif ( 'menu' === $section ) {
                     GDG_Admin::render_app_menu( $this->dashboard_url() );
+                } elseif ( 'tables' === $section ) {
+                    GDG_Admin::render_app_tables( $this->dashboard_url() );
                 } else {
                     Gelsendiele_Admin::render_app_users();
                 }
@@ -2535,7 +2538,7 @@ final class Gelsendiele_Reservierungsdashboard {
             array( 'kitchen', 'Küche', 'gdg_use_kitchen', $this->workspace_url( 'kitchen' ), 'K' ),
             array( 'bar', 'Schank', 'gdg_use_bar', $this->workspace_url( 'bar' ), 'B' ),
             array( 'checkout', 'Kasse', 'gdg_use_checkout', $this->workspace_url( 'checkout' ), '€' ),
-            array( 'tables', 'Tische & Bereiche', 'gdg_manage', admin_url( 'admin.php?page=gdg-tables' ), 'T' ),
+            array( 'tables', 'Tische & Bereiche', 'gdg_manage', add_query_arg( 'gd-section', 'tables', $dashboard ), 'T' ),
             array( 'menu', 'Speisekarte', 'gdg_manage', add_query_arg( 'gd-section', 'menu', $dashboard ), 'M' ),
             array( 'settings', 'Einstellungen', 'gelsendiele_manage_settings', add_query_arg( 'gd-section', 'settings', $dashboard ), 'E' ),
             array( 'users', 'Benutzer & Rechte', 'manage_options', add_query_arg( 'gd-section', 'users', $dashboard ), 'U' ),
