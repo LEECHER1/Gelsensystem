@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.7.1
+
+- URL- und Seitenmigration läuft erst in der sicheren WordPress-`init`-Phase.
+- Behebt `Undefined constant WP_POST_REVISIONS` unter WordPress 7.0.1.
+- Unnötige Seitenaktualisierungen werden durch einen Feldvergleich vermieden.
+
 ## 2.7.0
 
 - Eigene kanonische URL `/gelsensystem/` für die zentrale App eingeführt.

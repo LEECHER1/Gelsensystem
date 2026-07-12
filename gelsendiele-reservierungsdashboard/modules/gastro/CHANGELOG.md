@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.1 – 2026-07-12
+
+- URL-Migration mit der sicheren WordPress-Initialisierungsphase synchronisiert.
+
 ## 2.7.0 – 2026-07-12
 
 - Arbeitsseiten auf die neue Zentrale unter `/gelsensystem/` umgestellt.

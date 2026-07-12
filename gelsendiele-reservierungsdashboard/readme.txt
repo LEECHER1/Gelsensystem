@@ -2,7 +2,7 @@
 Contributors: Andreas Schwarz / OpenAI
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.7.0
+Stable tag: 2.7.1
 
 Zentrales Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für Gastronomiebetriebe.
 
@@ -38,6 +38,11 @@ Das Zahlungsmodul dokumentiert Bar- und Kartenzahlungen, ist aber noch keine RKS
 Installierbare ZIP-Dateien werden aus einem geprüften Git-Tag erstellt. Vor jedem Produktivupdate sind WordPress-Dateien und Datenbank vollständig zu sichern.
 
 == Changelog ==
+
+= 2.7.1 =
+* URL-Migration in die sichere WordPress-init-Phase verschoben.
+* Verhindert den Fehler "Undefined constant WP_POST_REVISIONS" unter WordPress 7.0.1.
+* Zentrale Seite wird nur noch aktualisiert, wenn sich Titel, Slug, Status oder Shortcode tatsächlich ändern.
 
 = 2.7.0 =
 * Zentrale Gelsensystem-App auf die eigene kanonische URL /gelsensystem/ umgestellt.
