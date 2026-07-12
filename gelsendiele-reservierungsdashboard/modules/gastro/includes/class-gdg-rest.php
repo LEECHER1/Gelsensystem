@@ -124,8 +124,26 @@ final class GDG_REST {
 		return is_user_logged_in() && ( current_user_can( 'gdg_use_checkout' ) || current_user_can( 'gdg_manage' ) );
 	}
 
-	public static function can_update_item(): bool {
-		return self::can_use_any_app();
+	public static function can_update_item( WP_REST_Request $request ): bool {
+		if ( ! is_user_logged_in() ) {
+			return false;
+		}
+		if ( current_user_can( 'gdg_manage' ) || current_user_can( 'gdg_use_service' ) ) {
+			return true;
+		}
+
+		$item = GDG_DB::get_order_item( (int) $request['id'] );
+		if ( ! $item ) {
+			return false;
+		}
+		$params = (array) $request->get_json_params();
+		if ( isset( $params['quantity'] ) || isset( $params['note'] ) ) {
+			return false;
+		}
+		if ( 'bar' === $item['station'] ) {
+			return current_user_can( 'gdg_use_bar' );
+		}
+		return 'kitchen' === $item['station'] && current_user_can( 'gdg_use_kitchen' );
 	}
 
 	public static function can_queue( WP_REST_Request $request ): bool {

@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 if ( ! defined( 'RTB_BOOKING_POST_TYPE' ) ) { define( 'RTB_BOOKING_POST_TYPE', 'rtb-booking' ); }
 
 final class GD_Reservation_Engine {
-    const VERSION = '2.0.3';
+    const VERSION = GELSENDIELE_VERSION;
     const FORM_SHORTCODE = 'gelsendiele_reservierungsformular';
     const LEGACY_SHORTCODE = 'booking-form';
     const SETTINGS_OPTION = 'gd_reservation_engine_settings';
@@ -24,7 +24,8 @@ final class GD_Reservation_Engine {
         add_action( 'wp_ajax_gd_public_month_availability', array( $this, 'ajax_month_availability' ) );
         add_action( 'admin_init', array( $this, 'ensure_roles' ) );
         add_action( 'rtb_update_booking', array( $this, 'maybe_send_status_email' ), 10, 1 );
-        $this->bootstrap_compatibility_controller();
+        add_action( 'plugins_loaded', 'gelsendiele_register_rtb_compatibility_classes', 90 );
+        add_action( 'plugins_loaded', array( $this, 'bootstrap_compatibility_controller' ), 100 );
     }
 
     public static function activate() {
@@ -69,9 +70,19 @@ final class GD_Reservation_Engine {
         );
     }
 
-    public function settings() { return wp_parse_args( (array) get_option( self::SETTINGS_OPTION, array() ), self::defaults() ); }
+    public function settings() {
+        if ( class_exists( 'Gelsendiele_Settings' ) ) {
+            return wp_parse_args( Gelsendiele_Settings::reservation_engine_settings(), self::defaults() );
+        }
+        return wp_parse_args( (array) get_option( self::SETTINGS_OPTION, array() ), self::defaults() );
+    }
 
     public function register_content() {
+        // Solange Five Star aktiv ist, bleibt dessen Registrierung maßgeblich.
+        // Dadurch überschreiben sich die beiden Plugins nicht gegenseitig.
+        if ( defined( 'RTB_PLUGIN_DIR' ) ) {
+            return;
+        }
         register_post_type( RTB_BOOKING_POST_TYPE, array(
             'labels' => array('name'=>'Reservierungen','singular_name'=>'Reservierung','add_new_item'=>'Reservierung hinzufügen','edit_item'=>'Reservierung bearbeiten'),
             'public' => false, 'show_ui' => true, 'show_in_menu' => true,
@@ -99,7 +110,7 @@ final class GD_Reservation_Engine {
         if ( ! get_role('gd_reservation_manager') ) add_role('gd_reservation_manager','Reservierungsverwaltung',array('read'=>true,'manage_bookings'=>true,'edit_booking'=>true,'read_booking'=>true,'delete_booking'=>true));
     }
 
-    private function bootstrap_compatibility_controller() {
+    public function bootstrap_compatibility_controller() {
         global $rtb_controller;
         if ( ! isset($rtb_controller) || ! is_object($rtb_controller) ) $rtb_controller = new stdClass();
         if ( empty($rtb_controller->settings) ) $rtb_controller->settings = new GD_RTB_Settings_Compat($this);
@@ -119,6 +130,12 @@ final class GD_Reservation_Engine {
 
     public function render_form() {
         wp_enqueue_style('gd-reservation-form'); wp_enqueue_script('gd-reservation-form');
+        $brand_primary   = Gelsendiele_Settings::get( 'branding', 'primary_color', '#179b57' );
+        $brand_secondary = Gelsendiele_Settings::get( 'branding', 'secondary_color', '#0b5d38' );
+        wp_add_inline_style(
+            'gd-reservation-form',
+            '.gdrf-form{border-radius:var(--gelsendiele-radius,24px)}.gdrf-brand-logo{display:block;max-width:180px;max-height:96px;width:auto;height:auto;object-fit:contain;margin:0 0 16px}.gdrf-submit{background:linear-gradient(135deg,' . esc_attr( $brand_primary ) . ',' . esc_attr( $brand_secondary ) . ')}'
+        );
         $settings = $this->settings();
         wp_localize_script('gd-reservation-form','GDReservationForm',array(
             'ajaxUrl'=>admin_url('admin-ajax.php'),
@@ -130,9 +147,18 @@ final class GD_Reservation_Engine {
                 'weekdays'=>array('Mo','Di','Mi','Do','Fr','Sa','So')
             )
         ));
-        $s=$this->settings(); ob_start(); ?>
-        <div class="gdrf-shell"><form class="gdrf-form" data-gdrf-form novalidate>
-          <div class="gdrf-head"><span class="gdrf-eyebrow">Gelsendiele</span><h2>Tisch reservieren</h2><p>Wir freuen uns auf Ihren Besuch.</p></div>
+        $s             = $this->settings();
+        $business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
+        $form_settings = Gelsendiele_Settings::get( 'form', null, array() );
+        $branding      = Gelsendiele_Settings::get( 'branding', null, array() );
+        $form_style    = '--gd-accent:' . $branding['primary_color'] . ';--gd-bg:' . $branding['surface_color'] . ';--gelsendiele-radius:' . absint( $branding['border_radius'] ) . 'px;';
+        $logo_url      = $branding['logo_url'];
+        if ( ! $logo_url && ! empty( $branding['logo_attachment_id'] ) ) {
+            $logo_url = wp_get_attachment_image_url( absint( $branding['logo_attachment_id'] ), 'medium' );
+        }
+        ob_start(); ?>
+        <div class="gdrf-shell" style="<?php echo esc_attr( $form_style ); ?>"><form class="gdrf-form" data-gdrf-form novalidate>
+          <div class="gdrf-head"><?php if ( $logo_url ) : ?><img class="gdrf-brand-logo" src="<?php echo esc_url( $logo_url ); ?>" alt="<?php echo esc_attr( $business_name ); ?>"><?php endif; ?><span class="gdrf-eyebrow"><?php echo esc_html( $business_name ); ?></span><h2><?php echo esc_html( $form_settings['headline'] ); ?></h2><p><?php echo esc_html( $form_settings['intro'] ); ?></p></div>
           <div class="gdrf-grid">
             <label class="gdrf-date-field"><span>Datum *</span>
               <input type="hidden" name="date" required>
@@ -152,7 +178,7 @@ final class GD_Reservation_Engine {
           </div>
           <label class="gdrf-consent"><input type="checkbox" name="consent" value="1" required><span><?php echo esc_html($s['privacy_text']); ?></span></label>
           <input type="text" name="website" class="gdrf-hp" tabindex="-1" autocomplete="off">
-          <button type="submit" class="gdrf-submit">Reservierung anfragen</button>
+          <button type="submit" class="gdrf-submit"><?php echo esc_html( $form_settings['button_text'] ); ?></button>
           <div class="gdrf-message" data-gdrf-message aria-live="polite"></div>
         </form></div><?php return ob_get_clean();
     }
@@ -188,14 +214,17 @@ final class GD_Reservation_Engine {
         check_ajax_referer('gd_public_reservation','nonce');
         if(!empty($_POST['website'])) $this->send_json(false,array('message'=>'Die Anfrage konnte nicht verarbeitet werden.'),400);
         $data=array('date'=>sanitize_text_field(wp_unslash($_POST['date']??'')),'time'=>sanitize_text_field(wp_unslash($_POST['time']??'')),'party'=>absint($_POST['party']??0),'name'=>sanitize_text_field(wp_unslash($_POST['name']??'')),'email'=>sanitize_email(wp_unslash($_POST['email']??'')),'phone'=>sanitize_text_field(wp_unslash($_POST['phone']??'')),'message'=>sanitize_textarea_field(wp_unslash($_POST['message']??'')));
-        if(empty($_POST['consent'])||!$this->valid_date($data['date'])||!preg_match('/^\d{2}:\d{2}$/',$data['time'])||!$data['party']||!$data['name']||!is_email($data['email'])||!$data['phone']) $this->send_json(false,array('message'=>'Bitte füllen Sie alle Pflichtfelder korrekt aus.'),422);
+        $settings = $this->settings();
+        if(empty($_POST['consent'])||!$this->valid_date($data['date'])||!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/',$data['time'])||$data['party']<absint($settings['min_party'])||$data['party']>absint($settings['max_party'])||!$data['name']||!is_email($data['email'])||!$data['phone']) $this->send_json(false,array('message'=>'Bitte füllen Sie alle Pflichtfelder korrekt aus.'),422);
         if(!in_array($data['time'],$this->available_slots($data['date'],$data['party']),true)) $this->send_json(false,array('message'=>'Diese Uhrzeit ist leider nicht mehr verfügbar.'),409);
         // Deliberately save with our own engine. When Five Star is still active its rtbBooking
         // class owns the same name and may terminate or alter the AJAX response.
         $local = $data['date'].' '.$data['time'].':00';
+        $confirmation_mode = Gelsendiele_Settings::get( 'general', 'confirmation_mode', 'manual' );
+        $initial_status = ( 'automatic' === $confirmation_mode || get_option( 'gd_auto_confirm_bookings', false ) ) ? 'confirmed' : 'pending';
         $id = wp_insert_post(array(
             'post_type'=>RTB_BOOKING_POST_TYPE,
-            'post_status'=>'pending',
+            'post_status'=>$initial_status,
             'post_title'=>$data['name'],
             'post_content'=>$data['message'],
             'post_date'=>$local,
@@ -226,33 +255,130 @@ final class GD_Reservation_Engine {
         $today=new DateTimeImmutable('today',wp_timezone()); $max=$today->modify('+'.absint($this->settings()['advance_days']).' days'); return $d>=$today&&$d<=$max;
     }
 
-    public function ranges_for_date($date) {
-        $s=$this->settings(); if(in_array($date,(array)$s['closed_dates'],true))return array();
-        $d=DateTimeImmutable::createFromFormat('!Y-m-d',$date,wp_timezone()); if(!$d)return array(); $keys=array(1=>'mon',2=>'tue',3=>'wed',4=>'thu',5=>'fri',6=>'sat',7=>'sun'); return (array)($s['opening_hours'][$keys[(int)$d->format('N')]]??array());
+    public function ranges_for_date( $date ) {
+        $settings = $this->settings();
+        if ( in_array( $date, (array) $settings['closed_dates'], true ) ) {
+            return array();
+        }
+        $day = DateTimeImmutable::createFromFormat( '!Y-m-d', $date, wp_timezone() );
+        if ( ! $day ) {
+            return array();
+        }
+        $keys   = array( 1 => 'mon', 2 => 'tue', 3 => 'wed', 4 => 'thu', 5 => 'fri', 6 => 'sat', 7 => 'sun' );
+        $ranges = (array) ( $settings['opening_hours'][ $keys[ (int) $day->format( 'N' ) ] ] ?? array() );
+
+        // Der nach Mitternacht liegende Teil einer Öffnung gehört zum realen
+        // Folgetag. Dadurch wird z. B. Samstag 01:00 auch als Samstag gespeichert.
+        $previous     = $day->modify( '-1 day' );
+        $previous_key = $keys[ (int) $previous->format( 'N' ) ];
+        foreach ( (array) ( $settings['opening_hours'][ $previous_key ] ?? array() ) as $range ) {
+            if ( isset( $range['start'], $range['end'] ) && $range['end'] < $range['start'] ) {
+                $ranges[] = array( 'start' => '00:00', 'end' => $range['end'] );
+            }
+        }
+        return $ranges;
     }
 
-    public function available_slots($date,$party=1,$exclude=0) {
-        $s=$this->settings(); $slots=array(); $interval=max(5,absint($s['time_interval'])); $duration=max($interval,absint($s['booking_duration']));
-        $now=new DateTimeImmutable('now',wp_timezone());
-        foreach($this->ranges_for_date($date) as $range){
-            $start=DateTimeImmutable::createFromFormat('!Y-m-d H:i',$date.' '.$range['start'],wp_timezone()); $end=DateTimeImmutable::createFromFormat('!Y-m-d H:i',$date.' '.$range['end'],wp_timezone()); if(!$start||!$end)continue;
-            for($t=$start;$t<=$end->modify('-'.$duration.' minutes');$t=$t->modify('+'.$interval.' minutes')){
-                if($t<$now->modify('+'.absint($s['lead_minutes']).' minutes'))continue;
-                if($this->has_capacity($t,$party,$exclude))$slots[]=$t->format('H:i');
+    public function available_slots( $date, $party = 1, $exclude = 0 ) {
+        $settings = $this->settings();
+        $slots    = array();
+        $interval = max( 5, absint( $settings['time_interval'] ) );
+        $duration = max( $interval, absint( $settings['booking_duration'] ) + absint( $settings['buffer_minutes'] ?? 0 ) );
+        $now      = new DateTimeImmutable( 'now', wp_timezone() );
+        foreach ( $this->ranges_for_date( $date ) as $range ) {
+            $start = DateTimeImmutable::createFromFormat( '!Y-m-d H:i', $date . ' ' . $range['start'], wp_timezone() );
+            $end   = DateTimeImmutable::createFromFormat( '!Y-m-d H:i', $date . ' ' . $range['end'], wp_timezone() );
+            if ( ! $start || ! $end ) {
+                continue;
             }
-        } return array_values(array_unique($slots));
+            if ( $end <= $start ) {
+                $end = $end->modify( '+1 day' );
+            }
+            for ( $time = $start; $time <= $end->modify( '-' . $duration . ' minutes' ); $time = $time->modify( '+' . $interval . ' minutes' ) ) {
+                if ( $time->format( 'Y-m-d' ) !== $date || $time < $now->modify( '+' . absint( $settings['lead_minutes'] ) . ' minutes' ) ) {
+                    continue;
+                }
+                if ( $this->has_capacity( $time, $party, $exclude ) ) {
+                    $slots[] = $time->format( 'H:i' );
+                }
+            }
+        }
+        return array_values( array_unique( $slots ) );
     }
 
     private function has_capacity(DateTimeImmutable $start,$party,$exclude=0){
-        $s=$this->settings(); $duration=max(30,absint($s['booking_duration'])); $end=$start->modify('+'.$duration.' minutes'); $count=0;$people=0;
-        $posts=get_posts(array('post_type'=>RTB_BOOKING_POST_TYPE,'post_status'=>array('pending','payment_pending','confirmed','arrived'),'posts_per_page'=>-1,'post__not_in'=>$exclude?array($exclude):array(),'date_query'=>array(array('after'=>$start->format('Y-m-d 00:00:00'),'before'=>$start->format('Y-m-d 23:59:59'),'inclusive'=>true))));
+        $s=$this->settings(); $duration=max(30,absint($s['booking_duration'])+absint($s['buffer_minutes']??0)); $end=$start->modify('+'.$duration.' minutes'); $count=0;$people=0;
+        $posts=get_posts(array('post_type'=>RTB_BOOKING_POST_TYPE,'post_status'=>array('pending','payment_pending','confirmed','arrived'),'posts_per_page'=>-1,'post__not_in'=>$exclude?array($exclude):array(),'date_query'=>array(array('after'=>$start->modify('-1 day')->format('Y-m-d 00:00:00'),'before'=>$start->modify('+1 day')->format('Y-m-d 23:59:59'),'inclusive'=>true))));
         foreach($posts as $p){$ps=new DateTimeImmutable($p->post_date,wp_timezone());$pe=$ps->modify('+'.$duration.' minutes');if($start<$pe&&$end>$ps){$m=(array)get_post_meta($p->ID,'rtb',true);$count++;$people+=absint($m['party']??0);}}
         return !(absint($s['max_tables'])>0&&$count>=absint($s['max_tables'])) && !(absint($s['max_people'])>0&&($people+$party)>absint($s['max_people']));
     }
 
-    public function maybe_send_status_email($booking){ if(!is_object($booking)||empty($booking->ID))return; $old=get_post_meta($booking->ID,'_gd_last_emailed_status',true);$new=get_post_status($booking->ID);if($old===$new)return;update_post_meta($booking->ID,'_gd_last_emailed_status',$new); if(in_array($new,array('confirmed','cancelled'),true))$this->send_guest_email($booking->ID,$new); }
-    public function send_new_booking_emails($id){$p=get_post($id);$m=(array)get_post_meta($id,'rtb',true);$admin=$this->settings()['admin_email'];wp_mail($admin,'Neue Reservierungsanfrage: '.$p->post_title,"Neue Anfrage\n\nName: {$p->post_title}\nDatum: ".wp_date('d.m.Y H:i',strtotime($p->post_date))."\nPersonen: ".absint($m['party']??0)."\nTelefon: ".($m['phone']??'')."\nE-Mail: ".($m['email']??''));wp_mail($m['email']??'','Ihre Reservierungsanfrage bei der Gelsendiele',"Hallo {$p->post_title},\n\nvielen Dank für Ihre Anfrage am ".wp_date('d.m.Y \u\m H:i',strtotime($p->post_date))." Uhr für ".absint($m['party']??0)." Personen. Wir melden uns mit der Bestätigung.\n\nIhre Gelsendiele");}
-    private function send_guest_email($id,$status){$p=get_post($id);$m=(array)get_post_meta($id,'rtb',true);$email=$m['email']??'';if(!is_email($email))return;$confirmed='confirmed'===$status;$subject=$confirmed?'Ihre Reservierung ist bestätigt':'Ihre Reservierung wurde storniert';$text=$confirmed?'Ihre Reservierung wurde bestätigt.':'Leider wurde Ihre Reservierung storniert.';wp_mail($email,$subject,"Hallo {$p->post_title},\n\n{$text}\n\nTermin: ".wp_date('d.m.Y \u\m H:i',strtotime($p->post_date))." Uhr\nPersonen: ".absint($m['party']??0)."\n\nIhre Gelsendiele");}
+    public function maybe_send_status_email( $booking ) {
+        // Bei aktivem Five Star besitzt dessen Benachrichtigungssystem diesen Hook.
+        // Eigene Mails würden sonst doppelt versendet.
+        if ( defined( 'RTB_PLUGIN_DIR' ) || ! is_object( $booking ) || empty( $booking->ID ) ) {
+            return;
+        }
+        $old = get_post_meta( $booking->ID, '_gd_last_emailed_status', true );
+        $new = get_post_status( $booking->ID );
+        if ( $old === $new ) {
+            return;
+        }
+        update_post_meta( $booking->ID, '_gd_last_emailed_status', $new );
+        if ( in_array( $new, array( 'confirmed', 'cancelled' ), true ) ) {
+            $this->send_guest_email( $booking->ID, $new );
+        }
+    }
+
+    public function send_new_booking_emails( $id ) {
+        $post = get_post( $id );
+        if ( ! $post ) {
+            return;
+        }
+        $meta          = (array) get_post_meta( $id, 'rtb', true );
+        $settings      = $this->settings();
+        $business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
+        $admin         = sanitize_email( $settings['admin_email'] );
+        $guest_email   = isset( $meta['email'] ) ? sanitize_email( $meta['email'] ) : '';
+        $confirmed     = 'confirmed' === get_post_status( $id );
+        $date          = wp_date( 'd.m.Y H:i', strtotime( $post->post_date ) );
+        $party         = absint( isset( $meta['party'] ) ? $meta['party'] : 0 );
+
+        if ( is_email( $admin ) ) {
+            $this->deliver_mail(
+                $admin,
+                'Neue Reservierung: ' . $post->post_title,
+                "Neue Reservierung\n\nName: {$post->post_title}\nDatum: {$date}\nPersonen: {$party}\nTelefon: " . ( isset( $meta['phone'] ) ? $meta['phone'] : '' ) . "\nE-Mail: {$guest_email}"
+            );
+        }
+        if ( is_email( $guest_email ) ) {
+            $subject = $confirmed ? 'Ihre Reservierung ist bestätigt' : 'Ihre Reservierungsanfrage bei ' . $business_name;
+            $status  = $confirmed ? 'Ihre Reservierung wurde bestätigt.' : 'Vielen Dank für Ihre Anfrage. Wir melden uns mit der Bestätigung.';
+            $this->deliver_mail( $guest_email, $subject, "Hallo {$post->post_title},\n\n{$status}\n\nTermin: {$date} Uhr\nPersonen: {$party}\n\n{$business_name}" );
+        }
+        update_post_meta( $id, '_gd_last_emailed_status', get_post_status( $id ) );
+    }
+
+    private function send_guest_email( $id, $status ) {
+        $post  = get_post( $id );
+        $meta  = (array) get_post_meta( $id, 'rtb', true );
+        $email = isset( $meta['email'] ) ? sanitize_email( $meta['email'] ) : '';
+        if ( ! $post || ! is_email( $email ) ) {
+            return;
+        }
+        $business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
+        $confirmed     = 'confirmed' === $status;
+        $subject       = $confirmed ? 'Ihre Reservierung ist bestätigt' : 'Ihre Reservierung wurde storniert';
+        $text          = $confirmed ? 'Ihre Reservierung wurde bestätigt.' : 'Leider wurde Ihre Reservierung storniert.';
+        $body          = "Hallo {$post->post_title},\n\n{$text}\n\nTermin: " . wp_date( 'd.m.Y \u\m H:i', strtotime( $post->post_date ) ) . " Uhr\nPersonen: " . absint( isset( $meta['party'] ) ? $meta['party'] : 0 ) . "\n\n{$business_name}";
+        $this->deliver_mail( $email, $subject, $body );
+    }
+
+    private function deliver_mail( $recipient, $subject, $body ) {
+        if ( ! wp_mail( $recipient, $subject, $body ) ) {
+            error_log( '[Gelsendiele] Eine Reservierungs-E-Mail konnte nicht versendet werden.' );
+        }
+    }
 }
 
 final class GD_RTB_Settings_Compat {
@@ -260,6 +386,7 @@ final class GD_RTB_Settings_Compat {
     public function get_setting($key,$default='',$timeslot=false){$s=$this->engine->settings(); if('schedule-open'===$key){$days=array('sun'=>'sunday','mon'=>'monday','tue'=>'tuesday','wed'=>'wednesday','thu'=>'thursday','fri'=>'friday','sat'=>'saturday');$weekdays=array();foreach($days as $short=>$long){$weekdays[$long]=!empty($s['opening_hours'][$short]);}return array(array('weekdays'=>$weekdays));} if('schedule-closed'===$key){return array_map(function($date){return array('date'=>$date);},(array)$s['closed_dates']);}$map=array('time-interval'=>'time_interval','rtb-dining-block-length'=>'booking_duration','rtb-enable-max-tables'=>'max_tables','rtb-max-tables-count'=>'max_tables','rtb-max-people-count'=>'max_people');$k=$map[$key]??$key;return $s[$k]??$default;}
 }
 
+function gelsendiele_register_rtb_compatibility_classes() {
 if ( ! class_exists('rtbBooking') ) {
 class rtbBooking {
     public $ID=0,$post_status='pending',$name='',$email='',$phone='',$party=0,$message='',$confirmed_user=0,$temp_confirmed_user=0,$validation_errors=array(),$data=array();
@@ -278,6 +405,7 @@ class rtbAJAX {
     public $year,$month,$day,$location;
     public function get_opening_hours(){return GD_Reservation_Engine::instance()->ranges_for_date(sprintf('%04d-%02d-%02d',$this->year,$this->month,$this->day));}
     public function get_all_possible_timeslots($hours){$date=sprintf('%04d-%02d-%02d',$this->year,$this->month,$this->day);$slots=GD_Reservation_Engine::instance()->available_slots($date,1);return array_map(function($t)use($date){return DateTimeImmutable::createFromFormat('!Y-m-d H:i',$date.' '.$t,wp_timezone())->getTimestamp();},$slots);}
+}
 }
 }
 

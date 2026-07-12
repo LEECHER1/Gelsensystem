@@ -97,12 +97,13 @@
   }
 
   function setupTheme() {
-    const stored = localStorage.getItem('gdg-theme') || 'auto';
+    let stored = config.themeMode || 'auto';
+    try { stored = localStorage.getItem('gdg-theme') || stored; } catch (_) {}
     applyTheme(stored);
     app.querySelector('[data-gdg-theme-toggle]')?.addEventListener('click', () => {
       const current = app.dataset.theme || 'auto';
       const next = current === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('gdg-theme', next);
+      try { localStorage.setItem('gdg-theme', next); } catch (_) {}
       applyTheme(next);
     });
   }

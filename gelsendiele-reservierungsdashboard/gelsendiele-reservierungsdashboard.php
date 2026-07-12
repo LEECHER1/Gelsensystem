@@ -1,9 +1,10 @@
 <?php
 /**
  * Plugin Name: Gelsendiele Reservierungs-Dashboard
+ * Plugin URI: https://github.com/LEECHER1/Gelsendiele
  * Description: Eigenständiges Reservierungs-, Service-, Küchen- und Kassensystem für die Gelsendiele.
- * Version: 2.0.3
- * Author: Andreas Schwarz / OpenAI
+ * Version: 2.1.0
+ * Author: Andreas Schwarz / Gelsendiele
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
  * Requires PHP: 7.4
@@ -13,11 +14,22 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.1.0' );
+defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
+defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
+defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );
+
+require_once GELSENDIELE_DIR . 'includes/class-gelsendiele-settings.php';
+require_once GELSENDIELE_DIR . 'includes/class-gelsendiele-migrator.php';
+require_once GELSENDIELE_DIR . 'includes/class-gelsendiele-admin.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-gd-reservation-engine.php';
 require_once plugin_dir_path( __FILE__ ) . 'modules/gastro/gelsendiele-gastro-system.php';
 
+Gelsendiele_Migrator::bootstrap();
+Gelsendiele_Admin::bootstrap();
+
 final class Gelsendiele_Reservierungsdashboard {
-    const VERSION = '2.0.1';
+    const VERSION = GELSENDIELE_VERSION;
     const SHORTCODE = 'gelsendiele_reservierungen';
     const PAGE_OPTION = 'gd_reservierungsdashboard_page_id';
     const TABLE_META = '_gd_table_number';
@@ -70,7 +82,8 @@ final class Gelsendiele_Reservierungsdashboard {
         add_filter( 'rtb_determine_booking_status', array( $this, 'maybe_auto_confirm_booking' ), 999, 2 );
         add_action( 'admin_post_gd_export_bookings_csv', array( $this, 'export_bookings_csv' ) );
         add_action( 'admin_post_gd_export_bookings_xlsx', array( $this, 'export_bookings_xlsx' ) );
-        add_action( 'admin_menu', array( $this, 'register_settings_page' ), 99 );
+        // Der zentrale Gelsendiele-Menübaum ersetzt die frühere, Five-Star-nahe
+        // Dashboard-Unterseite. Die Render-Methode bleibt für Rückwärtskompatibilität erhalten.
 
         // Tischnummer auch in der normalen WordPress-Verwaltung anzeigen.
         add_action( 'add_meta_boxes', array( $this, 'register_table_meta_box' ) );
@@ -93,7 +106,7 @@ final class Gelsendiele_Reservierungsdashboard {
 
     public static function activate() {
         GD_Reservation_Engine::activate();
-        if ( class_exists( 'GDG_DB' ) ) { GDG_DB::activate(); }
+        Gelsendiele_Migrator::activate();
         if ( false === get_option( self::TABLE_COUNT_OPTION, false ) ) {
             add_option( self::TABLE_COUNT_OPTION, 30, '', false );
         }
@@ -178,15 +191,17 @@ final class Gelsendiele_Reservierungsdashboard {
     private function output_pwa_manifest() {
         $icon_192 = add_query_arg( 'ver', self::VERSION, plugin_dir_url( __FILE__ ) . 'assets/gelsendiele-app-icon-192.png' );
         $icon_512 = add_query_arg( 'ver', self::VERSION, plugin_dir_url( __FILE__ ) . 'assets/gelsendiele-app-icon-512.png' );
+        $business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
+        $theme_color   = Gelsendiele_Settings::get( 'branding', 'dark_surface_color', '#08110b' );
 
         nocache_headers();
         header( 'Content-Type: application/manifest+json; charset=UTF-8' );
 
         echo wp_json_encode( array(
             'id'               => trailingslashit( (string) wp_parse_url( $this->dashboard_url(), PHP_URL_PATH ) ),
-            'name'             => 'Gelsendiele Reservierungen',
+            'name'             => $business_name . ' Reservierungen',
             'short_name'       => 'Reservierungen',
-            'description'      => 'Reservierungen der Gelsendiele verwalten',
+            'description'      => 'Reservierungen von ' . $business_name . ' verwalten',
             'start_url'        => $this->dashboard_url(),
             'scope'            => trailingslashit( (string) wp_parse_url( $this->dashboard_url(), PHP_URL_PATH ) ),
             'display'          => 'standalone',
@@ -204,8 +219,8 @@ final class Gelsendiele_Reservierungsdashboard {
                     'url'       => add_query_arg( 'gd-view', 'today', $this->dashboard_url() ),
                 ),
             ),
-            'background_color' => '#08110b',
-            'theme_color'      => '#08110b',
+            'background_color' => $theme_color,
+            'theme_color'      => $theme_color,
             'orientation'      => 'any',
             'icons'            => array(
                 array(
@@ -354,18 +369,24 @@ final class Gelsendiele_Reservierungsdashboard {
             $default_view = 'pending';
         }
 
-        $user       = wp_get_current_user();
-        $logout_url = wp_logout_url( $this->dashboard_url() );
+        $user          = wp_get_current_user();
+        $logout_url    = wp_logout_url( $this->dashboard_url() );
+        $business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
+        $branding      = Gelsendiele_Settings::get( 'branding', null, array() );
+        $brand_style   = Gelsendiele_Settings::css_variables()
+            . '--gd-green:' . $branding['primary_color'] . ';'
+            . '--gd-green-dark:' . $branding['secondary_color'] . ';'
+            . '--gd-bg:' . $branding['surface_color'] . ';';
         ob_start();
         ?>
-        <div class="gd-dashboard-shell" data-default-view="<?php echo esc_attr( $default_view ); ?>">
+        <div class="gd-dashboard-shell" data-default-view="<?php echo esc_attr( $default_view ); ?>" style="<?php echo esc_attr( $brand_style ); ?>">
             <div id="gd-network-banner" class="gd-network-banner" hidden aria-live="polite">Keine Internetverbindung</div>
 
             <header class="gd-mobile-appbar">
                 <div class="gd-mobile-brand">
-                    <?php echo $this->render_brand_logo( 'gd-mobile-logo', 'G', 'Gelsendiele' ); ?>
+                    <?php echo $this->render_brand_logo( 'gd-mobile-logo', 'G', $business_name ); ?>
                     <div>
-                        <small>Gelsendiele</small>
+                        <small><?php echo esc_html( $business_name ); ?></small>
                         <strong id="gd-mobile-title">Reservierungen</strong>
                     </div>
                 </div>
@@ -388,7 +409,7 @@ final class Gelsendiele_Reservierungsdashboard {
 
             <header class="gd-dashboard-header">
                 <div>
-                    <span class="gd-eyebrow">Gelsendiele</span>
+                    <span class="gd-eyebrow"><?php echo esc_html( $business_name ); ?></span>
                     <h1>Reservierungen</h1>
                     <p>Anfragen schnell prüfen, bestätigen oder ablehnen.</p>
                 </div>
@@ -762,12 +783,15 @@ final class Gelsendiele_Reservierungsdashboard {
     }
 
     private function render_login() {
+        $business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
+        $branding      = Gelsendiele_Settings::get( 'branding', null, array() );
+        $brand_style   = Gelsendiele_Settings::css_variables() . '--gd-green:' . $branding['primary_color'] . ';--gd-green-dark:' . $branding['secondary_color'] . ';';
         ob_start();
         ?>
-        <div class="gd-login-page">
+        <div class="gd-login-page" style="<?php echo esc_attr( $brand_style ); ?>">
             <section class="gd-login-card">
-                <?php echo $this->render_brand_logo( 'gd-login-logo', 'G', 'Gelsendiele' ); ?>
-                <span class="gd-eyebrow">Gelsendiele</span>
+                <?php echo $this->render_brand_logo( 'gd-login-logo', 'G', $business_name ); ?>
+                <span class="gd-eyebrow"><?php echo esc_html( $business_name ); ?></span>
                 <h1>Reservierungen verwalten</h1>
                 <p>Melden Sie sich mit Ihren normalen WordPress-Zugangsdaten an.</p>
                 <form id="gd-loginform" method="post" novalidate>
@@ -891,6 +915,9 @@ final class Gelsendiele_Reservierungsdashboard {
         $this->verify_ajax_request();
         $enabled = isset( $_POST['enabled'] ) && '1' === (string) wp_unslash( $_POST['enabled'] );
         update_option( self::AUTO_CONFIRM_OPTION, $enabled ? 1 : 0, false );
+        $general = Gelsendiele_Settings::get( 'general', null, array() );
+        $general['confirmation_mode'] = $enabled ? 'automatic' : 'manual';
+        Gelsendiele_Settings::save_sections( array( 'general' => $general ) );
 
         wp_send_json_success( array(
             'enabled' => $enabled,
@@ -1062,7 +1089,7 @@ final class Gelsendiele_Reservierungsdashboard {
         }
 
         $date_object = DateTime::createFromFormat( '!Y-m-d', $date, wp_timezone() );
-        if ( ! $date_object || $date_object->format( 'Y-m-d' ) !== $date || ! preg_match( '/^\d{2}:\d{2}$/', $time ) ) {
+        if ( ! $date_object || $date_object->format( 'Y-m-d' ) !== $date || ! preg_match( '/^(?:[01]\d|2[0-3]):[0-5]\d$/', $time ) ) {
             wp_send_json_error( array( 'message' => 'Datum oder Uhrzeit ist ungültig.' ), 400 );
         }
 
@@ -1158,7 +1185,7 @@ final class Gelsendiele_Reservierungsdashboard {
         }
 
         $date_object = DateTime::createFromFormat( '!Y-m-d', $date, wp_timezone() );
-        if ( ! $date_object || $date_object->format( 'Y-m-d' ) !== $date || ! preg_match( '/^\d{2}:\d{2}$/', $time ) ) {
+        if ( ! $date_object || $date_object->format( 'Y-m-d' ) !== $date || ! preg_match( '/^(?:[01]\d|2[0-3]):[0-5]\d$/', $time ) ) {
             wp_send_json_error( array( 'message' => 'Datum oder Uhrzeit ist ungültig.' ), 400 );
         }
 
@@ -2065,50 +2092,20 @@ final class Gelsendiele_Reservierungsdashboard {
     }
 
     private function get_open_weekdays() {
-        $rules = $this->get_rtb_setting( 'schedule-open', array() );
-        if ( ! is_array( $rules ) || empty( $rules ) ) {
-            return null;
+        $hours = Gelsendiele_Settings::get( 'opening_hours', null, array() );
+        $order = array( 'sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat' );
+        $open  = array();
+        foreach ( $order as $day ) {
+            $open[] = ! empty( $hours[ $day ]['enabled'] ) && ! empty( $hours[ $day ]['blocks'] );
         }
-        $day_indexes = array(
-            'sunday' => 0, 'monday' => 1, 'tuesday' => 2, 'wednesday' => 3,
-            'thursday' => 4, 'friday' => 5, 'saturday' => 6,
-        );
-        $open = array_fill( 0, 7, false );
-        $found = false;
-        foreach ( $rules as $rule ) {
-            if ( ! is_array( $rule ) || empty( $rule['weekdays'] ) || ! is_array( $rule['weekdays'] ) ) {
-                continue;
-            }
-            foreach ( $day_indexes as $name => $index ) {
-                if ( ! empty( $rule['weekdays'][ $name ] ) ) {
-                    $open[ $index ] = true;
-                    $found = true;
-                }
-            }
-        }
-        return $found ? $open : null;
+        return $open;
     }
 
     private function get_date_exceptions() {
-        $rules = $this->get_rtb_setting( 'schedule-closed', array() );
-        if ( ! is_array( $rules ) || empty( $rules ) ) {
-            return array();
-        }
         $exceptions = array();
-        foreach ( $rules as $rule ) {
-            if ( ! is_array( $rule ) ) {
-                continue;
-            }
-            $mode = ( isset( $rule['time'] ) && is_array( $rule['time'] ) && ! empty( $rule['time'] ) ) ? 'open' : 'closed';
-            if ( ! empty( $rule['date_range'] ) && is_array( $rule['date_range'] ) ) {
-                $start = ! empty( $rule['date_range']['start'] ) ? sanitize_text_field( $rule['date_range']['start'] ) : '';
-                $end   = ! empty( $rule['date_range']['end'] ) ? sanitize_text_field( $rule['date_range']['end'] ) : '';
-                if ( $start || $end ) {
-                    $exceptions[] = array( 'type' => 'range', 'start' => $start, 'end' => $end, 'mode' => $mode );
-                }
-            } elseif ( ! empty( $rule['date'] ) ) {
-                $exceptions[] = array( 'type' => 'date', 'date' => sanitize_text_field( $rule['date'] ), 'mode' => $mode );
-            }
+        $availability = Gelsendiele_Settings::get( 'availability', null, array() );
+        foreach ( isset( $availability['closed_dates'] ) ? (array) $availability['closed_dates'] : array() as $date ) {
+            $exceptions[] = array( 'type' => 'date', 'date' => $date, 'mode' => 'closed' );
         }
         return $exceptions;
     }
@@ -2197,14 +2194,9 @@ final class Gelsendiele_Reservierungsdashboard {
     }
 
     private function get_booking_duration_minutes() {
-        global $rtb_controller;
-
-        $duration = 0;
-        if ( isset( $rtb_controller->settings ) && is_object( $rtb_controller->settings ) && method_exists( $rtb_controller->settings, 'get_setting' ) ) {
-            $duration = absint( $rtb_controller->settings->get_setting( 'rtb-dining-block-length' ) );
-        }
-
-        return max( 30, min( 720, $duration ?: 120 ) );
+        $duration = absint( Gelsendiele_Settings::get( 'reservations', 'booking_duration', 120 ) );
+        $buffer   = absint( Gelsendiele_Settings::get( 'reservations', 'buffer_minutes', 0 ) );
+        return max( 30, min( 960, ( $duration ?: 120 ) + $buffer ) );
     }
 
     private function ensure_rtb_class( $class_name, $candidates ) {
@@ -2227,189 +2219,37 @@ final class Gelsendiele_Reservierungsdashboard {
     }
 
     private function calculate_available_slots( DateTime $date, $party = 1, $exclude_booking_id = 0 ) {
-        global $rtb_controller;
-
-        if ( ! $this->ensure_rtb_class( 'rtbAJAX', array( 'includes/AJAX.class.php', 'includes/Ajax.class.php' ) ) ) {
+        if ( ! class_exists( 'GD_Reservation_Engine' ) ) {
             return array();
         }
-
-        $helper = new rtbAJAX();
-        $helper->year     = $date->format( 'Y' );
-        $helper->month    = $date->format( 'm' );
-        $helper->day      = $date->format( 'd' );
-        $helper->location = false;
-
-        $hours = $helper->get_opening_hours();
-        if ( empty( $hours ) || ! is_array( $hours ) ) {
-            return array();
-        }
-        $candidate_timestamps = $helper->get_all_possible_timeslots( $hours );
-        if ( empty( $candidate_timestamps ) || ! is_array( $candidate_timestamps ) ) {
-            return array();
-        }
-
-        $party            = max( 1, absint( $party ) );
-        $interval_minutes = 30;
-        $check_capacity   = false;
-        $settings         = isset( $rtb_controller->settings ) && is_object( $rtb_controller->settings ) ? $rtb_controller->settings : null;
-        if ( $settings && method_exists( $settings, 'get_setting' ) ) {
-            $interval_minutes = max( 5, absint( $settings->get_setting( 'time-interval' ) ) ?: 30 );
-            $check_capacity   = ! empty( $settings->get_setting( 'rtb-enable-max-tables' ) );
-        }
-        $interval_seconds = $interval_minutes * MINUTE_IN_SECONDS;
-        $duration_seconds = $this->get_booking_duration_minutes() * MINUTE_IN_SECONDS;
-
-        $active_statuses = array_values( array_intersect( array_keys( $this->get_booking_statuses() ), array( 'pending', 'payment_pending', 'confirmed', 'arrived' ) ) );
-        if ( empty( $active_statuses ) ) {
-            $active_statuses = array( 'pending', 'confirmed' );
-        }
-        $slot_query = array(
-            'post_type'      => $this->booking_post_type(),
-            'post_status'    => $active_statuses,
-            'posts_per_page' => -1,
-            'date_query'     => array( array(
-                'after'     => $date->format( 'Y-m-d 00:00:00' ),
-                'before'    => $date->format( 'Y-m-d 23:59:59' ),
-                'inclusive' => true,
-            ) ),
+        return GD_Reservation_Engine::instance()->available_slots(
+            $date->format( 'Y-m-d' ),
+            max( 1, absint( $party ) ),
+            absint( $exclude_booking_id )
         );
-        if ( $exclude_booking_id ) {
-            $slot_query['post__not_in'] = array( absint( $exclude_booking_id ) );
-        }
-        $posts = get_posts( $slot_query );
-
-        $available = array();
-        foreach ( $candidate_timestamps as $slot_timestamp ) {
-            $slot_timestamp = (int) $slot_timestamp;
-            $slot_datetime  = ( new DateTime( '@' . $slot_timestamp ) )->setTimezone( wp_timezone() );
-            $slot_mysql     = $slot_datetime->format( 'Y-m-d H:i:s' );
-            $candidate_duration = max( $interval_seconds, $duration_seconds );
-            $candidate_end = $slot_timestamp + $candidate_duration;
-            $overlapping_count = 0;
-            $overlapping_people = 0;
-
-            foreach ( $posts as $post ) {
-                $booking_start_object = DateTimeImmutable::createFromFormat( 'Y-m-d H:i:s', $post->post_date, wp_timezone() );
-                if ( ! $booking_start_object ) {
-                    continue;
-                }
-                $booking_start = $booking_start_object->getTimestamp();
-                $booking_end   = $booking_start + $duration_seconds;
-                if ( $slot_timestamp < $booking_end && $candidate_end > $booking_start ) {
-                    $meta = get_post_meta( $post->ID, 'rtb', true );
-                    $meta = is_array( $meta ) ? $meta : array();
-                    $overlapping_count++;
-                    $overlapping_people += isset( $meta['party'] ) ? absint( $meta['party'] ) : 0;
-                }
-            }
-
-            if ( $check_capacity && $settings ) {
-                $timeslot = function_exists( 'rtb_get_timeslot' ) ? rtb_get_timeslot( $slot_mysql, false ) : false;
-                $max_reservations = absint( $settings->get_setting( 'rtb-max-tables-count', false, $timeslot ) );
-                $max_people       = absint( $settings->get_setting( 'rtb-max-people-count', false, $timeslot ) );
-                if ( $max_reservations > 0 && $overlapping_count >= $max_reservations ) {
-                    continue;
-                }
-                if ( $max_people > 0 && ( $overlapping_people + $party ) > $max_people ) {
-                    continue;
-                }
-            }
-
-            $available[] = $slot_datetime->format( 'H:i' );
-        }
-
-        return array_values( array_unique( $available ) );
     }
 
     private function create_manual_booking( $data ) {
-        if ( ! $this->ensure_rtb_class( 'rtbBooking', array( 'includes/Booking.class.php' ) ) ) {
-            return new WP_Error( 'gd_rtb_missing', 'Das Gelsendiele-Reservierungsmodul wurde nicht gefunden.' );
+        $local_date = $data['date'] . ' ' . $data['time'] . ':00';
+        $booking_id = wp_insert_post( array(
+            'post_type'     => $this->booking_post_type(),
+            'post_status'   => $data['status'],
+            'post_title'    => $data['name'],
+            'post_content'  => $data['guest_message'],
+            'post_date'     => $local_date,
+            'post_date_gmt' => get_gmt_from_date( $local_date ),
+            'post_author'   => get_current_user_id(),
+        ), true );
+        if ( is_wp_error( $booking_id ) || ! $booking_id ) {
+            return is_wp_error( $booking_id ) ? $booking_id : new WP_Error( 'gd_manual_booking_failed', 'Die Reservierung konnte nicht gespeichert werden.' );
         }
 
-        $booking_id   = 0;
-        $booking      = null;
-        $force_direct = ! empty( $data['force_direct'] );
-
-        // Innerhalb der regulären Öffnungszeiten zuerst den nativen Five-Star-
-        // Ablauf verwenden. So bleiben alle offiziellen Validierungen und Hooks erhalten.
-        if ( ! $force_direct ) {
-            $original_post = $_POST;
-            $_POST = array(
-                'rtb-date'              => $data['date'],
-                'rtb-time'              => $data['time'],
-                'rtb-party'             => $data['party'],
-                'rtb-name'              => $data['name'],
-                'rtb-email'             => $data['email'],
-                'rtb-phone'             => $data['phone'],
-                'rtb-message'           => $data['guest_message'],
-                'rtb-consent-statement' => '1',
-            );
-
-            $this->manual_creation_status = $data['status'];
-            $booking = new rtbBooking();
-            $inserted = false;
-            try {
-                $inserted = $booking->insert_booking();
-            } catch ( Throwable $error ) {
-                $inserted = false;
-            } finally {
-                $this->manual_creation_status = null;
-                $_POST = $original_post;
-            }
-            $booking_id = $inserted && ! empty( $booking->ID ) ? absint( $booking->ID ) : 0;
-        }
-
-        // Für bewusst bestätigte Ausnahmen (außerhalb der Öffnungszeiten oder
-        // ohne Kontaktdaten) wird eine echte Five-Star-Reservierung direkt als
-        // WordPress-Beitrag angelegt. Anschließend läuft ein Statuswechsel über
-        // das native rtbBooking-Objekt, damit Benachrichtigungs-Hooks erhalten bleiben.
-        if ( ! $booking_id ) {
-            $local_date    = $data['date'] . ' ' . $data['time'] . ':00';
-            $initial_status = 'confirmed' === $data['status'] ? 'pending' : $data['status'];
-            $booking_id = wp_insert_post( array(
-                'post_type'     => $this->booking_post_type(),
-                'post_status'   => $initial_status,
-                'post_title'    => $data['name'],
-                'post_content'  => $data['guest_message'],
-                'post_date'     => $local_date,
-                'post_date_gmt' => get_gmt_from_date( $local_date ),
-                'post_author'   => get_current_user_id(),
-            ), true );
-            if ( is_wp_error( $booking_id ) ) {
-                return $booking_id;
-            }
-            update_post_meta( $booking_id, 'rtb', array(
-                'party' => absint( $data['party'] ),
-                'email' => $data['email'],
-                'phone' => $data['phone'],
-            ) );
-
-            if ( 'confirmed' === $data['status'] ) {
-                $updated = $this->update_booking_status_with_rtb( $booking_id, 'confirmed' );
-                if ( is_wp_error( $updated ) ) {
-                    return $updated;
-                }
-            }
-        }
-
-        if ( ! $booking_id ) {
-            $errors = array();
-            if ( $booking && isset( $booking->validation_errors ) ) {
-                foreach ( (array) $booking->validation_errors as $error ) {
-                    if ( ! empty( $error['message'] ) ) {
-                        $errors[] = wp_strip_all_tags( $error['message'] );
-                    }
-                }
-            }
-            return new WP_Error( 'gd_manual_booking_failed', $errors ? implode( ' ', $errors ) : 'Die Reservierung konnte nicht gespeichert werden.' );
-        }
-
-        if ( get_post_status( $booking_id ) !== $data['status'] ) {
-            $updated = $this->update_booking_status_with_rtb( $booking_id, $data['status'] );
-            if ( is_wp_error( $updated ) ) {
-                return $updated;
-            }
-        }
+        update_post_meta( $booking_id, 'rtb', array(
+            'party' => absint( $data['party'] ),
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+        ) );
+        update_post_meta( $booking_id, '_gd_created_by_engine', GELSENDIELE_VERSION );
 
         update_post_meta( $booking_id, '_gd_manual_booking', 1 );
         if ( ! empty( $data['outside_hours'] ) ) {
@@ -2425,12 +2265,13 @@ final class Gelsendiele_Reservierungsdashboard {
             update_post_meta( $booking_id, self::COMMENT_META, $data['internal_comment'] );
         }
 
+        GD_Reservation_Engine::instance()->send_new_booking_emails( $booking_id );
         do_action( 'gd_reservierungsdashboard_manual_booking_created', $booking_id, $data );
         return $booking_id;
     }
 
     private function get_table_availability_for_datetime( $date, $time, $party, $exclude_booking_id = 0, $selected_table = '' ) {
-        if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $date ) || ! preg_match( '/^\d{2}:\d{2}$/', (string) $time ) ) {
+        if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $date ) || ! preg_match( '/^(?:[01]\d|2[0-3]):[0-5]\d$/', (string) $time ) ) {
             return new WP_Error( 'gd_invalid_datetime', 'Datum oder Uhrzeit ist ungültig.' );
         }
         $timezone = wp_timezone();
@@ -2553,8 +2394,15 @@ final class Gelsendiele_Reservierungsdashboard {
     }
 
     private function get_brand_logo_url( $size = 'medium' ) {
-        // Exakt dasselbe Logo wie in der Navigationsleiste der Gelsendiele-Webseite.
-        return 'https://www.gelsendiele.at/wp-content/uploads/2026/07/Logo-Gelsendiele_klein-1-300x247.png';
+        $attachment_id = absint( Gelsendiele_Settings::get( 'branding', 'logo_attachment_id', 0 ) );
+        if ( $attachment_id ) {
+            $attachment = wp_get_attachment_image_url( $attachment_id, $size );
+            if ( $attachment ) {
+                return $attachment;
+            }
+        }
+        $custom_url = Gelsendiele_Settings::get( 'branding', 'logo_url', '' );
+        return $custom_url ? $custom_url : plugin_dir_url( __FILE__ ) . 'assets/gelsendiele-app-icon-192.png';
     }
 
     private function render_brand_logo( $wrapper_class = 'gd-mobile-logo', $fallback = 'G', $label = 'Gelsendiele' ) {

@@ -10,10 +10,12 @@ final class GDG_DB {
 		return $wpdb->prefix . 'gdg_' . $name;
 	}
 
-	public static function activate(): void {
+	public static function activate( $seed_demo_data = false ): void {
 		self::create_tables();
 		self::create_roles();
-		self::seed_defaults();
+		if ( $seed_demo_data ) {
+			self::seed_defaults();
+		}
 		self::create_app_pages();
 		update_option( 'gdg_db_version', GDG_VERSION );
 		flush_rewrite_rules();
@@ -21,6 +23,35 @@ final class GDG_DB {
 
 	public static function deactivate(): void {
 		flush_rewrite_rules();
+	}
+
+	/** Übernimmt das bisherige nummerische Tischmodell ohne Reservierungen zu verändern. */
+	public static function migrate_legacy_tables(): void {
+		global $wpdb;
+		if ( 0 < (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . self::table( 'tables' ) ) ) {
+			return;
+		}
+		$count      = max( 0, min( 300, absint( get_option( 'gd_table_count', 0 ) ) ) );
+		$default    = max( 1, min( 50, absint( get_option( 'gd_table_default_capacity', 5 ) ) ) );
+		$overrides  = get_option( 'gd_table_capacity_overrides', array() );
+		$overrides  = is_array( $overrides ) ? $overrides : array();
+		$now        = current_time( 'mysql' );
+		for ( $number = 1; $number <= $count; $number++ ) {
+			$seats = isset( $overrides[ $number ] ) ? absint( $overrides[ $number ] ) : $default;
+			$wpdb->insert(
+				self::table( 'tables' ),
+				array(
+					'name'       => 'Tisch ' . $number,
+					'seats'      => max( 1, min( 50, $seats ) ),
+					'area'       => 'Gastraum',
+					'sort_order' => $number,
+					'active'     => 1,
+					'created_at' => $now,
+					'updated_at' => $now,
+				),
+				array( '%s', '%d', '%s', '%d', '%d', '%s', '%s' )
+			);
+		}
 	}
 
 	private static function create_tables(): void {
@@ -452,6 +483,12 @@ final class GDG_DB {
 			$wpdb->prepare( 'SELECT * FROM ' . self::table( 'order_items' ) . ' WHERE order_id = %d ORDER BY created_at ASC, id ASC', $order_id ),
 			ARRAY_A
 		) ?: array();
+	}
+
+	public static function get_order_item( int $item_id ): ?array {
+		global $wpdb;
+		$item = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . self::table( 'order_items' ) . ' WHERE id = %d', $item_id ), ARRAY_A );
+		return $item ?: null;
 	}
 
 	public static function get_queue( string $station ): array {

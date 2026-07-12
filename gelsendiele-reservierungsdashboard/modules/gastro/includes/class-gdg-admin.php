@@ -6,19 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class GDG_Admin {
 	public static function register_menu(): void {
-		add_menu_page(
-			'Gelsendiele Gastro',
-			'Gelsendiele Gastro',
-			'gdg_manage',
-			'gdg-gastro',
-			array( __CLASS__, 'render_dashboard' ),
-			'dashicons-food',
-			26
-		);
-		add_submenu_page( 'gdg-gastro', 'Übersicht', 'Übersicht', 'gdg_manage', 'gdg-gastro', array( __CLASS__, 'render_dashboard' ) );
-		add_submenu_page( 'gdg-gastro', 'Tische', 'Tische', 'gdg_manage', 'gdg-tables', array( __CLASS__, 'render_tables' ) );
-		add_submenu_page( 'gdg-gastro', 'Speisekarte', 'Speisekarte', 'gdg_manage', 'gdg-menu', array( __CLASS__, 'render_menu' ) );
-		add_submenu_page( 'gdg-gastro', 'Einstellungen', 'Einstellungen', 'gdg_manage', 'gdg-settings', array( __CLASS__, 'render_settings' ) );
+		add_submenu_page( 'gelsendiele', 'Tische & Bereiche', 'Tischplan', 'gdg_manage', 'gdg-tables', array( __CLASS__, 'render_tables' ), 3 );
+		add_submenu_page( 'gelsendiele', 'Speisekarte', 'Speisekarte', 'gdg_manage', 'gdg-menu', array( __CLASS__, 'render_menu' ), 7 );
+		add_submenu_page( 'gelsendiele', 'Gastro-Einstellungen', 'Gastro-Einstellungen', 'gdg_manage', 'gdg-settings', array( __CLASS__, 'render_settings' ), 11 );
 	}
 
 	public static function handle_actions(): void {

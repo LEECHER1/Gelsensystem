@@ -42,14 +42,21 @@ final class GDG_App {
 			'checkout' => 'Kasse',
 		);
 		$urls = self::get_app_urls();
+		$business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
+		$branding      = Gelsendiele_Settings::get( 'branding', null, array() );
+		$logo_url      = $branding['logo_url'];
+		if ( ! $logo_url && ! empty( $branding['logo_attachment_id'] ) ) {
+			$logo_url = wp_get_attachment_image_url( absint( $branding['logo_attachment_id'] ), 'thumbnail' );
+		}
+		$brand_style = Gelsendiele_Settings::css_variables();
 
 		ob_start();
 		?>
-		<div class="gdg-app" data-view="<?php echo esc_attr( $view ); ?>">
+		<div class="gdg-app" data-view="<?php echo esc_attr( $view ); ?>" style="<?php echo esc_attr( $brand_style ); ?>">
 			<header class="gdg-topbar">
 				<div class="gdg-brand">
-					<span class="gdg-brand-mark">G</span>
-					<div><strong>Gelsendiele</strong><span><?php echo esc_html( $labels[ $view ] ); ?></span></div>
+					<span class="gdg-brand-mark"><?php if ( $logo_url ) : ?><img src="<?php echo esc_url( $logo_url ); ?>" alt=""><?php else : ?>G<?php endif; ?></span>
+					<div><strong><?php echo esc_html( $business_name ); ?></strong><span><?php echo esc_html( $labels[ $view ] ); ?></span></div>
 				</div>
 				<nav class="gdg-nav" aria-label="Arbeitsbereiche">
 					<?php foreach ( $labels as $nav_view => $label ) : ?>
@@ -82,6 +89,7 @@ final class GDG_App {
 			'nonce' => wp_create_nonce( 'wp_rest' ),
 			'view' => $view,
 			'pollInterval' => max( 3, min( 30, (int) get_option( 'gdg_poll_interval', 5 ) ) ) * 1000,
+			'themeMode' => Gelsendiele_Settings::get( 'branding', 'theme_mode', 'auto' ),
 			'locale' => get_locale(),
 			'prefill' => array(
 				'reservationId' => isset( $_GET['reservation_id'] ) ? absint( $_GET['reservation_id'] ) : 0,

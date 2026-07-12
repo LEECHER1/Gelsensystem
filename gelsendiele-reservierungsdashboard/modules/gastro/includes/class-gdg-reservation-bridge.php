@@ -31,6 +31,9 @@ final class GDG_Reservation_Bridge {
 	}
 
 	private static function extract_guest_name( WP_Post $post ): string {
+		if ( '' !== trim( $post->post_title ) ) {
+			return sanitize_text_field( $post->post_title );
+		}
 		$possible = array( 'name', '_name', 'customer_name', '_customer_name', 'rtb_name', '_rtb_name' );
 		foreach ( $possible as $key ) {
 			$value = get_post_meta( $post->ID, $key, true );

@@ -2,11 +2,15 @@
 Contributors: Andreas Schwarz / OpenAI
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.0.1
+Stable tag: 2.1.0
 
 Eigenständiges Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für die Gelsendiele.
 
 == Enthalten ==
+* Zentrales Gelsendiele-Menü für Reservierung und Gastro-Module
+* Versionierte, wiederholbare Migrationen bei Installation und Update
+* Flexible Betriebs-, Logo-, Farb- und Darstellungsoptionen
+* Mehrere Öffnungsblöcke pro Wochentag und Öffnungen über Mitternacht
 * Öffentliches Reservierungsformular: [gelsendiele_reservierungsformular]
 * Kompatibler Ersatz für den bisherigen Shortcode [booking-form], sobald Five Star deaktiviert ist
 * Bestehendes Reservierungsdashboard mit manueller Anlage, Bearbeitung, Tischzuordnung, Export und PWA
@@ -25,3 +29,6 @@ Eigenständiges Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsys
 
 == Wichtiger Hinweis ==
 Das Zahlungsmodul dokumentiert Bar- und Kartenzahlungen, ist aber noch keine RKSV-Registrierkasse und besitzt noch keine direkte Terminalanbindung.
+
+== Aktualisierung ==
+Installierbare ZIP-Dateien werden aus einem geprüften Git-Tag erstellt. Vor jedem Produktivupdate sind WordPress-Dateien und Datenbank vollständig zu sichern.
