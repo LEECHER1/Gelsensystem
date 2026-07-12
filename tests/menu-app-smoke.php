@@ -13,7 +13,7 @@ function menu_expect( $condition, $message ) {
 	}
 }
 
-menu_expect( false !== strpos( $entry, "array( 'reservations', 'settings', 'users', 'menu' )" ), 'Speisekarte ist keine zentrale App-Sektion' );
+menu_expect( false !== strpos( $entry, "array( 'reservations', 'settings', 'users', 'menu', 'tables' )" ), 'Speisekarte ist keine zentrale App-Sektion' );
 menu_expect( false !== strpos( $entry, "GDG_Admin::render_app_menu" ), 'App-Renderer wird nicht aufgerufen' );
 menu_expect( false !== strpos( $entry, "add_query_arg( 'gd-section', 'menu', \$dashboard )" ), 'Navigation führt nicht in die zentrale App' );
 menu_expect( false !== strpos( $admin, 'public static function render_app_menu' ), 'Speisekarten-Renderer fehlt' );

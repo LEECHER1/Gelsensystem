@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.6.0
+
+- Tisch- und Bereichsverwaltung in die zentrale Gelsensystem-App übernommen.
+- Tischname, Sitzplätze, Bereich, Reihenfolge und Sichtbarkeit lassen sich direkt pflegen.
+- Bereiche werden aus den Tischzuordnungen gebildet und mit Sitzplatzsummen dargestellt.
+- Aktuell belegte Tische sind in der Verwaltung sichtbar.
+- Responsive Desktop-/Mobile-Oberfläche und Dark-Mode-Stile ergänzt.
+
 ## 2.5.0
 
 - Speisekartenverwaltung in die zentrale Gelsensystem-App übernommen.

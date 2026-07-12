@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.6.0 – 2026-07-12
+
+- Tische und Bereiche direkt in der zentralen Gelsensystem-App verwaltbar.
+- Live-Belegungsstatus, Bereichsgruppen und Sitzplatzsummen ergänzt.
+- Frontend-sichere Speicherung über bestehende Rechte- und Nonce-Prüfung.
+
 ## 2.5.0 – 2026-07-12
 
 - Speisekartenpflege direkt in der zentralen Gelsensystem-App.

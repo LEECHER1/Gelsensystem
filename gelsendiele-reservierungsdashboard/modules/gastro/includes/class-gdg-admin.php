@@ -36,12 +36,16 @@ final class GDG_Admin {
 
 	private static function redirect( string $page, string $notice = 'saved' ): void {
 		if ( isset( $_POST['gdg_context'] ) && 'app' === sanitize_key( wp_unslash( $_POST['gdg_context'] ) ) ) {
+			$section = isset( $_POST['gdg_section'] ) ? sanitize_key( wp_unslash( $_POST['gdg_section'] ) ) : 'menu';
+			if ( ! in_array( $section, array( 'menu', 'tables' ), true ) ) {
+				$section = 'menu';
+			}
 			$page_id       = (int) get_option( 'gd_reservierungsdashboard_page_id', 0 );
 			$dashboard_url = $page_id ? get_permalink( $page_id ) : home_url( '/reservierungsverwaltung/' );
 			wp_safe_redirect(
 				add_query_arg(
 					array(
-						'gd-section' => 'menu',
+						'gd-section' => $section,
 						'gdg_notice' => $notice,
 					),
 					$dashboard_url
@@ -58,7 +62,7 @@ final class GDG_Admin {
 		$id = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
 		$data = array(
 			'name' => sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ),
-			'seats' => max( 1, absint( $_POST['seats'] ?? 4 ) ),
+			'seats' => max( 1, min( 500, absint( $_POST['seats'] ?? 4 ) ) ),
 			'area' => sanitize_text_field( wp_unslash( $_POST['area'] ?? '' ) ),
 			'sort_order' => intval( $_POST['sort_order'] ?? 0 ),
 			'active' => empty( $_POST['active'] ) ? 0 : 1,
@@ -218,6 +222,91 @@ final class GDG_Admin {
 		<?php
 	}
 
+	/** Rendert die Tisch- und Bereichsverwaltung innerhalb der zentralen App. */
+	public static function render_app_tables( string $dashboard_url ): void {
+		self::guard();
+		global $wpdb;
+
+		$tables     = GDG_DB::get_tables( false );
+		$open_orders = GDG_DB::get_open_orders();
+		$edit_id    = isset( $_GET['edit'] ) ? absint( $_GET['edit'] ) : 0;
+		$edit       = $edit_id ? $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . GDG_DB::table( 'tables' ) . ' WHERE id = %d', $edit_id ), ARRAY_A ) : null;
+		$app_url    = add_query_arg( 'gd-section', 'tables', $dashboard_url );
+		$areas      = array();
+		$occupied   = array();
+		$active_tables = 0;
+		$active_seats  = 0;
+
+		foreach ( $open_orders as $order ) {
+			$occupied[ (int) $order['table_id'] ] = true;
+		}
+		foreach ( $tables as $table ) {
+			$area = trim( (string) $table['area'] );
+			$area = '' !== $area ? $area : 'Ohne Bereich';
+			if ( ! isset( $areas[ $area ] ) ) {
+				$areas[ $area ] = array();
+			}
+			$areas[ $area ][] = $table;
+			if ( ! empty( $table['active'] ) ) {
+				$active_tables++;
+				$active_seats += (int) $table['seats'];
+			}
+		}
+		?>
+		<div class="gelsensystem-table-manager">
+			<header class="gelsensystem-section-heading">
+				<div><span>Raumplanung</span><h1>Tische &amp; Bereiche</h1><p>Tischplan, Sitzplätze und Bereiche für Reservierung, Service und Kasse verwalten.</p></div>
+			</header>
+			<?php self::notice(); ?>
+			<section class="gelsensystem-table-summary" aria-label="Tischübersicht">
+				<div><strong><?php echo esc_html( (string) $active_tables ); ?></strong><span>Aktive Tische</span></div>
+				<div><strong><?php echo esc_html( (string) $active_seats ); ?></strong><span>Sitzplätze</span></div>
+				<div><strong><?php echo esc_html( (string) count( $areas ) ); ?></strong><span>Bereiche</span></div>
+				<div><strong><?php echo esc_html( (string) count( $occupied ) ); ?></strong><span>Aktuell belegt</span></div>
+			</section>
+
+			<div class="gelsensystem-table-layout">
+				<form method="post" class="gelsensystem-table-form">
+					<header><div><span>Tisch</span><h2><?php echo esc_html( $edit ? 'Tisch bearbeiten' : 'Tisch hinzufügen' ); ?></h2></div><?php if ( $edit ) : ?><a href="<?php echo esc_url( $app_url ); ?>">Abbrechen</a><?php endif; ?></header>
+					<?php wp_nonce_field( 'gdg_admin_action', 'gdg_nonce' ); ?>
+					<input type="hidden" name="gdg_action" value="save_table"><input type="hidden" name="gdg_context" value="app"><input type="hidden" name="gdg_section" value="tables"><input type="hidden" name="id" value="<?php echo esc_attr( $edit['id'] ?? 0 ); ?>">
+					<label><span>Name *</span><input name="name" required maxlength="100" value="<?php echo esc_attr( $edit['name'] ?? '' ); ?>" placeholder="z. B. Tisch 12"></label>
+					<div class="gelsensystem-table-fields">
+						<label><span>Sitzplätze *</span><input type="number" min="1" max="500" name="seats" required value="<?php echo esc_attr( $edit['seats'] ?? 4 ); ?>" inputmode="numeric"></label>
+						<label><span>Reihenfolge</span><input type="number" name="sort_order" value="<?php echo esc_attr( $edit['sort_order'] ?? 0 ); ?>" inputmode="numeric"></label>
+					</div>
+					<label><span>Bereich</span><input name="area" maxlength="100" list="gelsensystem-table-areas" value="<?php echo esc_attr( $edit['area'] ?? '' ); ?>" placeholder="z. B. Gaststube"><small>Ein neuer Name legt automatisch einen neuen Bereich an.</small></label>
+					<datalist id="gelsensystem-table-areas"><?php foreach ( array_keys( $areas ) as $area ) : if ( 'Ohne Bereich' !== $area ) : ?><option value="<?php echo esc_attr( $area ); ?>"><?php endif; endforeach; ?></datalist>
+					<label class="gelsensystem-table-check"><input type="checkbox" name="active" value="1" <?php checked( ! isset( $edit['active'] ) || (int) $edit['active'] === 1 ); ?>><span>In Service und Tischplan anzeigen</span></label>
+					<button type="submit" class="button button-primary"><?php echo esc_html( $edit ? 'Tisch speichern' : 'Tisch hinzufügen' ); ?></button>
+				</form>
+
+				<section class="gelsensystem-table-inventory">
+					<header><div><span>Tischplan</span><h2>Vorhandene Tische</h2></div><p>Bereiche entstehen automatisch durch die Zuordnung der Tische.</p></header>
+					<?php if ( $areas ) : ?>
+						<div class="gelsensystem-area-list">
+							<?php foreach ( $areas as $area_name => $area_tables ) : ?>
+								<section class="gelsensystem-area-card">
+									<header><div><strong><?php echo esc_html( $area_name ); ?></strong><small><?php echo esc_html( sprintf( '%d Tische', count( $area_tables ) ) ); ?></small></div><span><?php echo esc_html( (string) array_sum( array_map( static function ( $table ) { return ! empty( $table['active'] ) ? (int) $table['seats'] : 0; }, $area_tables ) ) ); ?> Plätze</span></header>
+									<div class="gelsensystem-table-grid">
+										<?php foreach ( $area_tables as $table ) : $is_occupied = ! empty( $occupied[ (int) $table['id'] ] ); ?>
+											<article class="<?php echo empty( $table['active'] ) ? 'is-inactive' : ( $is_occupied ? 'is-occupied' : '' ); ?>">
+												<div><strong><?php echo esc_html( $table['name'] ); ?></strong><small><?php echo esc_html( sprintf( '%d Plätze · Position %d', (int) $table['seats'], (int) $table['sort_order'] ) ); ?></small></div>
+												<span class="gelsensystem-table-state"><?php echo empty( $table['active'] ) ? 'Deaktiviert' : ( $is_occupied ? 'Belegt' : 'Frei' ); ?></span>
+												<a href="<?php echo esc_url( add_query_arg( 'edit', $table['id'], $app_url ) ); ?>" aria-label="<?php echo esc_attr( $table['name'] . ' bearbeiten' ); ?>">Bearbeiten</a>
+											</article>
+										<?php endforeach; ?>
+									</div>
+								</section>
+							<?php endforeach; ?>
+						</div>
+					<?php else : ?><div class="gelsensystem-table-empty"><strong>Noch keine Tische angelegt.</strong><span>Lege links den ersten Tisch und seinen Bereich an.</span></div><?php endif; ?>
+				</section>
+			</div>
+		</div>
+		<?php
+	}
+
 	public static function render_menu(): void {
 		self::guard();
 		global $wpdb;
@@ -301,7 +390,7 @@ final class GDG_Admin {
 				<form method="post" class="gelsensystem-menu-form">
 					<header><div><span>Kategorie</span><h2><?php echo esc_html( $edit_cat ? 'Kategorie bearbeiten' : 'Kategorie hinzufügen' ); ?></h2></div><?php if ( $edit_cat ) : ?><a href="<?php echo esc_url( $app_url ); ?>">Abbrechen</a><?php endif; ?></header>
 					<?php wp_nonce_field( 'gdg_admin_action', 'gdg_nonce' ); ?>
-					<input type="hidden" name="gdg_action" value="save_category"><input type="hidden" name="gdg_context" value="app"><input type="hidden" name="id" value="<?php echo esc_attr( $edit_cat['id'] ?? 0 ); ?>">
+					<input type="hidden" name="gdg_action" value="save_category"><input type="hidden" name="gdg_context" value="app"><input type="hidden" name="gdg_section" value="menu"><input type="hidden" name="id" value="<?php echo esc_attr( $edit_cat['id'] ?? 0 ); ?>">
 					<label><span>Name *</span><input name="name" required maxlength="120" value="<?php echo esc_attr( $edit_cat['name'] ?? '' ); ?>" placeholder="z. B. Hauptspeisen"></label>
 					<label><span>Reihenfolge</span><input type="number" name="sort_order" value="<?php echo esc_attr( $edit_cat['sort_order'] ?? 0 ); ?>" inputmode="numeric"><small>Kleinere Zahlen erscheinen zuerst.</small></label>
 					<label class="gelsensystem-menu-check"><input type="checkbox" name="active" value="1" <?php checked( ! isset( $edit_cat['active'] ) || (int) $edit_cat['active'] === 1 ); ?>><span>In der Speisekarte anzeigen</span></label>
@@ -311,7 +400,7 @@ final class GDG_Admin {
 				<form method="post" class="gelsensystem-menu-form gelsensystem-menu-item-form">
 					<header><div><span>Artikel</span><h2><?php echo esc_html( $edit_item ? 'Eintrag bearbeiten' : 'Gericht oder Getränk hinzufügen' ); ?></h2></div><?php if ( $edit_item ) : ?><a href="<?php echo esc_url( $app_url ); ?>">Abbrechen</a><?php endif; ?></header>
 					<?php wp_nonce_field( 'gdg_admin_action', 'gdg_nonce' ); ?>
-					<input type="hidden" name="gdg_action" value="save_menu_item"><input type="hidden" name="gdg_context" value="app"><input type="hidden" name="id" value="<?php echo esc_attr( $edit_item['id'] ?? 0 ); ?>">
+					<input type="hidden" name="gdg_action" value="save_menu_item"><input type="hidden" name="gdg_context" value="app"><input type="hidden" name="gdg_section" value="menu"><input type="hidden" name="id" value="<?php echo esc_attr( $edit_item['id'] ?? 0 ); ?>">
 					<div class="gelsensystem-menu-field-grid">
 						<label><span>Kategorie *</span><select name="category_id" required><option value="">Bitte wählen</option><?php foreach ( $categories as $category ) : ?><option value="<?php echo esc_attr( $category['id'] ); ?>" <?php selected( $edit_item['category_id'] ?? 0, $category['id'] ); ?>><?php echo esc_html( $category['name'] ); ?></option><?php endforeach; ?></select></label>
 						<label><span>Name *</span><input name="name" required maxlength="180" value="<?php echo esc_attr( $edit_item['name'] ?? '' ); ?>" placeholder="z. B. Wiener Schnitzel"></label>
