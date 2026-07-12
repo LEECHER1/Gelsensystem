@@ -341,7 +341,7 @@ final class Gelsendiele_Admin {
 					<label><span>Standarddarstellung</span><select name="gelsendiele_settings[branding][theme_mode]"><option value="auto" <?php selected( $branding['theme_mode'], 'auto' ); ?>>System</option><option value="light" <?php selected( $branding['theme_mode'], 'light' ); ?>>Hell</option><option value="dark" <?php selected( $branding['theme_mode'], 'dark' ); ?>>Dunkel</option></select></label>
 				</div>
 			</section>
-			<?php submit_button( 'Allgemeine Einstellungen speichern' ); ?>
+			<?php self::render_submit_button( 'Allgemeine Einstellungen speichern' ); ?>
 		</form>
 		<?php
 	}
@@ -366,7 +366,7 @@ final class Gelsendiele_Admin {
 				</section>
 			<?php endforeach; ?>
 			</div>
-			<?php submit_button( 'Öffnungszeiten speichern' ); ?>
+			<?php self::render_submit_button( 'Öffnungszeiten speichern' ); ?>
 		</form>
 		<?php
 	}
@@ -383,7 +383,7 @@ final class Gelsendiele_Admin {
 		?>
 		<form method="post" class="gelsendiele-settings-form"><?php wp_nonce_field( 'gelsendiele_save_settings', 'gelsendiele_settings_nonce' ); ?><input type="hidden" name="gelsendiele_settings_action" value="save"><section class="gelsendiele-settings-card"><h2>Reservierungsregeln</h2><div class="gelsendiele-field-grid">
 		<?php foreach ( $fields as $key => $field ) : ?><label><span><?php echo esc_html( $field[0] ); ?></span><input type="number" min="<?php echo esc_attr( $field[1] ); ?>" max="<?php echo esc_attr( $field[2] ); ?>" name="gelsendiele_settings[reservations][<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( $res[ $key ] ); ?>"></label><?php endforeach; ?>
-		</div></section><?php submit_button( 'Reservierungseinstellungen speichern' ); ?></form>
+		</div></section><?php self::render_submit_button( 'Reservierungseinstellungen speichern' ); ?></form>
 		<?php
 	}
 
@@ -412,7 +412,7 @@ final class Gelsendiele_Admin {
 			<template data-gelsendiele-rule-template>
 				<?php self::render_availability_rule( self::empty_availability_rule(), '__RULE_INDEX__' ); ?>
 			</template>
-			<?php submit_button( 'Verfügbarkeiten speichern' ); ?>
+			<?php self::render_submit_button( 'Verfügbarkeiten speichern' ); ?>
 		</form>
 		<?php
 	}
@@ -499,7 +499,7 @@ final class Gelsendiele_Admin {
 				</details>
 			<?php endforeach; ?>
 			</div>
-			<?php submit_button( 'E-Mail-Einstellungen speichern' ); ?>
+			<?php self::render_submit_button( 'E-Mail-Einstellungen speichern' ); ?>
 		</form>
 		<?php
 	}
@@ -545,7 +545,7 @@ final class Gelsendiele_Admin {
 			</section>
 
 			<section class="gelsendiele-settings-card"><h2>Einbindung</h2><p>Bestehender Shortcode:</p><p><code>[gelsendiele_reservierungsformular]</code></p><p>Kompatibler Alias: <code>[booking-form]</code></p></section>
-			<?php submit_button( 'Formulareinstellungen speichern' ); ?>
+			<?php self::render_submit_button( 'Formulareinstellungen speichern' ); ?>
 		</form>
 		<?php
 	}
@@ -606,6 +606,14 @@ final class Gelsendiele_Admin {
 
 	private static function color_field( $label, $key, $value ) {
 		echo '<label><span>' . esc_html( $label ) . '</span><input type="color" name="gelsendiele_settings[branding][' . esc_attr( $key ) . ']" value="' . esc_attr( $value ) . '"></label>';
+	}
+
+	private static function render_submit_button( $text ) {
+		if ( is_admin() && function_exists( 'submit_button' ) ) {
+			submit_button( $text );
+			return;
+		}
+		echo '<p class="submit"><button type="submit" class="button button-primary">' . esc_html( $text ) . '</button></p>';
 	}
 
 	private static function workspace_url( $view ) {
