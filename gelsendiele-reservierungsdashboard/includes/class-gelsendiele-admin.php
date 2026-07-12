@@ -82,7 +82,7 @@ final class Gelsendiele_Admin {
 	public static function render_reservations() {
 		self::guard( 'manage_bookings' );
 		$page_id       = (int) get_option( 'gd_reservierungsdashboard_page_id', 0 );
-		$dashboard_url = $page_id ? get_permalink( $page_id ) : home_url( '/reservierungsverwaltung/' );
+		$dashboard_url = $page_id ? get_permalink( $page_id ) : home_url( '/gelsensystem/' );
 		?>
 		<div class="wrap gelsendiele-admin-wrap"><h1>Reservierungen</h1>
 			<div class="gelsendiele-action-panel">

@@ -1924,6 +1924,7 @@ html[data-gd-theme="dark"] .gd-table-picker-clear:focus-visible { background:#20
    ========================================================== */
 .gelsensystem-sidebar { display:none; }
 .gd-central-mobile-header { display:none; }
+.gelsensystem-mobile-nav { display:none; }
 .gd-central-content { min-width:0; }
 .gelsensystem-section-heading { display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin:0 0 24px; }
 .gelsensystem-section-heading span { color:var(--gd-green);font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase; }
@@ -1993,15 +1994,70 @@ html[data-gd-theme="dark"] .gelsensystem-user-card small { color:#aab7ac; }
 }
 
 @media (max-width:1024px) {
-  .gd-central-section-shell { padding:0 18px 50px; }
-  .gd-central-mobile-header { position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:15px;margin:0 -18px 22px;padding:12px 18px;border-bottom:1px solid var(--gd-border);background:rgba(248,250,248,.94);backdrop-filter:blur(16px); }
+  .gd-central-section-shell { padding:0 18px calc(38px + var(--gd-safe-bottom));overflow:visible!important; }
+  .gd-central-mobile-header { position:sticky;top:0;z-index:220;display:flex;align-items:center;justify-content:space-between;gap:15px;min-height:66px;margin:0 -18px;padding:10px 18px;border-bottom:1px solid var(--gd-border);background:rgba(248,250,248,.96);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px); }
   .gd-central-mobile-header small,.gd-central-mobile-header strong { display:block; }
-  .gd-central-mobile-header small { color:var(--gd-green);font-size:10px;font-weight:850;letter-spacing:1.2px;text-transform:uppercase; }
-  .gd-central-mobile-header a { color:var(--gd-green);font-size:13px;font-weight:750;text-decoration:none; }
+  .gd-central-mobile-header>div { min-width:0; }
+  .gd-central-mobile-header small { max-width:72vw;overflow:hidden;color:var(--gd-green);font-size:9px;font-weight:850;letter-spacing:1px;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap; }
+  .gd-central-mobile-header strong { max-width:72vw;margin-top:2px;overflow:hidden;font-size:17px;text-overflow:ellipsis;white-space:nowrap; }
+  .gd-central-mobile-header .gd-icon-button { flex:0 0 46px;width:46px;height:46px;border:1px solid var(--gd-border);border-radius:14px;background:#fff; }
+  .gelsensystem-mobile-nav { position:sticky;top:66px;z-index:210;display:flex;gap:8px;margin:0 -18px 22px;padding:9px 18px 11px;overflow-x:auto;border-bottom:1px solid var(--gd-border);background:rgba(244,247,244,.96);scroll-padding:18px;scroll-snap-type:x proximity;scrollbar-width:none;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px); }
+  .gelsensystem-mobile-nav::-webkit-scrollbar { display:none; }
+  .gelsensystem-mobile-nav a { display:flex;align-items:center;gap:8px;min-width:max-content;min-height:50px;padding:5px 12px 5px 7px;border:1px solid var(--gd-border);border-radius:15px;color:var(--gd-muted);background:#fff;text-decoration:none;scroll-snap-align:start;box-shadow:0 3px 12px rgba(24,40,24,.035); }
+  .gelsensystem-mobile-nav a>span { display:grid;place-items:center;width:36px;height:36px;flex:0 0 36px;border-radius:11px;color:var(--gd-green);background:var(--gd-green-soft);font-size:11px;font-weight:900; }
+  .gelsensystem-mobile-nav a>strong { max-width:150px;overflow:hidden;font-size:12px;text-overflow:ellipsis;white-space:nowrap; }
+  .gelsensystem-mobile-nav a.is-active { color:#fff;border-color:var(--gd-green);background:var(--gd-green);box-shadow:0 7px 18px rgba(49,91,45,.18); }
+  .gelsensystem-mobile-nav a.is-active>span { color:var(--gd-green-dark);background:#fff; }
+  .gd-central-content { width:100%;padding:0; }
   .gelsensystem-user-card { grid-template-columns:1fr;gap:14px; }
   .gelsensystem-user-card .button { width:100%; }
   .gelsensystem-app-settings .gelsendiele-settings-card { padding:18px; }
+  .gelsensystem-app-settings .nav-tab-wrapper { gap:8px;margin:0 -2px;padding:2px 2px 14px;scroll-snap-type:x proximity; }
+  .gelsensystem-app-settings .nav-tab { min-height:48px;padding:0 17px;scroll-snap-align:start; }
+  .gelsensystem-user-card select,
+  .gelsensystem-user-card .button,
+  .gelsensystem-app-settings .button,
+  .gelsensystem-app-settings input:not([type="checkbox"]):not([type="color"]),
+  .gelsensystem-app-settings select { min-height:48px; }
+  .gd-central-section-shell .gelsensystem-menu-form input:not([type="checkbox"]),
+  .gd-central-section-shell .gelsensystem-menu-form select,
+  .gd-central-section-shell .gelsensystem-menu-form .button,
+  .gd-central-section-shell .gelsensystem-table-form input:not([type="checkbox"]),
+  .gd-central-section-shell .gelsensystem-table-form .button { min-height:50px; }
+  .gd-central-section-shell .gelsensystem-menu-list .button,.gd-central-section-shell .gelsensystem-table-grid article>a { min-height:44px;display:inline-flex;align-items:center; }
 }
+
+@media (min-width:700px) and (max-width:1024px) {
+  .gd-central-section-shell { padding-right:28px;padding-left:28px; }
+  .gd-central-mobile-header,.gelsensystem-mobile-nav { margin-right:-28px;margin-left:-28px;padding-right:28px;padding-left:28px; }
+  .gd-central-content { max-width:960px;margin:0 auto; }
+  .gelsensystem-mobile-nav a { min-height:54px; }
+  .gelsensystem-mobile-nav a>strong { font-size:13px; }
+  .gelsensystem-user-card { grid-template-columns:minmax(220px,1fr) minmax(280px,1.2fr); }
+  .gelsensystem-user-card .button { grid-column:2;width:auto;justify-self:end; }
+}
+
+@media (max-width:699px) {
+  .gd-central-section-shell { padding-right:14px;padding-left:14px; }
+  .gd-central-mobile-header,.gelsensystem-mobile-nav { margin-right:-14px;margin-left:-14px;padding-right:14px;padding-left:14px; }
+  .gelsensystem-mobile-nav { gap:7px;margin-bottom:16px; }
+  .gelsensystem-mobile-nav a { min-height:48px;padding-right:10px; }
+  .gelsensystem-mobile-nav a>span { width:34px;height:34px;flex-basis:34px; }
+  .gelsensystem-mobile-nav a>strong { max-width:120px;font-size:11px; }
+  .gelsensystem-section-heading { margin-bottom:17px; }
+  .gelsensystem-section-heading h1,.gelsensystem-app-settings>h1 { margin-top:3px;font-size:28px;letter-spacing:-.7px; }
+  .gelsensystem-section-heading p { font-size:13px;line-height:1.45; }
+  .gelsensystem-menu-manager,.gelsensystem-table-manager { gap:17px; }
+  .gelsensystem-user-card { padding:16px;border-radius:16px; }
+  .gelsensystem-app-settings .gelsendiele-settings-card { padding:16px; }
+  .gd-system-links .gd-sheet-row { min-height:72px; }
+}
+
+html[data-gd-theme="dark"] .gd-central-mobile-header,
+html[data-gd-theme="dark"] .gelsensystem-mobile-nav { color:var(--gd-text);border-color:var(--gd-border);background:rgba(17,23,19,.97); }
+html[data-gd-theme="dark"] .gd-central-mobile-header .gd-icon-button,
+html[data-gd-theme="dark"] .gelsensystem-mobile-nav a { color:var(--gd-text);border-color:var(--gd-border);background:#19211b; }
+html[data-gd-theme="dark"] .gelsensystem-mobile-nav a.is-active { color:#fff;border-color:#4a8c43;background:#315b2d; }
 
 /* ==========================================================
    Version 2.5.0 – zentrale Speisekartenverwaltung

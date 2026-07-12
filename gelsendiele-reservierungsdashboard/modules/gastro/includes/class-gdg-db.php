@@ -264,16 +264,23 @@ final class GDG_DB {
 	}
 
 	private static function create_app_pages(): void {
-		$parent = get_page_by_path( 'reservierungsverwaltung' );
-		$parent_id = $parent ? (int) $parent->ID : 0;
+		$parent_id = (int) get_option( 'gd_reservierungsdashboard_page_id', 0 );
+		$parent    = $parent_id ? get_post( $parent_id ) : null;
+		if ( ! $parent || 'page' !== $parent->post_type ) {
+			$parent = get_page_by_path( 'gelsensystem' );
+			if ( ! $parent ) {
+				$parent = get_page_by_path( 'reservierungsverwaltung' );
+			}
+			$parent_id = $parent ? (int) $parent->ID : 0;
+		}
 		if ( ! $parent_id ) {
 			$parent_id = wp_insert_post(
 				array(
-					'post_title' => 'Gelsensystem Gastro',
-					'post_name' => 'gelsendiele-gastro',
+					'post_title' => 'Gelsensystem',
+					'post_name' => 'gelsensystem',
 					'post_status' => 'publish',
 					'post_type' => 'page',
-					'post_content' => '<p>Bitte einen der Arbeitsbereiche auswählen.</p>',
+					'post_content' => '[gelsendiele_reservierungen]',
 				),
 				true
 			);
@@ -306,6 +313,9 @@ final class GDG_DB {
 					wp_update_post( array( 'ID' => $existing_id, 'post_content' => trim( $content . "\n\n" . $expected_shortcode ) ) );
 				}
 				update_post_meta( $existing_id, '_gdg_view', $view );
+				if ( (int) $existing_page->post_parent !== $parent_id ) {
+					wp_update_post( array( 'ID' => $existing_id, 'post_parent' => $parent_id ) );
+				}
 				$page_ids[ $view ] = $existing_id;
 				continue;
 			}

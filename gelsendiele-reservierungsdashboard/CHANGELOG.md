@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.7.0
+
+- Eigene kanonische URL `/gelsensystem/` für die zentrale App eingeführt.
+- Bestehende Zentrale und Gastro-Arbeitsseiten werden idempotent auf die neue URL-Struktur migriert.
+- Alte Links unter `/reservierungsverwaltung/` bleiben durch permanente Weiterleitungen kompatibel.
+- Horizontale Touch-Navigation für alle berechtigten Arbeitsbereiche auf Smartphone und Tablet ergänzt.
+- Reservierungs-Menü um Service, Küche, Schank, Kasse, Tische und Speisekarte erweitert.
+- Touch-Ziele, Formularhöhen, Abstände und Tablet-Aufteilungen optimiert.
+- Direkter Hell-/Dunkelmodus-Schalter auf zentralen Verwaltungsseiten ergänzt.
+
 ## 2.6.0
 
 - Tisch- und Bereichsverwaltung in die zentrale Gelsensystem-App übernommen.

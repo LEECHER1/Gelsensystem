@@ -1910,7 +1910,7 @@
   if ('serviceWorker' in navigator && GDReservations.pwaServiceWorker) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register(GDReservations.pwaServiceWorker, {
-        scope: GDReservations.pwaScope || '/reservierungsverwaltung/'
+        scope: GDReservations.pwaScope || '/gelsensystem/'
       }).catch(() => {});
     });
   }

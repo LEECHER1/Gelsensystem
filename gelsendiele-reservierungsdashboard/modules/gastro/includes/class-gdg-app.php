@@ -45,7 +45,7 @@ final class GDG_App {
 		);
 		$urls = self::get_app_urls();
 		$dashboard_page_id = (int) get_option( 'gd_reservierungsdashboard_page_id', 0 );
-		$dashboard_url     = $dashboard_page_id ? get_permalink( $dashboard_page_id ) : home_url( '/reservierungsverwaltung/' );
+		$dashboard_url     = $dashboard_page_id ? get_permalink( $dashboard_page_id ) : home_url( '/gelsensystem/' );
 		$business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
 		$branding      = Gelsendiele_Settings::get( 'branding', null, array() );
 		$logo_url      = $branding['logo_url'];
