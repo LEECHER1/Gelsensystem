@@ -1,0 +1,36 @@
+name: Plugin checks
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['7.4', '8.2', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify plugin
+        run: ./scripts/verify-plugin.sh
+      - name: Build installable ZIP
+        if: matrix.php == '8.2'
+        run: ./scripts/build-plugin.sh
+      - uses: actions/upload-artifact@v4
+        if: matrix.php == '8.2'
+        with:
+          name: gelsensystem-plugin
+          path: dist/*.zip
+          if-no-files-found: error
