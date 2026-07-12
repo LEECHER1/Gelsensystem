@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.9.0
+
+- Desktop-Seitenleiste lässt sich zu einer kompakten Icon-Leiste einklappen; die Auswahl bleibt lokal gespeichert.
+- Reservierungskarten sind auf Tablet und Desktop standardmäßig geschlossen und per Kopfzeile ein- und ausklappbar.
+- Aktualisierung als Icon in die obere rechte Aktionsleiste verschoben.
+- Wischaktualisierung auf Touch-Tablets und Touch-Desktops erweitert.
+- Hell-/Dunkelmodus-Schalter im Desktop-Kopf zentriert und ohne störenden dunklen Kasten gestaltet.
+
 ## 2.8.0
 
 - Tablet-Reservierungen zeigen eine eigene Statusleiste mit den Zählern für Offen, Heute, Kommend und Bestätigt.

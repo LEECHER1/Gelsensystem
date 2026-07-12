@@ -36,6 +36,15 @@ central_expect( false !== strpos( $entry, 'Einstellungen &amp; Werkzeuge' ), 'We
 central_expect( false !== strpos( $css, '.gd-desktop-tabs { display:flex !important' ), 'Tablet-Statusleiste mit allen Zählern fehlt' );
 central_expect( false !== strpos( $css, '.gd-tab:not(.is-active) span[data-count]' ), 'Dark-Mode-Kontrast für inaktive Zähler fehlt' );
 central_expect( false !== strpos( $css, '@media (min-width:1025px)' ) && false !== strpos( $css, '.gd-sheet-layer.is-open' ), 'Desktop-Seitenmenü fehlt' );
+central_expect( false !== strpos( $entry, 'data-sidebar-toggle' ), 'einklappbare Desktop-Seitenleiste fehlt' );
+central_expect( false !== strpos( $js, "window.localStorage.setItem('gd-sidebar-collapsed'" ), 'Seitenleistenstatus wird nicht gespeichert' );
+central_expect( false !== strpos( $css, 'body.gd-sidebar-collapsed .gelsensystem-sidebar' ), 'kompakter Seitenleistenstil fehlt' );
+central_expect( false === strpos( $js, "if (!card || window.matchMedia('(min-width: 1025px)').matches) return;" ), 'Desktop-Karten können noch nicht eingeklappt werden' );
+central_expect( false !== strpos( $css, '.gd-booking-card.is-expanded .gd-card-details' ), 'geöffneter Kartenzustand fehlt' );
+central_expect( false !== strpos( $entry, 'class="gd-icon-button gd-desktop-refresh-button"' ), 'Aktualisierungsicon in der Desktop-Kopfleiste fehlt' );
+central_expect( false === strpos( $entry, 'class="gd-refresh" data-refresh>Aktualisieren' ), 'alter Aktualisierungstext ist noch in der Toolbar sichtbar' );
+central_expect( false !== strpos( $js, "window.matchMedia('(pointer: coarse)').matches" ), 'Wischaktualisierung fehlt auf Touch-Tablets' );
+central_expect( false !== strpos( $css, 'html[data-gd-theme="dark"] .gd-desktop-theme-button' ) && false !== strpos( $css, 'background:transparent !important' ), 'zentrierter Dark-Mode-Schalter fehlt' );
 central_expect( false !== strpos( $js, "scope: GDReservations.pwaScope || '/gelsensystem/'" ), 'PWA-Fallback nutzt noch die alte URL' );
 
 echo "Zentrale-URL- und Responsive-Tests erfolgreich.\n";
