@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.10.0
+
+- Gemeinsame einklappbare Desktop-Seitenleiste auf Service, Küche, Schank und Kasse ergänzt.
+- Fokuszustand wird beim Wechsel zwischen Zentrale und Arbeitsbereichen beibehalten.
+- Öffentliche, responsive Speisekarte per `[gelsensystem_speisekarte]` für Enfold ergänzt.
+- Aktive Kategorien, Gerichte, Beschreibungen und Preise werden direkt aus der zentralen Speisekartenpflege ausgegeben.
+
 ## 2.9.0
 
 - Desktop-Seitenleiste lässt sich zu einer kompakten Icon-Leiste einklappen; die Auswahl bleibt lokal gespeichert.

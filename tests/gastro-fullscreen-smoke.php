@@ -46,5 +46,9 @@ gdg_expect( false !== strpos( $css, 'min-width: 0 !important' ), 'Theme-Mindestb
 gdg_expect( false !== strpos( $css, '.gdg-loading[hidden]' ), 'Lade-Layer respektiert hidden nicht' );
 gdg_expect( false !== strpos( $js, "localStorage.setItem('gd-dashboard-theme'" ), 'Theme-Auswahl wird nicht systemweit geteilt' );
 gdg_expect( false !== strpos( $js, 'document.documentElement.dataset.gdgTheme' ), 'Dokument-Theme wird nicht aktualisiert' );
+gdg_expect( false !== strpos( $css, '.gdg-app.is-nav-collapsed' ), 'einklappbarer Fokusmodus fehlt' );
+gdg_expect( false !== strpos( $css, '@media (min-width: 1025px)' ), 'Desktop-Seitenleiste fehlt' );
+gdg_expect( false !== strpos( $js, "localStorage.getItem('gd-sidebar-collapsed')" ), 'Menüzustand wird nicht geteilt' );
+gdg_expect( false !== strpos( $js, "localStorage.setItem('gd-sidebar-collapsed'" ), 'Menüzustand wird nicht gespeichert' );
 
 echo "Gastro-Vollbild- und Theme-Tests erfolgreich.\n";

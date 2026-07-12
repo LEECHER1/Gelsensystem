@@ -2,7 +2,7 @@
 Contributors: Andreas Schwarz / OpenAI
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.9.0
+Stable tag: 2.10.0
 
 Zentrales Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für Gastronomiebetriebe.
 
@@ -13,6 +13,7 @@ Zentrales Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem f�
 * Flexible Betriebs-, Logo-, Farb- und Darstellungsoptionen
 * Mehrere Öffnungsblöcke pro Wochentag und Öffnungen über Mitternacht
 * Öffentliches Reservierungsformular: [gelsendiele_reservierungsformular]
+* Öffentliche, dynamische Speisekarte für Enfold und andere Themes: [gelsensystem_speisekarte]
 * Kompatibler Ersatz für den bisherigen Shortcode [booking-form], sobald Five Star deaktiviert ist
 * Bestehendes Reservierungsdashboard mit manueller Anlage, Bearbeitung, Tischzuordnung, Export und PWA
 * Eigener Reservierungs-Datentyp und eigene Statusverwaltung
@@ -38,6 +39,12 @@ Das Zahlungsmodul dokumentiert Bar- und Kartenzahlungen, ist aber noch keine RKS
 Installierbare ZIP-Dateien werden aus einem geprüften Git-Tag erstellt. Vor jedem Produktivupdate sind WordPress-Dateien und Datenbank vollständig zu sichern.
 
 == Changelog ==
+
+= 2.10.0 =
+* Service, Küche, Schank und Kasse erhalten dieselbe einklappbare Desktop-Seitenleiste wie die Zentrale.
+* Der Fokusmodus bleibt beim Wechsel zwischen allen Arbeitsbereichen erhalten.
+* Neuer responsiver Shortcode [gelsensystem_speisekarte] für eine dynamische Website-Speisekarte.
+* Kategorien, Sichtbarkeit, Beschreibungen und Preise stammen immer direkt aus der Gelsensystem-Pflege.
 
 = 2.9.0 =
 * Einklappbare Desktop-Seitenleiste für eine breite Fokusansicht.
