@@ -67,6 +67,34 @@
     if (centralThemeColor) centralThemeColor.content = centralTheme === 'dark' ? '#111713' : '#315b2d';
   }
 
+  const sidebar = document.querySelector('.gelsensystem-sidebar');
+  const sidebarToggle = sidebar?.querySelector('[data-sidebar-toggle]');
+  const desktopSidebar = window.matchMedia('(min-width: 1025px)');
+
+  function applySidebarState(collapsed, persist = false) {
+    const isCollapsed = Boolean(collapsed && desktopSidebar.matches);
+    document.body.classList.toggle('gd-sidebar-collapsed', isCollapsed);
+    if (sidebarToggle) {
+      sidebarToggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+      sidebarToggle.setAttribute('aria-label', isCollapsed ? 'Seitenleiste ausklappen' : 'Seitenleiste einklappen');
+      sidebarToggle.setAttribute('title', isCollapsed ? 'Seitenleiste ausklappen' : 'Seitenleiste einklappen');
+    }
+    if (persist) {
+      try { window.localStorage.setItem('gd-sidebar-collapsed', isCollapsed ? '1' : '0'); } catch (error) {}
+    }
+  }
+
+  if (sidebar && sidebarToggle) {
+    let sidebarCollapsed = false;
+    try { sidebarCollapsed = window.localStorage.getItem('gd-sidebar-collapsed') === '1'; } catch (error) {}
+    applySidebarState(sidebarCollapsed);
+    sidebarToggle.addEventListener('click', () => {
+      sidebarCollapsed = !document.body.classList.contains('gd-sidebar-collapsed');
+      applySidebarState(sidebarCollapsed, true);
+    });
+    desktopSidebar.addEventListener?.('change', () => applySidebarState(sidebarCollapsed));
+  }
+
   const shell = document.querySelector('.gd-dashboard-shell[data-default-view]');
   if (!shell || typeof GDReservations === 'undefined') return;
 
@@ -202,7 +230,8 @@
 
 
   function initializePullToRefresh() {
-    if (!mainContent || !window.matchMedia('(max-width: 1024px)').matches) return;
+    const touchCapable = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+    if (!mainContent || (!window.matchMedia('(max-width: 1024px)').matches && !touchCapable)) return;
 
     const indicator = document.createElement('div');
     indicator.className = 'gd-pull-refresh';
@@ -617,7 +646,7 @@
   }
 
   function toggleCard(card, force) {
-    if (!card || window.matchMedia('(min-width: 1025px)').matches) return;
+    if (!card) return;
     const expanded = typeof force === 'boolean' ? force : !card.classList.contains('is-expanded');
     card.classList.toggle('is-expanded', expanded);
     const toggle = card.querySelector('.gd-card-summary');

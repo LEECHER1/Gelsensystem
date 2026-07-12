@@ -3,7 +3,7 @@
  * Plugin Name: Gelsensystem
  * Plugin URI: https://github.com/LEECHER1/Gelsensystem
  * Description: Zentrales Reservierungs-, Service-, Küchen- und Kassensystem für Gastronomiebetriebe.
- * Version: 2.8.0
+ * Version: 2.9.0
  * Author: Andreas Schwarz / Gelsensystem
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.8.0' );
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.9.0' );
 defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
 defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );
@@ -536,6 +536,9 @@ final class Gelsendiele_Reservierungsdashboard {
                     <p>Anfragen schnell prüfen, bestätigen oder ablehnen.</p>
                 </div>
                 <div class="gd-header-actions">
+                    <button type="button" class="gd-icon-button gd-desktop-refresh-button" data-refresh aria-label="Reservierungen aktualisieren" title="Aktualisieren">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0-14.7-4.7L3 9m0 0V4m0 5h5M4 13a8.1 8.1 0 0 0 14.7 4.7L21 15m0 0v5m0-5h-5"/></svg>
+                    </button>
                     <button type="button" class="gd-desktop-settings-button" data-open-more>
                         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>
                         <span>Einstellungen</span>
@@ -571,7 +574,6 @@ final class Gelsendiele_Reservierungsdashboard {
                 </label>
                 <div class="gd-toolbar-actions gd-desktop-only">
                     <button type="button" class="gd-manual-add-desktop" data-open-manual-booking><span aria-hidden="true">＋</span> Reservierung hinzufügen</button>
-                    <button type="button" class="gd-refresh" data-refresh>Aktualisieren</button>
                 </div>
             </div>
 
@@ -2598,8 +2600,11 @@ final class Gelsendiele_Reservierungsdashboard {
         $business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
         ?>
         <aside class="gelsensystem-sidebar" aria-label="Gelsensystem Bereiche">
+            <button type="button" class="gelsensystem-sidebar-toggle" data-sidebar-toggle aria-label="Seitenleiste einklappen" aria-expanded="true" title="Seitenleiste einklappen">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+            </button>
             <a class="gelsensystem-sidebar-brand" href="<?php echo esc_url( $dashboard ); ?>"><span>GS</span><div><strong>Gelsensystem</strong><small><?php echo esc_html( $business_name ); ?></small></div></a>
-            <nav><?php foreach ( $items as $item ) : if ( ! current_user_can( $item[2] ) || ! $item[3] ) { continue; } ?><a class="<?php echo $active === $item[0] ? 'is-active' : ''; ?>" href="<?php echo esc_url( $item[3] ); ?>"><span><?php echo esc_html( $item[4] ); ?></span><?php echo esc_html( $item[1] ); ?></a><?php endforeach; ?></nav>
+            <nav><?php foreach ( $items as $item ) : if ( ! current_user_can( $item[2] ) || ! $item[3] ) { continue; } ?><a class="<?php echo $active === $item[0] ? 'is-active' : ''; ?>" href="<?php echo esc_url( $item[3] ); ?>" title="<?php echo esc_attr( $item[1] ); ?>"><span><?php echo esc_html( $item[4] ); ?></span><?php echo esc_html( $item[1] ); ?></a><?php endforeach; ?></nav>
             <div class="gelsensystem-sidebar-footer"><small>Angemeldet als</small><strong><?php echo esc_html( wp_get_current_user()->display_name ); ?></strong><a href="<?php echo esc_url( wp_logout_url( $dashboard ) ); ?>">Abmelden</a></div>
         </aside>
         <?php

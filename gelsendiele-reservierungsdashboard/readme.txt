@@ -2,7 +2,7 @@
 Contributors: Andreas Schwarz / OpenAI
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.8.0
+Stable tag: 2.9.0
 
 Zentrales Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für Gastronomiebetriebe.
 
@@ -38,6 +38,12 @@ Das Zahlungsmodul dokumentiert Bar- und Kartenzahlungen, ist aber noch keine RKS
 Installierbare ZIP-Dateien werden aus einem geprüften Git-Tag erstellt. Vor jedem Produktivupdate sind WordPress-Dateien und Datenbank vollständig zu sichern.
 
 == Changelog ==
+
+= 2.9.0 =
+* Einklappbare Desktop-Seitenleiste für eine breite Fokusansicht.
+* Reservierungskarten lassen sich nun auch auf Tablet und Desktop schließen und öffnen.
+* Aktualisierung als Icon oben rechts sowie Wischaktualisierung auf Touch-Geräten.
+* Zentrierter, rahmenloser Hell-/Dunkelmodus-Schalter im Desktop-Kopf.
 
 = 2.8.0 =
 * Tablet-Statusleiste zeigt alle wichtigen Reservierungszähler gleichzeitig.

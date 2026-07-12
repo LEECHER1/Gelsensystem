@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.9.0 – 2026-07-12
+
+- Gemeinsamer Fokusmodus mit einklappbarer Seitenleiste und Karten ergänzt.
+- Aktualisierungs- und Theme-Bedienung auf Tablet und Desktop verfeinert.
+
 ## 2.8.0 – 2026-07-12
 
 - Gemeinsame Tablet- und Desktop-UX der Reservierungszentrale vereinfacht.
