@@ -1,6 +1,9 @@
 (() => {
   'use strict';
 
+  if (window.GelsensystemSettingsLoaded) return;
+  window.GelsensystemSettingsLoaded = true;
+
   document.querySelectorAll('[data-gelsendiele-day]').forEach((day) => {
     const blocks = day.querySelector('[data-gelsendiele-blocks]');
     const template = day.querySelector('[data-gelsendiele-block-template]');

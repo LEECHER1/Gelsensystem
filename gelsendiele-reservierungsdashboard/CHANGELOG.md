@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.2
+- Explizite, themeunabhängige Script-Ausgabe in app-internen Einstellungs- und Benutzerbereichen.
+- Idempotente Initialisierung verhindert doppelte Event-Handler, falls ein Theme registrierte Skripte doch ausgibt.
+
 ## 2.4.1
 - Robuste Script-Ausgabe für app-interne Einstellungen bei Themes mit veränderter Footer-Ausgabe.
 - Frühzeitige Theme-Initialisierung verhindert falsche Farben und erhält die Hell-/Dunkelwahl über alle App-Bereiche.
