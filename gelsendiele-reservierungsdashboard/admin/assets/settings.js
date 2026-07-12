@@ -69,6 +69,27 @@
     updateEmpty();
   }
 
+  document.querySelectorAll('[data-gelsensystem-form-field]').forEach((row) => {
+    const enabled = row.querySelector('[data-gelsensystem-field-enabled]');
+    const required = row.querySelector('[data-gelsensystem-field-required]');
+    if (!enabled || !required) return;
+    const sync = () => {
+      required.disabled = !enabled.checked;
+      if (!enabled.checked) required.checked = false;
+    };
+    enabled.addEventListener('change', sync);
+    sync();
+  });
+
+  document.querySelectorAll('.gelsensystem-email-template').forEach((template) => {
+    const recipient = template.querySelector('[data-gelsensystem-recipient]');
+    const custom = recipient?.closest('.gelsensystem-template-grid')?.querySelector('input[type="email"]');
+    if (!recipient || !custom) return;
+    const sync = () => { custom.closest('label').hidden = recipient.value !== 'custom'; };
+    recipient.addEventListener('change', sync);
+    sync();
+  });
+
   const selectLogo = document.querySelector('[data-gelsendiele-select-logo]');
   const logoUrl = document.querySelector('[data-gelsendiele-logo-url]');
   const logoId = document.querySelector('[data-gelsendiele-logo-id]');

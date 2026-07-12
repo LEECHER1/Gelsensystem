@@ -1918,6 +1918,7 @@ html[data-gd-theme="dark"] .gd-table-picker-clear:focus-visible { background:#20
   .gd-table-number-button { border-radius:13px; font-size:15px; }
   .gd-table-count-setting { grid-template-columns:90px minmax(0,1fr); }
 }
+.gd-form-preferences{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:8px}.gd-form-preferences span{display:inline-flex;padding:7px 10px;border-radius:9px;background:rgba(23,155,87,.08);line-height:1.35}.gd-form-preferences strong{margin-right:4px}
 
 /* ==========================================================
    Version 1.9.0 – Tischbelegung, Kapazitäten und Konflikt-Popup

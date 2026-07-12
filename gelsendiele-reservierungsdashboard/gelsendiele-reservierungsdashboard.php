@@ -3,7 +3,7 @@
  * Plugin Name: Gelsensystem
  * Plugin URI: https://github.com/LEECHER1/Gelsendiele
  * Description: Eigenständiges Reservierungs-, Service-, Küchen- und Kassensystem für die Gelsendiele.
- * Version: 2.2.0
+ * Version: 2.3.0
  * Author: Andreas Schwarz / Gelsendiele
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
@@ -14,13 +14,14 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.2.0' );
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.3.0' );
 defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
 defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );
 
 require_once GELSENDIELE_DIR . 'includes/class-gelsendiele-settings.php';
 require_once GELSENDIELE_DIR . 'includes/class-gelsendiele-availability.php';
+require_once GELSENDIELE_DIR . 'includes/class-gelsensystem-email.php';
 require_once GELSENDIELE_DIR . 'includes/class-gelsendiele-migrator.php';
 require_once GELSENDIELE_DIR . 'includes/class-gelsendiele-admin.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-gd-reservation-engine.php';
@@ -28,6 +29,7 @@ require_once plugin_dir_path( __FILE__ ) . 'modules/gastro/gelsendiele-gastro-sy
 
 Gelsendiele_Migrator::bootstrap();
 Gelsendiele_Admin::bootstrap();
+Gelsensystem_Email::bootstrap();
 
 final class Gelsendiele_Reservierungsdashboard {
     const VERSION = GELSENDIELE_VERSION;
@@ -1524,7 +1526,7 @@ final class Gelsendiele_Reservierungsdashboard {
 
         nocache_headers();
         header( 'Content-Type: text/csv; charset=UTF-8' );
-        header( 'Content-Disposition: attachment; filename="gelsendiele-reservierungen-' . wp_date( 'Y-m-d' ) . '.csv"' );
+        header( 'Content-Disposition: attachment; filename="gelsensystem-reservierungen-' . wp_date( 'Y-m-d' ) . '.csv"' );
         echo "\xEF\xBB\xBF";
 
         $output = fopen( 'php://output', 'w' );
@@ -1550,14 +1552,14 @@ final class Gelsendiele_Reservierungsdashboard {
             $rows[] = $this->export_row( $booking );
         }
 
-        $file = wp_tempnam( 'gelsendiele-reservierungen.xlsx' );
+        $file = wp_tempnam( 'gelsensystem-reservierungen.xlsx' );
         if ( ! $file || ! $this->create_xlsx_file( $file, $rows ) ) {
             wp_die( 'Die Excel-Datei konnte nicht erstellt werden.' );
         }
 
         nocache_headers();
         header( 'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' );
-        header( 'Content-Disposition: attachment; filename="gelsendiele-reservierungen-' . wp_date( 'Y-m-d' ) . '.xlsx"' );
+        header( 'Content-Disposition: attachment; filename="gelsensystem-reservierungen-' . wp_date( 'Y-m-d' ) . '.xlsx"' );
         header( 'Content-Length: ' . filesize( $file ) );
         readfile( $file );
         @unlink( $file );
@@ -1572,7 +1574,7 @@ final class Gelsendiele_Reservierungsdashboard {
     }
 
     private function export_headers() {
-        return array( 'ID', 'Datum', 'Uhrzeit', 'Status', 'Name', 'Personen', 'Tisch', 'Interne Notiz (Team)', 'Telefon', 'E-Mail', 'Nachricht des Gastes' );
+        return array( 'ID', 'Datum', 'Uhrzeit', 'Status', 'Name', 'Personen', 'Tisch', 'Bereichswunsch', 'Tischwunsch', 'Kinderstuhl', 'Hund', 'Allergien', 'Interne Notiz (Team)', 'Telefon', 'E-Mail', 'Nachricht des Gastes' );
     }
 
     private function export_row( $booking ) {
@@ -1584,6 +1586,11 @@ final class Gelsendiele_Reservierungsdashboard {
             $booking['name'],
             $booking['party'],
             $booking['tableNumber'],
+			isset( $booking['formDetails']['area'] ) ? $booking['formDetails']['area'] : '',
+			isset( $booking['formDetails']['table'] ) ? $booking['formDetails']['table'] : '',
+			! empty( $booking['formDetails']['highchair'] ) ? 'Ja' : 'Nein',
+			! empty( $booking['formDetails']['dog'] ) ? 'Ja' : 'Nein',
+			isset( $booking['formDetails']['allergies'] ) ? $booking['formDetails']['allergies'] : '',
             $booking['internalComment'],
             $booking['phone'],
             $booking['email'],
@@ -1952,15 +1959,20 @@ final class Gelsendiele_Reservierungsdashboard {
         $posts = get_posts( $args );
         $bookings = array();
 
-        foreach ( $posts as $post ) {
-            $meta = get_post_meta( $post->ID, 'rtb', true );
-            $meta = is_array( $meta ) ? $meta : array();
-            $haystack = strtolower( implode( ' ', array(
+		foreach ( $posts as $post ) {
+			$meta = get_post_meta( $post->ID, 'rtb', true );
+			$meta = is_array( $meta ) ? $meta : array();
+			$form_details = get_post_meta( $post->ID, '_gelsensystem_form_details', true );
+			$form_details = is_array( $form_details ) ? $form_details : array();
+			$haystack = strtolower( implode( ' ', array(
                 $post->post_title,
                 $meta['email'] ?? '',
                 $meta['phone'] ?? '',
                 (string) get_post_meta( $post->ID, self::TABLE_META, true ),
-                (string) get_post_meta( $post->ID, self::COMMENT_META, true ),
+				(string) get_post_meta( $post->ID, self::COMMENT_META, true ),
+				isset( $form_details['area'] ) ? $form_details['area'] : '',
+				isset( $form_details['table'] ) ? $form_details['table'] : '',
+				isset( $form_details['allergies'] ) ? $form_details['allergies'] : '',
             ) ) );
 
             if ( $search && false === strpos( $haystack, strtolower( $search ) ) ) {
@@ -1996,7 +2008,14 @@ final class Gelsendiele_Reservierungsdashboard {
                 'timestamp'  => $timestamp,
                 'outsideHours' => (bool) get_post_meta( $post->ID, '_gd_manual_outside_hours', true ),
                 'tableNumber'    => (string) get_post_meta( $post->ID, self::TABLE_META, true ),
-                'internalComment'=> $internal_comment,
+				'internalComment'=> $internal_comment,
+				'formDetails'    => array(
+					'area'      => isset( $form_details['area'] ) ? sanitize_text_field( $form_details['area'] ) : '',
+					'table'     => isset( $form_details['table'] ) ? sanitize_text_field( $form_details['table'] ) : '',
+					'highchair' => ! empty( $form_details['highchair'] ),
+					'dog'       => ! empty( $form_details['dog'] ),
+					'allergies' => isset( $form_details['allergies'] ) ? sanitize_textarea_field( $form_details['allergies'] ) : '',
+				),
                 'editUrl'    => admin_url( 'admin.php?page=rtb-bookings' ),
             );
         }

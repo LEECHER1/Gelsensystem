@@ -17,12 +17,14 @@ async function readJsonResponse(response){
 
 document.querySelectorAll('[data-gdrf-form]').forEach(form=>{
   const date=form.elements.date,time=form.elements.time,party=form.elements.party;
+  const submissionToken=form.elements.submission_token;
   const msg=form.querySelector('[data-gdrf-message]');
   const btn=form.querySelector('button[type=submit]');
   const initialButtonText=btn.textContent;
   const dateNotice=form.querySelector('[data-gdrf-date-notice]');
   const dateBtn=form.querySelector('[data-gdrf-date-button]');
   const dateLabel=form.querySelector('[data-gdrf-date-label]');
+  const initialDateText=dateLabel.textContent;
   const calendar=form.querySelector('[data-gdrf-calendar]');
   const monthLabel=form.querySelector('[data-gdrf-month]');
   const daysWrap=form.querySelector('[data-gdrf-days]');
@@ -127,12 +129,13 @@ document.querySelectorAll('[data-gdrf-form]').forEach(form=>{
       msg.textContent=(j.data&&j.data.message)||'Die Anfrage konnte nicht gesendet werden.';
       msg.classList.add(j.success?'is-success':'is-error');
       if(j.success){
-        form.reset();date.value='';dateLabel.textContent='Datum auswählen';dateBtn.classList.remove('has-value');
+        form.reset();date.value='';dateLabel.textContent=initialDateText;dateBtn.classList.remove('has-value');
+        if(submissionToken){submissionToken.value=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;}
         time.disabled=true;time.innerHTML='<option value="">Zuerst Datum wählen</option>';availability={};renderCalendar();
         msg.scrollIntoView({behavior:'smooth',block:'center'});
       }
     }catch(err){
-      msg.textContent='Die Serverantwort konnte nicht verarbeitet werden. Bitte prüfen Sie, ob die Reservierung bereits eingegangen ist.';
+      msg.textContent=cfg.errorText||'Die Serverantwort konnte nicht verarbeitet werden. Bitte prüfen Sie, ob die Reservierung bereits eingegangen ist.';
       msg.classList.add('is-error');
     }finally{btn.disabled=false;btn.textContent=initialButtonText;}
   });

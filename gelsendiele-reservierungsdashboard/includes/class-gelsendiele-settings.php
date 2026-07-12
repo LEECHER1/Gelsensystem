@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 final class Gelsendiele_Settings {
 	const OPTION         = 'gelsendiele_settings';
-	const SCHEMA_VERSION = 2;
+	const SCHEMA_VERSION = 3;
 
 	private static $cache = null;
 
@@ -61,13 +61,82 @@ final class Gelsendiele_Settings {
 				'closed_dates' => array(),
 				'rules'        => array(),
 			),
+			'emails'         => array(
+				'reminder_hours' => 24,
+				'templates'      => self::email_template_defaults(),
+			),
 			'form'           => array(
 				'privacy_text' => 'Ich stimme der Verarbeitung meiner Angaben zur Bearbeitung der Reservierung zu.',
 				'success_text' => 'Vielen Dank! Ihre Reservierungsanfrage wurde übermittelt.',
+				'error_text'   => 'Bitte prüfen Sie Ihre Angaben und versuchen Sie es erneut.',
 				'button_text'  => 'Reservierung anfragen',
 				'headline'     => 'Tisch reservieren',
 				'intro'        => 'Wir freuen uns auf Ihren Besuch.',
+				'width'        => 860,
+				'theme_mode'   => 'inherit',
+				'primary_color'=> '',
+				'surface_color'=> '',
+				'text_color'   => '',
+				'fields'       => self::form_field_defaults(),
 			),
+		);
+	}
+
+	public static function email_template_defaults() {
+		return array(
+			'internal_new' => array(
+				'label' => 'Neue Reservierungsanfrage an den Betrieb', 'enabled' => 1, 'recipient' => 'internal', 'custom_recipient' => '', 'format' => 'text',
+				'subject' => 'Neue Reservierung: {guest_name} am {date}',
+				'body' => "Neue Reservierung\n\nName: {guest_name}\nDatum: {date}\nUhrzeit: {time}\nPersonen: {party}\nTelefon: {phone}\nE-Mail: {email}\nTisch: {table}\nBereich: {area}\nKinderstuhl: {highchair}\nHund: {dog}\nAllergien: {allergies}\nNachricht: {message}\nBuchungsnummer: {booking_id}",
+			),
+			'guest_received' => array(
+				'label' => 'Eingangsbestätigung an den Gast', 'enabled' => 1, 'recipient' => 'guest', 'custom_recipient' => '', 'format' => 'text',
+				'subject' => 'Ihre Reservierungsanfrage bei {business_name}',
+				'body' => "Hallo {guest_name},\n\nvielen Dank für Ihre Anfrage. Wir melden uns mit der Bestätigung.\n\nTermin: {date} um {time} Uhr\nPersonen: {party}\n\n{business_name}",
+			),
+			'guest_confirmed' => array(
+				'label' => 'Reservierung bestätigt', 'enabled' => 1, 'recipient' => 'guest', 'custom_recipient' => '', 'format' => 'text',
+				'subject' => 'Ihre Reservierung bei {business_name} ist bestätigt',
+				'body' => "Hallo {guest_name},\n\nIhre Reservierung ist bestätigt.\n\nTermin: {date} um {time} Uhr\nPersonen: {party}\nTisch: {table}\n\n{business_name}",
+			),
+			'guest_rejected' => array(
+				'label' => 'Reservierung abgelehnt', 'enabled' => 1, 'recipient' => 'guest', 'custom_recipient' => '', 'format' => 'text',
+				'subject' => 'Ihre Reservierungsanfrage bei {business_name}',
+				'body' => "Hallo {guest_name},\n\nleider können wir Ihre Reservierungsanfrage für {date} um {time} Uhr nicht annehmen.\n\n{business_name}",
+			),
+			'guest_changed' => array(
+				'label' => 'Reservierung geändert', 'enabled' => 1, 'recipient' => 'guest', 'custom_recipient' => '', 'format' => 'text',
+				'subject' => 'Ihre Reservierung bei {business_name} wurde geändert',
+				'body' => "Hallo {guest_name},\n\nIhre Reservierung wurde aktualisiert.\n\nTermin: {date} um {time} Uhr\nPersonen: {party}\nTisch: {table}\n\n{business_name}",
+			),
+			'guest_cancelled' => array(
+				'label' => 'Reservierung storniert', 'enabled' => 1, 'recipient' => 'guest', 'custom_recipient' => '', 'format' => 'text',
+				'subject' => 'Ihre Reservierung bei {business_name} wurde storniert',
+				'body' => "Hallo {guest_name},\n\nIhre Reservierung für {date} um {time} Uhr wurde storniert.\n\n{business_name}",
+			),
+			'guest_reminder' => array(
+				'label' => 'Erinnerung vor dem Termin', 'enabled' => 0, 'recipient' => 'guest', 'custom_recipient' => '', 'format' => 'text',
+				'subject' => 'Erinnerung an Ihre Reservierung bei {business_name}',
+				'body' => "Hallo {guest_name},\n\nwir erinnern Sie an Ihre Reservierung am {date} um {time} Uhr für {party} Personen.\n\n{business_name}",
+			),
+		);
+	}
+
+	public static function form_field_defaults() {
+		return array(
+			'date' => array( 'label' => 'Datum', 'enabled' => 1, 'required' => 1, 'locked' => 1 ),
+			'time' => array( 'label' => 'Uhrzeit', 'enabled' => 1, 'required' => 1, 'locked' => 1 ),
+			'party' => array( 'label' => 'Personen', 'enabled' => 1, 'required' => 1, 'locked' => 1 ),
+			'name' => array( 'label' => 'Name', 'enabled' => 1, 'required' => 1 ),
+			'email' => array( 'label' => 'E-Mail', 'enabled' => 1, 'required' => 1 ),
+			'phone' => array( 'label' => 'Telefon', 'enabled' => 1, 'required' => 1 ),
+			'message' => array( 'label' => 'Nachricht', 'enabled' => 1, 'required' => 0 ),
+			'area' => array( 'label' => 'Bereichswunsch', 'enabled' => 0, 'required' => 0 ),
+			'table' => array( 'label' => 'Tischwunsch', 'enabled' => 0, 'required' => 0 ),
+			'highchair' => array( 'label' => 'Kinderstuhl benötigt', 'enabled' => 0, 'required' => 0 ),
+			'dog' => array( 'label' => 'Hund kommt mit', 'enabled' => 0, 'required' => 0 ),
+			'allergies' => array( 'label' => 'Allergien und Unverträglichkeiten', 'enabled' => 0, 'required' => 0 ),
+			'privacy' => array( 'label' => 'Datenschutz', 'enabled' => 1, 'required' => 1 ),
 		);
 	}
 
@@ -409,13 +478,62 @@ final class Gelsendiele_Settings {
 			'rules'        => array_slice( $rules, 0, 500 ),
 		);
 
+		$email_defaults     = self::email_template_defaults();
+		$email_source       = isset( $settings['emails'] ) && is_array( $settings['emails'] ) ? $settings['emails'] : array();
+		$email_templates    = isset( $email_source['templates'] ) && is_array( $email_source['templates'] ) ? $email_source['templates'] : array();
+		$sanitized_templates = array();
+		foreach ( $email_defaults as $slug => $template_default ) {
+			$template = isset( $email_templates[ $slug ] ) && is_array( $email_templates[ $slug ] ) ? self::merge_recursive( $template_default, $email_templates[ $slug ] ) : $template_default;
+			$format   = in_array( $template['format'], array( 'text', 'html' ), true ) ? $template['format'] : 'text';
+			$recipient = in_array( $template['recipient'], array( 'internal', 'guest', 'custom' ), true ) ? $template['recipient'] : $template_default['recipient'];
+			$sanitized_templates[ $slug ] = array(
+				'label'            => $template_default['label'],
+				'enabled'          => ! empty( $template['enabled'] ) ? 1 : 0,
+				'recipient'        => $recipient,
+				'custom_recipient' => sanitize_email( $template['custom_recipient'] ),
+				'format'           => $format,
+				'subject'          => sanitize_text_field( $template['subject'] ),
+				'body'             => 'html' === $format ? wp_kses_post( $template['body'] ) : sanitize_textarea_field( $template['body'] ),
+			);
+		}
+		$settings['emails'] = array(
+			'reminder_hours' => max( 1, min( 336, absint( isset( $email_source['reminder_hours'] ) ? $email_source['reminder_hours'] : 24 ) ) ),
+			'templates'      => $sanitized_templates,
+		);
+
 		$form = $settings['form'];
+		$field_defaults = self::form_field_defaults();
+		$field_source   = isset( $form['fields'] ) && is_array( $form['fields'] ) ? $form['fields'] : array();
+		$fields         = array();
+		foreach ( $field_defaults as $slug => $field_default ) {
+			$field = isset( $field_source[ $slug ] ) && is_array( $field_source[ $slug ] ) ? self::merge_recursive( $field_default, $field_source[ $slug ] ) : $field_default;
+			$locked = ! empty( $field_default['locked'] );
+			$label  = sanitize_text_field( $field['label'] );
+			$fields[ $slug ] = array(
+				'label'    => '' !== $label ? $label : $field_default['label'],
+				'enabled'  => ( $locked || ! empty( $field['enabled'] ) ) ? 1 : 0,
+				'required' => ( $locked || ! empty( $field['required'] ) ) ? 1 : 0,
+			);
+			if ( $locked ) {
+				$fields[ $slug ]['locked'] = 1;
+			}
+			if ( empty( $fields[ $slug ]['enabled'] ) ) {
+				$fields[ $slug ]['required'] = 0;
+			}
+		}
 		$settings['form'] = array(
 			'privacy_text' => sanitize_textarea_field( $form['privacy_text'] ),
 			'success_text' => sanitize_textarea_field( $form['success_text'] ),
+			'error_text'   => sanitize_textarea_field( $form['error_text'] ),
 			'button_text'  => sanitize_text_field( $form['button_text'] ),
 			'headline'     => sanitize_text_field( $form['headline'] ),
 			'intro'        => sanitize_textarea_field( $form['intro'] ),
+			'width'        => max( 320, min( 1400, absint( $form['width'] ) ) ),
+			'theme_mode'   => in_array( $form['theme_mode'], array( 'inherit', 'light', 'dark' ), true ) ? $form['theme_mode'] : 'inherit',
+			'primary_color'=> self::optional_color( $form['primary_color'] ),
+			'surface_color'=> self::optional_color( $form['surface_color'] ),
+			'text_color'   => self::optional_color( $form['text_color'] ),
+			'fields'       => $fields,
 		);
 		$settings['schema_version'] = self::SCHEMA_VERSION;
 		return $settings;
@@ -568,5 +686,10 @@ final class Gelsendiele_Settings {
 	private static function color( $value, $fallback ) {
 		$color = sanitize_hex_color( $value );
 		return $color ? $color : $fallback;
+	}
+
+	private static function optional_color( $value ) {
+		$color = sanitize_hex_color( $value );
+		return $color ? $color : '';
 	}
 }

@@ -2,6 +2,8 @@
 
 Ein modulares WordPress-Gastronomiesystem für Reservierungen, Tischverwaltung, Service, Küche, Schank und Abrechnung. Das Plugin wird schrittweise von der historischen Five-Star-Kompatibilität zu einem vollständig eigenständigen, professionell releasebaren Produkt migriert.
 
+Der aktuelle Entwicklungsstand enthält außerdem zentrale White-Label-Einstellungen, Sondertage und Kapazitätsregeln, eigene E-Mail-Vorlagen sowie ein konfigurierbares öffentliches Reservierungsformular.
+
 ## Repository- und Release-Modell
 
 - `main` enthält ausschließlich geprüfte, freigegebene Versionen.
