@@ -2002,6 +2002,90 @@ html[data-gd-theme="dark"] .gelsensystem-user-card small { color:#aab7ac; }
   .gelsensystem-user-card .button { width:100%; }
   .gelsensystem-app-settings .gelsendiele-settings-card { padding:18px; }
 }
+
+/* ==========================================================
+   Version 2.5.0 – zentrale Speisekartenverwaltung
+   ========================================================== */
+.gelsensystem-menu-manager { display:grid;gap:24px;color:var(--gd-text); }
+.gelsensystem-menu-manager * { box-sizing:border-box; }
+.gelsensystem-menu-manager>.notice { margin:0;padding:12px 15px;border:1px solid var(--gd-border);border-left:4px solid var(--gd-green);border-radius:11px;background:#fff; }
+.gelsensystem-menu-manager>.notice-error { border-left-color:var(--gd-danger); }
+.gelsensystem-menu-manager>.notice p { margin:0; }
+.gelsensystem-menu-summary { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px; }
+.gelsensystem-menu-summary>div { display:grid;gap:2px;padding:18px 20px;border:1px solid var(--gd-border);border-radius:17px;background:#fff;box-shadow:0 6px 22px rgba(24,40,24,.04); }
+.gelsensystem-menu-summary strong { font-size:28px;line-height:1; }
+.gelsensystem-menu-summary span { color:var(--gd-muted);font-size:12px;font-weight:750; }
+.gelsensystem-menu-editor-grid { display:grid;grid-template-columns:minmax(280px,.72fr) minmax(480px,1.28fr);gap:18px;align-items:start; }
+.gelsensystem-menu-form,.gelsensystem-menu-inventory,.gelsensystem-category-list { padding:22px;border:1px solid var(--gd-border);border-radius:20px;background:#fff;box-shadow:0 8px 28px rgba(20,32,24,.05); }
+.gelsensystem-menu-form { display:grid;gap:16px; }
+.gelsensystem-menu-form>header,.gelsensystem-menu-inventory>header { display:flex;align-items:flex-start;justify-content:space-between;gap:18px; }
+.gelsensystem-menu-form header span,.gelsensystem-menu-inventory header span,.gelsensystem-category-list header>span { color:var(--gd-green);font-size:10px;font-weight:850;letter-spacing:1.2px;text-transform:uppercase; }
+.gelsensystem-menu-form h2,.gelsensystem-menu-inventory h2,.gelsensystem-category-list h2 { margin:3px 0 0;font-size:21px;line-height:1.2; }
+.gelsensystem-menu-form header a { color:var(--gd-green);font-size:12px;font-weight:750;text-decoration:none; }
+.gelsensystem-menu-form label { display:grid;gap:6px; }
+.gelsensystem-menu-form label>span { font-size:12px;font-weight:800; }
+.gelsensystem-menu-form input:not([type="checkbox"]),.gelsensystem-menu-form select,.gelsensystem-menu-form textarea { width:100%;min-height:44px;padding:9px 11px;border:1px solid var(--gd-border);border-radius:11px;color:var(--gd-text);background:#f9fbf9;font:inherit; }
+.gelsensystem-menu-form textarea { resize:vertical; }
+.gelsensystem-menu-form small,.gelsensystem-menu-hint { margin:0;color:var(--gd-muted);font-size:11px; }
+.gelsensystem-menu-form .button { display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border:1px solid var(--gd-border);border-radius:11px;color:var(--gd-text);background:#fff;font-weight:800;cursor:pointer; }
+.gelsensystem-menu-form .button-primary { color:#fff;border-color:var(--gd-green);background:var(--gd-green); }
+.gelsensystem-menu-form .button:disabled { cursor:not-allowed;opacity:.5; }
+.gelsensystem-menu-field-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px; }
+.gelsensystem-menu-wide { grid-column:1/-1; }
+.gelsensystem-menu-check { display:flex!important;align-items:center;gap:9px;min-height:44px; }
+.gelsensystem-menu-check input { width:19px;height:19px;margin:0;accent-color:var(--gd-green); }
+.gelsensystem-menu-inventory { display:grid;gap:18px; }
+.gelsensystem-menu-inventory>header p { max-width:480px;margin:2px 0 0;color:var(--gd-muted);font-size:12px;line-height:1.5;text-align:right; }
+.gelsensystem-menu-list { display:grid;gap:9px; }
+.gelsensystem-menu-list article { display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:18px;padding:14px 15px;border:1px solid var(--gd-border);border-radius:14px;background:#f9fbf9; }
+.gelsensystem-menu-list article.is-inactive { opacity:.62; }
+.gelsensystem-menu-item-main { display:grid;min-width:0; }
+.gelsensystem-menu-item-main>span { color:var(--gd-green);font-size:10px;font-weight:800;text-transform:uppercase; }
+.gelsensystem-menu-item-main>strong { margin-top:2px;font-size:15px; }
+.gelsensystem-menu-item-main>small { margin-top:3px;overflow:hidden;color:var(--gd-muted);text-overflow:ellipsis;white-space:nowrap; }
+.gelsensystem-menu-item-meta { display:flex;align-items:center;justify-content:flex-end;gap:8px;white-space:nowrap; }
+.gelsensystem-menu-item-meta>span { padding:5px 8px;border-radius:999px;color:var(--gd-muted);background:#eef3ee;font-size:10px;font-weight:750; }
+.gelsensystem-menu-item-meta .is-on { color:#24622b;background:#e6f4e5; }
+.gelsensystem-menu-item-meta .is-off { color:#6d5141;background:#f3ece5; }
+.gelsensystem-menu-list .button { display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 12px;border:1px solid var(--gd-border);border-radius:10px;color:var(--gd-green);background:#fff;text-decoration:none;font-size:11px;font-weight:800; }
+.gelsensystem-menu-empty { display:grid;gap:5px;padding:28px;border:1px dashed var(--gd-border);border-radius:15px;color:var(--gd-muted);text-align:center; }
+.gelsensystem-menu-empty strong { color:var(--gd-text); }
+.gelsensystem-category-list { display:grid;gap:15px; }
+.gelsensystem-category-list>div { display:flex;flex-wrap:wrap;gap:9px; }
+.gelsensystem-category-list a { display:grid;gap:2px;min-width:150px;padding:11px 13px;border:1px solid var(--gd-border);border-radius:12px;color:var(--gd-text);background:#f9fbf9;text-decoration:none; }
+.gelsensystem-category-list a.is-inactive { opacity:.58; }
+.gelsensystem-category-list small { color:var(--gd-muted);font-size:10px; }
+html[data-gd-theme="dark"] .gelsensystem-menu-summary>div,
+html[data-gd-theme="dark"] .gelsensystem-menu-form,
+html[data-gd-theme="dark"] .gelsensystem-menu-inventory,
+html[data-gd-theme="dark"] .gelsensystem-category-list,
+html[data-gd-theme="dark"] .gelsensystem-menu-manager>.notice { color:#eef3ee;border-color:#344137;background:#151d17; }
+html[data-gd-theme="dark"] .gelsensystem-menu-form input:not([type="checkbox"]),
+html[data-gd-theme="dark"] .gelsensystem-menu-form select,
+html[data-gd-theme="dark"] .gelsensystem-menu-form textarea,
+html[data-gd-theme="dark"] .gelsensystem-menu-list article,
+html[data-gd-theme="dark"] .gelsensystem-category-list a { color:#eef3ee;border-color:#3c4a3f;background:#101712; }
+html[data-gd-theme="dark"] .gelsensystem-menu-list .button { color:#b9deb5;border-color:#405442;background:#1b261d; }
+html[data-gd-theme="dark"] .gelsensystem-menu-item-meta>span { background:#222d24; }
+html[data-gd-theme="dark"] .gelsensystem-menu-item-meta .is-on { color:#b8deb4;background:#203521; }
+html[data-gd-theme="dark"] .gelsensystem-menu-item-meta .is-off { color:#dec0aa;background:#38291f; }
+
+@media (max-width:900px) {
+  .gelsensystem-menu-editor-grid { grid-template-columns:1fr; }
+  .gelsensystem-menu-inventory>header { display:grid; }
+  .gelsensystem-menu-inventory>header p { text-align:left; }
+}
+@media (max-width:620px) {
+  .gelsensystem-menu-summary { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .gelsensystem-menu-summary>div { padding:14px 12px; }
+  .gelsensystem-menu-summary strong { font-size:23px; }
+  .gelsensystem-menu-form,.gelsensystem-menu-inventory,.gelsensystem-category-list { padding:17px;border-radius:17px; }
+  .gelsensystem-menu-field-grid { grid-template-columns:1fr; }
+  .gelsensystem-menu-wide { grid-column:auto; }
+  .gelsensystem-menu-list article { grid-template-columns:1fr auto;gap:12px; }
+  .gelsensystem-menu-item-main { grid-column:1/-1; }
+  .gelsensystem-menu-item-meta { justify-content:flex-start;flex-wrap:wrap; }
+}
 .gd-form-preferences{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:8px}.gd-form-preferences span{display:inline-flex;padding:7px 10px;border-radius:9px;background:rgba(23,155,87,.08);line-height:1.35}.gd-form-preferences strong{margin-right:4px}
 
 /* ==========================================================

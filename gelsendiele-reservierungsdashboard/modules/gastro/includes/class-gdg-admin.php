@@ -35,6 +35,20 @@ final class GDG_Admin {
 	}
 
 	private static function redirect( string $page, string $notice = 'saved' ): void {
+		if ( isset( $_POST['gdg_context'] ) && 'app' === sanitize_key( wp_unslash( $_POST['gdg_context'] ) ) ) {
+			$page_id       = (int) get_option( 'gd_reservierungsdashboard_page_id', 0 );
+			$dashboard_url = $page_id ? get_permalink( $page_id ) : home_url( '/reservierungsverwaltung/' );
+			wp_safe_redirect(
+				add_query_arg(
+					array(
+						'gd-section' => 'menu',
+						'gdg_notice' => $notice,
+					),
+					$dashboard_url
+				)
+			);
+			exit;
+		}
 		wp_safe_redirect( add_query_arg( array( 'page' => $page, 'gdg_notice' => $notice ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
@@ -247,6 +261,90 @@ final class GDG_Admin {
 			</tbody></table>
 			<h2 style="margin-top:28px">Kategorien</h2>
 			<p><?php foreach ( $categories as $category ) : ?><a class="button" style="margin:0 6px 6px 0" href="<?php echo esc_url( add_query_arg( array( 'page' => 'gdg-menu', 'edit_cat' => $category['id'] ), admin_url( 'admin.php' ) ) ); ?>"><?php echo esc_html( $category['name'] ); ?></a><?php endforeach; ?></p>
+		</div>
+		<?php
+	}
+
+	/** Rendert die Speisekartenpflege innerhalb der zentralen Gelsensystem-App. */
+	public static function render_app_menu( string $dashboard_url ): void {
+		self::guard();
+		global $wpdb;
+
+		$categories  = GDG_DB::get_categories( false );
+		$items       = GDG_DB::get_menu_items( false );
+		$edit_cat_id = isset( $_GET['edit_cat'] ) ? absint( $_GET['edit_cat'] ) : 0;
+		$edit_item_id = isset( $_GET['edit_item'] ) ? absint( $_GET['edit_item'] ) : 0;
+		$edit_cat    = $edit_cat_id ? $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . GDG_DB::table( 'menu_categories' ) . ' WHERE id = %d', $edit_cat_id ), ARRAY_A ) : null;
+		$edit_item   = $edit_item_id ? $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . GDG_DB::table( 'menu_items' ) . ' WHERE id = %d', $edit_item_id ), ARRAY_A ) : null;
+		$app_url     = add_query_arg( 'gd-section', 'menu', $dashboard_url );
+		$active_items = count(
+			array_filter(
+				$items,
+				static function ( $item ) {
+					return ! empty( $item['active'] );
+				}
+			)
+		);
+		?>
+		<div class="gelsensystem-menu-manager">
+			<header class="gelsensystem-section-heading">
+				<div><span>Gastronomie</span><h1>Speisekarte</h1><p>Kategorien, Gerichte, Getränke, Preise und Ausgabe zentral verwalten.</p></div>
+			</header>
+			<?php self::notice(); ?>
+			<section class="gelsensystem-menu-summary" aria-label="Speisekartenübersicht">
+				<div><strong><?php echo esc_html( (string) count( $categories ) ); ?></strong><span>Kategorien</span></div>
+				<div><strong><?php echo esc_html( (string) count( $items ) ); ?></strong><span>Einträge</span></div>
+				<div><strong><?php echo esc_html( (string) $active_items ); ?></strong><span>Aktiv</span></div>
+			</section>
+
+			<div class="gelsensystem-menu-editor-grid">
+				<form method="post" class="gelsensystem-menu-form">
+					<header><div><span>Kategorie</span><h2><?php echo esc_html( $edit_cat ? 'Kategorie bearbeiten' : 'Kategorie hinzufügen' ); ?></h2></div><?php if ( $edit_cat ) : ?><a href="<?php echo esc_url( $app_url ); ?>">Abbrechen</a><?php endif; ?></header>
+					<?php wp_nonce_field( 'gdg_admin_action', 'gdg_nonce' ); ?>
+					<input type="hidden" name="gdg_action" value="save_category"><input type="hidden" name="gdg_context" value="app"><input type="hidden" name="id" value="<?php echo esc_attr( $edit_cat['id'] ?? 0 ); ?>">
+					<label><span>Name *</span><input name="name" required maxlength="120" value="<?php echo esc_attr( $edit_cat['name'] ?? '' ); ?>" placeholder="z. B. Hauptspeisen"></label>
+					<label><span>Reihenfolge</span><input type="number" name="sort_order" value="<?php echo esc_attr( $edit_cat['sort_order'] ?? 0 ); ?>" inputmode="numeric"><small>Kleinere Zahlen erscheinen zuerst.</small></label>
+					<label class="gelsensystem-menu-check"><input type="checkbox" name="active" value="1" <?php checked( ! isset( $edit_cat['active'] ) || (int) $edit_cat['active'] === 1 ); ?>><span>In der Speisekarte anzeigen</span></label>
+					<button type="submit" class="button button-primary"><?php echo esc_html( $edit_cat ? 'Kategorie speichern' : 'Kategorie hinzufügen' ); ?></button>
+				</form>
+
+				<form method="post" class="gelsensystem-menu-form gelsensystem-menu-item-form">
+					<header><div><span>Artikel</span><h2><?php echo esc_html( $edit_item ? 'Eintrag bearbeiten' : 'Gericht oder Getränk hinzufügen' ); ?></h2></div><?php if ( $edit_item ) : ?><a href="<?php echo esc_url( $app_url ); ?>">Abbrechen</a><?php endif; ?></header>
+					<?php wp_nonce_field( 'gdg_admin_action', 'gdg_nonce' ); ?>
+					<input type="hidden" name="gdg_action" value="save_menu_item"><input type="hidden" name="gdg_context" value="app"><input type="hidden" name="id" value="<?php echo esc_attr( $edit_item['id'] ?? 0 ); ?>">
+					<div class="gelsensystem-menu-field-grid">
+						<label><span>Kategorie *</span><select name="category_id" required><option value="">Bitte wählen</option><?php foreach ( $categories as $category ) : ?><option value="<?php echo esc_attr( $category['id'] ); ?>" <?php selected( $edit_item['category_id'] ?? 0, $category['id'] ); ?>><?php echo esc_html( $category['name'] ); ?></option><?php endforeach; ?></select></label>
+						<label><span>Name *</span><input name="name" required maxlength="180" value="<?php echo esc_attr( $edit_item['name'] ?? '' ); ?>" placeholder="z. B. Wiener Schnitzel"></label>
+						<label class="gelsensystem-menu-wide"><span>Beschreibung</span><textarea rows="3" name="description" placeholder="Kurze Beschreibung oder Beilagen"><?php echo esc_textarea( $edit_item['description'] ?? '' ); ?></textarea></label>
+						<label><span>Preis (€) *</span><input type="number" step="0.01" min="0" name="price" required value="<?php echo esc_attr( $edit_item['price'] ?? '0.00' ); ?>" inputmode="decimal"></label>
+						<label><span>Ausgabe</span><select name="station"><option value="kitchen" <?php selected( $edit_item['station'] ?? 'kitchen', 'kitchen' ); ?>>Küche</option><option value="bar" <?php selected( $edit_item['station'] ?? '', 'bar' ); ?>>Schank</option></select></label>
+						<label><span>Reihenfolge</span><input type="number" name="sort_order" value="<?php echo esc_attr( $edit_item['sort_order'] ?? 0 ); ?>" inputmode="numeric"></label>
+						<label class="gelsensystem-menu-check"><input type="checkbox" name="active" value="1" <?php checked( ! isset( $edit_item['active'] ) || (int) $edit_item['active'] === 1 ); ?>><span>Im Service anzeigen</span></label>
+					</div>
+					<button type="submit" class="button button-primary" <?php disabled( empty( $categories ) ); ?>><?php echo esc_html( $edit_item ? 'Eintrag speichern' : 'Eintrag hinzufügen' ); ?></button>
+					<?php if ( empty( $categories ) ) : ?><p class="gelsensystem-menu-hint">Lege zuerst eine Kategorie an.</p><?php endif; ?>
+				</form>
+			</div>
+
+			<section class="gelsensystem-menu-inventory">
+				<header><div><span>Aktuelle Auswahl</span><h2>Vorhandene Einträge</h2></div><p>Einträge werden deaktiviert statt gelöscht, damit bestehende Bestellungen nachvollziehbar bleiben.</p></header>
+				<?php if ( $items ) : ?>
+					<div class="gelsensystem-menu-list">
+						<?php foreach ( $items as $item ) : ?>
+							<article class="<?php echo empty( $item['active'] ) ? 'is-inactive' : ''; ?>">
+								<div class="gelsensystem-menu-item-main"><span><?php echo esc_html( $item['category_name'] ?: 'Ohne Kategorie' ); ?></span><strong><?php echo esc_html( $item['name'] ); ?></strong><?php if ( $item['description'] ) : ?><small><?php echo esc_html( $item['description'] ); ?></small><?php endif; ?></div>
+								<div class="gelsensystem-menu-item-meta"><strong><?php echo esc_html( number_format_i18n( (float) $item['price'], 2 ) ); ?> €</strong><span><?php echo 'bar' === $item['station'] ? 'Schank' : 'Küche'; ?></span><span class="<?php echo empty( $item['active'] ) ? 'is-off' : 'is-on'; ?>"><?php echo empty( $item['active'] ) ? 'Deaktiviert' : 'Aktiv'; ?></span></div>
+								<a class="button" href="<?php echo esc_url( add_query_arg( 'edit_item', $item['id'], $app_url ) ); ?>">Bearbeiten</a>
+							</article>
+						<?php endforeach; ?>
+					</div>
+				<?php else : ?><div class="gelsensystem-menu-empty"><strong>Noch keine Speisen oder Getränke angelegt.</strong><span>Erstelle oben zuerst eine Kategorie und danach den ersten Eintrag.</span></div><?php endif; ?>
+			</section>
+
+			<section class="gelsensystem-category-list">
+				<header><span>Kategorien</span><h2>Sortierung und Sichtbarkeit</h2></header>
+				<div><?php foreach ( $categories as $category ) : ?><a class="<?php echo empty( $category['active'] ) ? 'is-inactive' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'edit_cat', $category['id'], $app_url ) ); ?>"><strong><?php echo esc_html( $category['name'] ); ?></strong><small><?php echo empty( $category['active'] ) ? 'Deaktiviert' : 'Aktiv'; ?> · Position <?php echo esc_html( (string) $category['sort_order'] ); ?></small></a><?php endforeach; ?></div>
+			</section>
 		</div>
 		<?php
 	}
