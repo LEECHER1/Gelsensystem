@@ -11,6 +11,7 @@ test -f "$PLUGIN/includes/class-gelsendiele-availability.php"
 test -f "$PLUGIN/includes/class-gelsensystem-email.php"
 test -f "$PLUGIN/includes/class-gelsendiele-migrator.php"
 test -f "$PLUGIN/includes/class-gelsendiele-admin.php"
+test -f "$PLUGIN/includes/class-gelsendiele-github-updater.php"
 
 VERSION="$(sed -n 's/^ \* Version: \([0-9][0-9.]*\)$/\1/p' "$ENTRY" | head -n 1)"
 CONSTANT_VERSION="$(sed -n "s/.*define( 'GELSENDIELE_VERSION', '\([^']*\)' ).*/\1/p" "$ENTRY" | head -n 1)"
@@ -36,6 +37,16 @@ fi
 
 if ! grep -Fq '.gdrf-theme-light' "$PLUGIN/assets/reservation-form.css"; then
   echo "Der explizite helle Formularstil fehlt." >&2
+  exit 1
+fi
+
+if ! grep -Fq 'api.github.com/repos/LEECHER1/Gelsendiele/releases/latest' "$PLUGIN/includes/class-gelsendiele-github-updater.php"; then
+  echo "Die vertrauenswürdige GitHub-Releasequelle fehlt." >&2
+  exit 1
+fi
+
+if ! grep -Fq "add_filter( 'auto_update_plugin'" "$PLUGIN/includes/class-gelsendiele-github-updater.php"; then
+  echo "Die automatische Gelsensystem-Aktualisierung fehlt." >&2
   exit 1
 fi
 

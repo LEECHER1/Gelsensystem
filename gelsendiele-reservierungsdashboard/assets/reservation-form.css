@@ -4,3 +4,37 @@
 .gdrf-theme-light{color-scheme:light;--gd-bg:#fff;--gd-text:#17221b;--gd-muted:#66756c}.gdrf-theme-light .gdrf-form{background:#fff!important;color:#17221b!important;border-color:rgba(20,55,36,.12)!important}.gdrf-theme-light .gdrf-form input,.gdrf-theme-light .gdrf-form select,.gdrf-theme-light .gdrf-form textarea,.gdrf-theme-light .gdrf-picker-button,.gdrf-theme-light .gdrf-option{border-color:#d8e1dc!important;background:#f8faf9!important;color:#17221b!important}.gdrf-theme-light .gdrf-picker-button:hover,.gdrf-theme-light .gdrf-picker-button:focus,.gdrf-theme-light .gdrf-form input:focus,.gdrf-theme-light .gdrf-form select:focus,.gdrf-theme-light .gdrf-form textarea:focus{border-color:var(--gd-accent)!important;background:#fff!important;color:#17221b!important}.gdrf-theme-light .gdrf-calendar{border-color:#d8e1dc!important;background:#fff!important;color:#17221b!important}.gdrf-theme-light .gdrf-calendar-head button,.gdrf-theme-light .gdrf-day.is-disabled{background:#f1f5f2!important}.gdrf-theme-light .gdrf-day{color:#17221b!important}.gdrf-theme-light .gdrf-day.is-selected{color:#fff!important}
 .gdrf-option{display:flex!important;min-height:52px;align-items:center;flex-direction:row!important;gap:10px!important;padding:12px 14px;border:1px solid #d8e1dc;border-radius:13px;background:#f8faf9}.gdrf-option input{width:20px!important;height:20px;flex:0 0 auto}.gdrf-theme-dark{--gd-muted:#b9c6be}.gdrf-theme-dark .gdrf-form{border-color:rgba(255,255,255,.16)}.gdrf-theme-dark .gdrf-form input,.gdrf-theme-dark .gdrf-form select,.gdrf-theme-dark .gdrf-form textarea,.gdrf-theme-dark .gdrf-picker-button,.gdrf-theme-dark .gdrf-option{border-color:#405249;background:#15241c;color:#f4f7f5}.gdrf-theme-dark .gdrf-calendar{border-color:#405249;background:#15241c;color:#f4f7f5}.gdrf-theme-dark .gdrf-calendar-head button,.gdrf-theme-dark .gdrf-day.is-disabled{background:#24352b}.gdrf-theme-dark .gdrf-day{color:#f4f7f5}.gdrf-theme-dark .gdrf-day.is-disabled{color:#748279}.gdrf-theme-dark .gdrf-form input:focus,.gdrf-theme-dark .gdrf-form select:focus,.gdrf-theme-dark .gdrf-form textarea:focus{background:#1c3025}
 @media(prefers-color-scheme:dark){.gdrf-theme-auto{--gd-bg:var(--gd-dark-bg);--gd-text:#f4f7f5;--gd-muted:#b9c6be}.gdrf-theme-auto .gdrf-form{border-color:rgba(255,255,255,.16)}.gdrf-theme-auto .gdrf-form input,.gdrf-theme-auto .gdrf-form select,.gdrf-theme-auto .gdrf-form textarea,.gdrf-theme-auto .gdrf-picker-button,.gdrf-theme-auto .gdrf-option{border-color:#405249;background:#15241c;color:#f4f7f5}.gdrf-theme-auto .gdrf-calendar{border-color:#405249;background:#15241c;color:#f4f7f5}.gdrf-theme-auto .gdrf-calendar-head button,.gdrf-theme-auto .gdrf-day.is-disabled{background:#24352b}.gdrf-theme-auto .gdrf-day{color:#f4f7f5}.gdrf-theme-auto .gdrf-day.is-disabled{color:#748279}}
+
+/* Compact desktop form. Kept as overrides so the mobile layout remains readable. */
+.gdrf-shell { margin: 12px auto; }
+.gdrf-form {
+  border-radius: 22px;
+  padding: clamp(16px, 2.2vw, 28px);
+  box-shadow: 0 14px 42px rgba(25, 56, 38, .09);
+}
+.gdrf-head { margin-bottom: 16px; }
+.gdrf-eyebrow { font-size: .72rem; letter-spacing: .15em; }
+.gdrf-head h2 { margin: .25rem 0 .35rem; font-size: clamp(1.65rem, 3vw, 2.55rem); line-height: 1.02; }
+.gdrf-head p { font-size: .94rem; }
+.gdrf-grid { gap: 11px 16px; }
+.gdrf-grid label { gap: 5px; }
+.gdrf-grid label > span { font-size: .84rem; }
+.gdrf-form input,
+.gdrf-form select,
+.gdrf-form textarea { padding: 10px 12px; border-radius: 11px; }
+.gdrf-form textarea { line-height: 1.35; resize: vertical; }
+.gdrf-picker-button { min-height: 43px; padding: 10px 12px; border-radius: 11px; }
+.gdrf-consent { gap: 9px; margin: 12px 0; font-size: .82rem; line-height: 1.35; }
+.gdrf-consent input { width: 18px; height: 18px; margin-top: 0; }
+.gdrf-submit { padding: 12px 20px; border-radius: 12px; box-shadow: 0 8px 18px rgba(23, 155, 87, .2); }
+.gdrf-message { margin-top: 10px; }
+.gdrf-date-notice { margin-top: 0; padding: 0; border-radius: 0; background: transparent; color: #7b877f; font-size: .72rem; }
+.gdrf-date-notice:not([hidden])::before { content: "* "; }
+.gdrf-date-notice[hidden] { display: none !important; }
+
+@media (max-width: 640px) {
+  .gdrf-shell { margin: 8px auto; }
+  .gdrf-grid { gap: 12px; }
+  .gdrf-form { padding: 18px; }
+  .gdrf-head { margin-bottom: 18px; }
+}

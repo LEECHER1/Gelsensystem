@@ -2,7 +2,7 @@
 Contributors: Andreas Schwarz / OpenAI
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.3.2
+Stable tag: 2.3.3
 
 Eigenständiges Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für die Gelsendiele.
 
@@ -37,6 +37,11 @@ Das Zahlungsmodul dokumentiert Bar- und Kartenzahlungen, ist aber noch keine RKS
 Installierbare ZIP-Dateien werden aus einem geprüften Git-Tag erstellt. Vor jedem Produktivupdate sind WordPress-Dateien und Datenbank vollständig zu sichern.
 
 == Changelog ==
+
+= 2.3.3 =
+* Das Reservierungsformular ist auf Desktop kompakter und benötigt deutlich weniger Bildschirmhöhe.
+* Der Verfügbarkeitshinweis ist schlichter Text mit Sternchen; die leere gelbe Hinweisleiste entfällt.
+* Neue offizielle GitHub-Releases werden über den nativen WordPress-Updater automatisch erkannt und eingespielt.
 
 = 2.3.2 =
 * Das öffentliche Reservierungsformular besitzt keinen zweiten Logoblock mehr; das Navigationslogo bleibt unverändert.
