@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.5
+- Kontextabhängiger Speichern-Button verhindert den Frontend-Aufruf der ausschließlich im WordPress-Admin verfügbaren Funktion `submit_button()`.
+- Alle sechs app-internen Einstellungsformulare werden dadurch vollständig und ohne PHP-Fehler gerendert.
+
 ## 2.4.4
 - Zentrale App-Skripte werden in Einstellungs- und Benutzerbereichen registriert, mit `defer` versehen und im Dokumentkopf ausgegeben.
 - Direkte Script-Tags entfallen, damit Sicherheits- und Optimierungsfilter des aktiven Themes die Initialisierung nicht entfernen.

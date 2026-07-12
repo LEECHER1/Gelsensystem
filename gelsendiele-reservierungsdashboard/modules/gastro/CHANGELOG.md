@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.4.5 – 2026-07-12
+- Gemeinsame Patchversion mit vollständig frontendkompatiblen Einstellungsformularen.
+
 ## 2.4.4 – 2026-07-12
 - Gemeinsame Patchversion mit WordPress-konformer Script-Strategie der zentralen App.
 

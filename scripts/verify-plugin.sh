@@ -60,6 +60,11 @@ if ! grep -Fq "wp_script_add_data( 'gelsendiele-settings', 'strategy', 'defer' )
   exit 1
 fi
 
+if grep -nE '<\?php[[:space:]]+submit_button\(' "$PLUGIN/includes/class-gelsendiele-admin.php"; then
+  echo "Einstellungsformulare dürfen submit_button() nicht direkt im Frontend aufrufen." >&2
+  exit 1
+fi
+
 if grep -RqsE 'Gelsendiele (Betriebsleitung|Service|Küche|Schank|Reservierungsmitarbeiter)' "$PLUGIN"; then
   echo "Historische Gelsendiele-Rollenbezeichnungen sind noch sichtbar." >&2
   exit 1
