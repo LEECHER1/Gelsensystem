@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.8.0 – 2026-07-12
+
+- Gemeinsame Tablet- und Desktop-UX der Reservierungszentrale vereinfacht.
+- Dark-Mode-Kontrast der Reservierungszähler korrigiert.
+
 ## 2.7.2 – 2026-07-12
 
 - Gemeinsame responsive Korrektur für Smartphone- und Tablet-Breiten.

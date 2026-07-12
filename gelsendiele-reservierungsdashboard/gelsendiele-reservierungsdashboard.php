@@ -3,7 +3,7 @@
  * Plugin Name: Gelsensystem
  * Plugin URI: https://github.com/LEECHER1/Gelsensystem
  * Description: Zentrales Reservierungs-, Service-, Küchen- und Kassensystem für Gastronomiebetriebe.
- * Version: 2.7.2
+ * Version: 2.8.0
  * Author: Andreas Schwarz / Gelsensystem
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.7.2' );
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.8.0' );
 defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
 defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );
@@ -522,8 +522,9 @@ final class Gelsendiele_Reservierungsdashboard {
                     <button type="button" class="gd-icon-button" data-refresh aria-label="Reservierungen aktualisieren">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0-14.7-4.7L3 9m0 0V4m0 5h5M4 13a8.1 8.1 0 0 0 14.7 4.7L21 15m0 0v5m0-5h-5"/></svg>
                     </button>
-                    <button type="button" class="gd-icon-button" data-open-more aria-label="Weitere Einstellungen öffnen">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>
+                    <button type="button" class="gd-icon-button gd-appbar-more-button" data-open-more aria-label="Einstellungen und Werkzeuge öffnen" title="Einstellungen und Werkzeuge">
+                        <svg class="gd-more-icon-dots" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>
+                        <svg class="gd-more-icon-settings" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>
                     </button>
                 </div>
             </header>
@@ -534,15 +535,21 @@ final class Gelsendiele_Reservierungsdashboard {
                     <h1>Reservierungen</h1>
                     <p>Anfragen schnell prüfen, bestätigen oder ablehnen.</p>
                 </div>
-                <div class="gd-user-menu">
-                    <button type="button" class="gd-icon-button gd-theme-button gd-desktop-theme-button" data-theme-button aria-label="Darstellung wechseln" title="Hell-/Dunkelmodus">
-                        <svg class="gd-theme-icon gd-theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
-                        <svg class="gd-theme-icon gd-theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                <div class="gd-header-actions">
+                    <button type="button" class="gd-desktop-settings-button" data-open-more>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>
+                        <span>Einstellungen</span>
                     </button>
-                    <span class="gd-user-avatar"><?php echo esc_html( strtoupper( mb_substr( $user->display_name, 0, 1 ) ) ); ?></span>
-                    <div>
-                        <strong><?php echo esc_html( $user->display_name ); ?></strong>
-                        <a href="<?php echo esc_url( $logout_url ); ?>">Abmelden</a>
+                    <div class="gd-user-menu">
+                        <button type="button" class="gd-icon-button gd-theme-button gd-desktop-theme-button" data-theme-button aria-label="Darstellung wechseln" title="Hell-/Dunkelmodus">
+                            <svg class="gd-theme-icon gd-theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
+                            <svg class="gd-theme-icon gd-theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                        </button>
+                        <span class="gd-user-avatar"><?php echo esc_html( strtoupper( mb_substr( $user->display_name, 0, 1 ) ) ); ?></span>
+                        <div>
+                            <strong><?php echo esc_html( $user->display_name ); ?></strong>
+                            <a href="<?php echo esc_url( $logout_url ); ?>">Abmelden</a>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -555,33 +562,6 @@ final class Gelsendiele_Reservierungsdashboard {
                 <button class="gd-tab gd-view-button" data-view="all">Alle</button>
             </nav>
 
-            <section class="gd-automation-panel gd-desktop-only">
-                <div>
-                    <strong>Automatische Bestätigung</strong>
-                    <p>Neue Reservierungsanfragen sofort bestätigen und die Bestätigungs-E-Mail versenden.</p>
-                </div>
-                <label class="gd-switch">
-                    <input type="checkbox" data-auto-confirm <?php checked( (bool) get_option( self::AUTO_CONFIRM_OPTION, false ) ); ?>>
-                    <span class="gd-switch-slider" aria-hidden="true"></span>
-                    <span class="screen-reader-text">Automatische Bestätigung aktivieren</span>
-                </label>
-                <span class="gd-setting-feedback" data-auto-confirm-feedback aria-live="polite"></span>
-            </section>
-
-            <section class="gd-automation-panel gd-desktop-only">
-                <div>
-                    <strong>Automatische Aktualisierung</strong>
-                    <p>Reservierungen regelmäßig im Hintergrund neu laden.</p>
-                </div>
-                <label class="gd-select-setting">
-                    <span class="screen-reader-text">Aktualisierungsintervall</span>
-                    <select data-refresh-interval>
-                        <?php echo $this->render_refresh_interval_options(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-                    </select>
-                </label>
-                <span class="gd-setting-feedback" data-refresh-interval-feedback aria-live="polite"></span>
-            </section>
-
             <div class="gd-toolbar">
                 <label class="gd-search">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
@@ -591,8 +571,6 @@ final class Gelsendiele_Reservierungsdashboard {
                 </label>
                 <div class="gd-toolbar-actions gd-desktop-only">
                     <button type="button" class="gd-manual-add-desktop" data-open-manual-booking><span aria-hidden="true">＋</span> Reservierung hinzufügen</button>
-                    <button type="button" class="gd-export gd-export-csv" data-export-csv>CSV exportieren</button>
-                    <button type="button" class="gd-export gd-export-xlsx" data-export-xlsx>Excel exportieren</button>
                     <button type="button" class="gd-refresh" data-refresh>Aktualisieren</button>
                 </div>
             </div>
@@ -636,7 +614,7 @@ final class Gelsendiele_Reservierungsdashboard {
                     <header class="gd-sheet-header">
                         <div>
                             <span class="gd-eyebrow">Verwaltung</span>
-                            <h2 id="gd-more-title">Mehr</h2>
+                            <h2 id="gd-more-title">Einstellungen &amp; Werkzeuge</h2>
                         </div>
                         <button type="button" class="gd-sheet-close" data-close-more aria-label="Einstellungsmenü schließen" title="Schließen">
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
