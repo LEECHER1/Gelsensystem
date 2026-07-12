@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.10.0 – 2026-07-12
+
+- Einklappbare Desktop-Seitenleiste für alle Gastro-Arbeitsbereiche ergänzt.
+- Öffentliche dynamische Speisekarte als responsiver WordPress-Shortcode ergänzt.
+
 ## 2.9.0 – 2026-07-12
 
 - Gemeinsamer Fokusmodus mit einklappbarer Seitenleiste und Karten ergänzt.

@@ -9,6 +9,7 @@
   const loading = app.querySelector('.gdg-loading');
   const connection = app.querySelector('.gdg-connection');
   const themeButton = app.querySelector('[data-gdg-theme-toggle]');
+  const navToggle = app.querySelector('[data-gdg-nav-toggle]');
   const themeColorMeta = document.getElementById('gdg-theme-color');
   const systemDarkMode = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
   let followsSystemTheme = false;
@@ -123,6 +124,26 @@
     }
   }
 
+  function setupNavigation() {
+    let collapsed = false;
+    try { collapsed = window.localStorage.getItem('gd-sidebar-collapsed') === '1'; } catch (_) {}
+
+    const applyNavigation = (value) => {
+      collapsed = Boolean(value);
+      app.classList.toggle('is-nav-collapsed', collapsed);
+      if (navToggle) {
+        navToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        navToggle.setAttribute('aria-label', collapsed ? 'Menü ausklappen' : 'Menü einklappen');
+      }
+    };
+
+    applyNavigation(collapsed);
+    navToggle?.addEventListener('click', () => {
+      applyNavigation(!collapsed);
+      try { window.localStorage.setItem('gd-sidebar-collapsed', collapsed ? '1' : '0'); } catch (_) {}
+    });
+  }
+
   function storedTheme() {
     try {
       const shared = window.localStorage.getItem('gd-dashboard-theme');
@@ -195,6 +216,7 @@
 
   async function init() {
     setupTheme();
+    setupNavigation();
     try {
       await refreshBootstrap(false);
       showScreen();

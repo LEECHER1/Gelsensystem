@@ -9,6 +9,70 @@ final class GDG_App {
 
 	public static function register_shortcode(): void {
 		add_shortcode( 'gelsendiele_gastro', array( __CLASS__, 'shortcode' ) );
+		add_shortcode( 'gelsensystem_speisekarte', array( __CLASS__, 'public_menu_shortcode' ) );
+	}
+
+	/** Öffentliche, immer aus den aktiven Gelsensystem-Daten erzeugte Speisekarte. */
+	public static function public_menu_shortcode( array $atts = array() ): string {
+		$atts = shortcode_atts(
+			array(
+				'title'        => 'Unsere Speisekarte',
+				'intro'        => '',
+				'category_nav' => 'yes',
+				'columns'      => '2',
+			),
+			$atts,
+			'gelsensystem_speisekarte'
+		);
+
+		$categories = GDG_DB::get_categories( true );
+		$items      = GDG_DB::get_menu_items( true );
+		$grouped    = array();
+		foreach ( $items as $item ) {
+			$grouped[ (int) $item['category_id'] ][] = $item;
+		}
+
+		wp_enqueue_style( 'gdg-public-menu', GDG_URL . 'assets/public-menu.css', array(), GDG_VERSION );
+		$instance      = wp_unique_id( 'gdg-menu-' );
+		$business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
+		$columns       = '1' === (string) $atts['columns'] ? 1 : 2;
+
+		ob_start();
+		?>
+		<section class="gdg-public-menu gdg-public-menu--columns-<?php echo esc_attr( (string) $columns ); ?>" style="<?php echo esc_attr( Gelsendiele_Settings::css_variables() ); ?>" aria-labelledby="<?php echo esc_attr( $instance . '-title' ); ?>">
+			<header class="gdg-public-menu__intro">
+				<span><?php echo esc_html( $business_name ); ?></span>
+				<h2 id="<?php echo esc_attr( $instance . '-title' ); ?>"><?php echo esc_html( $atts['title'] ); ?></h2>
+				<?php if ( '' !== trim( (string) $atts['intro'] ) ) : ?><p><?php echo esc_html( $atts['intro'] ); ?></p><?php endif; ?>
+			</header>
+			<?php if ( 'yes' === strtolower( (string) $atts['category_nav'] ) && count( $categories ) > 1 ) : ?>
+				<nav class="gdg-public-menu__nav" aria-label="Speisekarten-Kategorien">
+					<?php foreach ( $categories as $category ) : ?>
+						<?php if ( ! empty( $grouped[ (int) $category['id'] ] ) ) : ?><a href="#<?php echo esc_attr( $instance . '-category-' . (int) $category['id'] ); ?>"><?php echo esc_html( $category['name'] ); ?></a><?php endif; ?>
+					<?php endforeach; ?>
+				</nav>
+			<?php endif; ?>
+			<div class="gdg-public-menu__categories">
+				<?php foreach ( $categories as $category ) : ?>
+					<?php $category_items = $grouped[ (int) $category['id'] ] ?? array(); ?>
+					<?php if ( empty( $category_items ) ) { continue; } ?>
+					<section class="gdg-public-menu__category" id="<?php echo esc_attr( $instance . '-category-' . (int) $category['id'] ); ?>">
+						<header><h3><?php echo esc_html( $category['name'] ); ?></h3><span><?php echo esc_html( sprintf( _n( '%d Gericht', '%d Gerichte', count( $category_items ), 'gelsendiele-gastro' ), count( $category_items ) ) ); ?></span></header>
+						<div class="gdg-public-menu__items">
+							<?php foreach ( $category_items as $item ) : ?>
+								<article class="gdg-public-menu__item">
+									<div><h4><?php echo esc_html( $item['name'] ); ?></h4><?php if ( '' !== trim( (string) $item['description'] ) ) : ?><p><?php echo esc_html( $item['description'] ); ?></p><?php endif; ?></div>
+									<strong><?php echo esc_html( number_format_i18n( (float) $item['price'], 2 ) . ' €' ); ?></strong>
+								</article>
+							<?php endforeach; ?>
+						</div>
+					</section>
+				<?php endforeach; ?>
+				<?php if ( empty( $items ) ) : ?><p class="gdg-public-menu__empty">Die Speisekarte wird gerade aktualisiert. Bitte schau in Kürze wieder vorbei.</p><?php endif; ?>
+			</div>
+		</section>
+		<?php
+		return (string) ob_get_clean();
 	}
 
 	public static function shortcode( array $atts = array() ): string {
@@ -62,14 +126,15 @@ final class GDG_App {
 					<span class="gdg-brand-mark"><?php if ( $logo_url ) : ?><img src="<?php echo esc_url( $logo_url ); ?>" alt=""><?php else : ?>G<?php endif; ?></span>
 					<div><strong>Gelsensystem</strong><span><?php echo esc_html( $business_name . ' · ' . $labels[ $view ] ); ?></span></div>
 				</div>
+				<button type="button" class="gdg-nav-toggle" data-gdg-nav-toggle aria-label="Menü einklappen" aria-expanded="true" title="Menü ein-/ausklappen"><span aria-hidden="true">‹</span></button>
 				<nav class="gdg-nav" aria-label="Arbeitsbereiche">
-					<?php if ( current_user_can( 'manage_bookings' ) ) : ?><a href="<?php echo esc_url( add_query_arg( 'gd-section', 'reservations', $dashboard_url ) ); ?>">Reservierungen</a><?php endif; ?>
+					<?php if ( current_user_can( 'manage_bookings' ) ) : ?><a href="<?php echo esc_url( add_query_arg( 'gd-section', 'reservations', $dashboard_url ) ); ?>"><span aria-hidden="true">R</span><b>Reservierungen</b></a><?php endif; ?>
 					<?php foreach ( $labels as $nav_view => $label ) : ?>
 						<?php if ( self::can_view( $nav_view ) && ! empty( $urls[ $nav_view ] ) ) : ?>
-							<a class="<?php echo $nav_view === $view ? 'is-active' : ''; ?>" href="<?php echo esc_url( $urls[ $nav_view ] ); ?>"><?php echo esc_html( $label ); ?></a>
+							<a class="<?php echo $nav_view === $view ? 'is-active' : ''; ?>" href="<?php echo esc_url( $urls[ $nav_view ] ); ?>"><span aria-hidden="true"><?php echo esc_html( strtoupper( substr( $label, 0, 1 ) ) ); ?></span><b><?php echo esc_html( $label ); ?></b></a>
 						<?php endif; ?>
 					<?php endforeach; ?>
-					<?php if ( current_user_can( 'gelsendiele_manage_settings' ) ) : ?><a href="<?php echo esc_url( add_query_arg( 'gd-section', 'settings', $dashboard_url ) ); ?>">Einstellungen</a><?php endif; ?>
+					<?php if ( current_user_can( 'gelsendiele_manage_settings' ) ) : ?><a href="<?php echo esc_url( add_query_arg( 'gd-section', 'settings', $dashboard_url ) ); ?>"><span aria-hidden="true">E</span><b>Einstellungen</b></a><?php endif; ?>
 				</nav>
 				<div class="gdg-top-actions">
 					<span class="gdg-connection" title="Verbindungsstatus"><i></i><span>Online</span></span>

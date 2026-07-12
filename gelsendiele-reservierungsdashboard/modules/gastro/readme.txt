@@ -3,7 +3,7 @@ Contributors: Andreas Schwarz / Gelsendiele
 Tags: gastronomie, bestellung, küche, schank, tische, reservierung
 Requires at least: 6.4
 Requires PHP: 7.4
-Stable tag: 2.9.0
+Stable tag: 2.10.0
 
 Service-, Küchen-, Schank- und Zahlungsmodul des Gelsensystems.
 
@@ -21,6 +21,8 @@ Service-, Küchen-, Schank- und Zahlungsmodul des Gelsensystems.
 * Bar- und manuelle Kartenzahlung
 * Tisch wird nach vollständiger Bezahlung automatisch freigegeben
 * Heller und dunkler Modus
+* Einklappbare Desktop-Navigation in allen Arbeitsbereichen
+* Öffentliche dynamische Speisekarte per [gelsensystem_speisekarte]
 * Mitarbeiterrollen: Service, Küche und Schank
 * Reservierungs-ID kann mit einer Bestellung verknüpft werden
 

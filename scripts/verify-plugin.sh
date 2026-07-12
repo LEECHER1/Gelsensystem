@@ -15,6 +15,7 @@ test -f "$PLUGIN/includes/class-gelsendiele-github-updater.php"
 test -f "$ROOT/tests/menu-app-smoke.php"
 test -f "$ROOT/tests/tables-app-smoke.php"
 test -f "$ROOT/tests/central-url-responsive-smoke.php"
+test -f "$ROOT/tests/public-menu-smoke.php"
 
 VERSION="$(sed -n 's/^ \* Version: \([0-9][0-9.]*\)$/\1/p' "$ENTRY" | head -n 1)"
 CONSTANT_VERSION="$(sed -n "s/.*define( 'GELSENDIELE_VERSION', '\([^']*\)' ).*/\1/p" "$ENTRY" | head -n 1)"
@@ -88,6 +89,7 @@ if command -v php >/dev/null 2>&1; then
   php "$ROOT/tests/menu-app-smoke.php" >/dev/null
   php "$ROOT/tests/tables-app-smoke.php" >/dev/null
   php "$ROOT/tests/central-url-responsive-smoke.php" >/dev/null
+  php "$ROOT/tests/public-menu-smoke.php" >/dev/null
 else
   echo "Hinweis: PHP ist lokal nicht verfügbar; PHP-Lint wird in GitHub Actions ausgeführt." >&2
 fi
