@@ -3,7 +3,7 @@
  * Plugin Name: Gelsensystem
  * Plugin URI: https://github.com/LEECHER1/Gelsendiele
  * Description: Eigenständiges Reservierungs-, Service-, Küchen- und Kassensystem für die Gelsendiele.
- * Version: 2.3.1
+ * Version: 2.3.2
  * Author: Andreas Schwarz / Gelsendiele
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.3.1' );
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.3.2' );
 defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
 defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );

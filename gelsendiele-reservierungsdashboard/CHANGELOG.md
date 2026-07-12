@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.2
+- Das öffentliche Reservierungsformular zeigt kein zusätzliches Logo mehr; das Navigationslogo bleibt erhalten.
+- Der helle Formularmodus überschreibt Theme-Stile für Datumsschaltfläche, Felder, Kalender und Auswahloptionen zuverlässig.
+
 ## 2.3.1
 - Service, Küche, Schank und Kasse verwenden dasselbe eigenständige Vollbildprinzip wie die Reservierungsverwaltung.
 - Theme-Header, Theme-Footer, Adminleiste und Inhaltsbreiten des WordPress-Themes werden auf den internen Arbeitsseiten entfernt.

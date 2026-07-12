@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.2 – 2026-07-12
+- Öffentlicher Reservierungsformularstil im Hellmodus gegen Theme-Überschreibungen abgesichert.
+- Zweites Logo innerhalb des öffentlichen Formulars entfernt.
+
 ## 2.3.1 – 2026-07-12
 
 - Eigenständiges Vollbild-Template für Service, Küche, Schank und Kasse
