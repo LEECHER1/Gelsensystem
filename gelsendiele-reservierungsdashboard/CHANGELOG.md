@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.3
+- Das öffentliche Reservierungsformular benötigt durch kleinere Abstände und Feldhöhen deutlich weniger Bildschirmhöhe.
+- Der Verfügbarkeitshinweis wird als schlichter Sternchen-Text ausgegeben; die leere gelbe Hinweisleiste wurde entfernt.
+- Ein integrierter, auf das öffentliche Projekt und exakt benannte Release-ZIPs begrenzter GitHub-Updater ermöglicht automatische Folgeupdates über WordPress.
+
 ## 2.3.2
 - Das öffentliche Reservierungsformular zeigt kein zusätzliches Logo mehr; das Navigationslogo bleibt erhalten.
 - Der helle Formularmodus überschreibt Theme-Stile für Datumsschaltfläche, Felder, Kalender und Auswahloptionen zuverlässig.

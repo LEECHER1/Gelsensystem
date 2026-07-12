@@ -3,7 +3,7 @@
  * Plugin Name: Gelsensystem
  * Plugin URI: https://github.com/LEECHER1/Gelsendiele
  * Description: Eigenständiges Reservierungs-, Service-, Küchen- und Kassensystem für die Gelsendiele.
- * Version: 2.3.2
+ * Version: 2.3.3
  * Author: Andreas Schwarz / Gelsendiele
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.3.2' );
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.3.3' );
 defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
 defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );
@@ -24,12 +24,14 @@ require_once GELSENDIELE_DIR . 'includes/class-gelsendiele-availability.php';
 require_once GELSENDIELE_DIR . 'includes/class-gelsensystem-email.php';
 require_once GELSENDIELE_DIR . 'includes/class-gelsendiele-migrator.php';
 require_once GELSENDIELE_DIR . 'includes/class-gelsendiele-admin.php';
+require_once GELSENDIELE_DIR . 'includes/class-gelsendiele-github-updater.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-gd-reservation-engine.php';
 require_once plugin_dir_path( __FILE__ ) . 'modules/gastro/gelsendiele-gastro-system.php';
 
 Gelsendiele_Migrator::bootstrap();
 Gelsendiele_Admin::bootstrap();
 Gelsensystem_Email::bootstrap();
+Gelsendiele_GitHub_Updater::bootstrap();
 
 final class Gelsendiele_Reservierungsdashboard {
     const VERSION = GELSENDIELE_VERSION;
