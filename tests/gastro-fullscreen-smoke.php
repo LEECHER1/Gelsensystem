@@ -41,6 +41,8 @@ $js       = file_get_contents( $root . 'assets/app.js' );
 
 gdg_expect( false !== strpos( $template, 'gdg-app-root' ), 'eigenständiges App-Template fehlt' );
 gdg_expect( false !== strpos( $css, 'body.gdg-standalone-app .gdg-app' ), 'Vollbild-CSS fehlt' );
+gdg_expect( false !== strpos( $css, 'html[data-gdg-theme]' ), 'Theme-Mindestbreite wird nicht überschrieben' );
+gdg_expect( false !== strpos( $css, 'min-width: 0 !important' ), 'Theme-Mindestbreite bleibt aktiv' );
 gdg_expect( false !== strpos( $css, '.gdg-loading[hidden]' ), 'Lade-Layer respektiert hidden nicht' );
 gdg_expect( false !== strpos( $js, "localStorage.setItem('gd-dashboard-theme'" ), 'Theme-Auswahl wird nicht systemweit geteilt' );
 gdg_expect( false !== strpos( $js, 'document.documentElement.dataset.gdgTheme' ), 'Dokument-Theme wird nicht aktualisiert' );

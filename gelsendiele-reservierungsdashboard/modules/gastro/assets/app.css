@@ -5,6 +5,12 @@
 html[data-gdg-theme="light"] { color-scheme: light; background: #f3f5f7; }
 html[data-gdg-theme="dark"] { color-scheme: dark; background: var(--gelsendiele-dark-surface, #08110b); }
 
+html[data-gdg-theme] {
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+}
+
 body.gdg-standalone-app {
   width: 100% !important;
   min-width: 0 !important;
