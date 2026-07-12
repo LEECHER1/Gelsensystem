@@ -55,6 +55,13 @@ if ! grep -Fq 'gelsensystem-sidebar' "$PLUGIN/assets/dashboard.css"; then
   exit 1
 fi
 
+APP_SCRIPT_LINE="$(grep -n 'admin/assets/settings.js?ver=' "$PLUGIN/templates/dashboard-app.php" | head -n 1 | cut -d: -f1)"
+FOOTER_LINE="$(grep -n 'wp_footer();' "$PLUGIN/templates/dashboard-app.php" | head -n 1 | cut -d: -f1)"
+if [[ -z "$APP_SCRIPT_LINE" || -z "$FOOTER_LINE" || "$APP_SCRIPT_LINE" -ge "$FOOTER_LINE" ]]; then
+  echo "Die App-Skripte müssen vor wp_footer() ausgegeben werden." >&2
+  exit 1
+fi
+
 if grep -RqsE 'Gelsendiele (Betriebsleitung|Service|Küche|Schank|Reservierungsmitarbeiter)' "$PLUGIN"; then
   echo "Historische Gelsendiele-Rollenbezeichnungen sind noch sichtbar." >&2
   exit 1
