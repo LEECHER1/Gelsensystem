@@ -20,6 +20,8 @@ central_expect( false !== strpos( $entry, "\$target_slug = 'gelsensystem'" ), 'k
 central_expect( false !== strpos( $entry, 'public function redirect_legacy_app_urls' ), 'Weiterleitung alter URLs fehlt' );
 central_expect( false !== strpos( $entry, "home_url( '/reservierungsverwaltung/' )" ), 'alte URL wird nicht erkannt' );
 central_expect( false !== strpos( $migrator, 'Gelsendiele_Reservierungsdashboard::ensure_central_page()' ), 'URL-Migration läuft bei Updates nicht' );
+central_expect( false !== strpos( $migrator, "add_action( 'init', array( __CLASS__, 'maybe_migrate' ), 1 )" ), 'URL-Migration läuft zu früh' );
+central_expect( false === strpos( $migrator, "add_action( 'plugins_loaded', array( __CLASS__, 'maybe_migrate' )" ), 'unsichere plugins_loaded-Migration ist noch aktiv' );
 central_expect( false !== strpos( $db, "get_option( 'gd_reservierungsdashboard_page_id'" ), 'Arbeitsseiten verwenden nicht die neue Zentrale' );
 central_expect( false !== strpos( $entry, 'class="gelsensystem-mobile-nav"' ), 'Touch-Navigation fehlt' );
 central_expect( false !== strpos( $entry, 'render_more_app_links' ), 'Arbeitsbereiche fehlen im mobilen Mehr-Menü' );

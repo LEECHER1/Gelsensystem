@@ -7,11 +7,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Führt idempotente Updates auch bei bereits aktivem Plugin aus. */
 final class Gelsendiele_Migrator {
 	const VERSION_OPTION = 'gelsendiele_migration_version';
-	const TARGET_VERSION = '2.7.0';
+	const TARGET_VERSION = '2.7.1';
 	const ERROR_OPTION   = 'gelsendiele_last_migration_error';
 
 	public static function bootstrap() {
-		add_action( 'plugins_loaded', array( __CLASS__, 'maybe_migrate' ), 120 );
+		// Seiten- und Rollenfunktionen sind erst ab init vollständig verfügbar.
+		add_action( 'init', array( __CLASS__, 'maybe_migrate' ), 1 );
 	}
 
 	public static function activate() {

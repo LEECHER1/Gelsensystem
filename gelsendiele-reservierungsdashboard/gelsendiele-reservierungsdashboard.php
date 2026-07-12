@@ -3,7 +3,7 @@
  * Plugin Name: Gelsensystem
  * Plugin URI: https://github.com/LEECHER1/Gelsensystem
  * Description: Zentrales Reservierungs-, Service-, Küchen- und Kassensystem für Gastronomiebetriebe.
- * Version: 2.7.0
+ * Version: 2.7.1
  * Author: Andreas Schwarz / Gelsensystem
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.7.0' );
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.7.1' );
 defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
 defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );
@@ -161,15 +161,22 @@ final class Gelsendiele_Reservierungsdashboard {
             if ( ! has_shortcode( $content, self::SHORTCODE ) ) {
                 $content = trim( $content . "\n\n" . $shortcode );
             }
-            wp_update_post(
-                array(
-                    'ID'           => $page_id,
-                    'post_title'   => 'Gelsensystem',
-                    'post_name'    => $target_slug,
-                    'post_status'  => 'publish',
-                    'post_content' => $content,
-                )
-            );
+            $update = array( 'ID' => $page_id );
+            if ( 'Gelsensystem' !== $page->post_title ) {
+                $update['post_title'] = 'Gelsensystem';
+            }
+            if ( $target_slug !== $page->post_name ) {
+                $update['post_name'] = $target_slug;
+            }
+            if ( 'publish' !== $page->post_status ) {
+                $update['post_status'] = 'publish';
+            }
+            if ( $content !== (string) $page->post_content ) {
+                $update['post_content'] = $content;
+            }
+            if ( count( $update ) > 1 ) {
+                wp_update_post( $update );
+            }
         } else {
             $page_id = wp_insert_post(
                 array(
