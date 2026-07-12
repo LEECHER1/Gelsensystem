@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.4.1 – 2026-07-12
+- Gemeinsame Versions- und Theme-Initialisierung mit der zentralen Gelsensystem-App.
+
 ## 2.4.0 – 2026-07-12
 - Sichtbare Produktmarke auf Gelsensystem umgestellt, der konfigurierte Gastronomiebetrieb wird als Kunde angezeigt.
 - Navigation verbindet Reservierungen, Arbeitsbereiche und zentrale Einstellungen.

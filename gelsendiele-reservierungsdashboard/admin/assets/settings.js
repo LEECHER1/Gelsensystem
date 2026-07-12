@@ -94,6 +94,7 @@
   const logoUrl = document.querySelector('[data-gelsendiele-logo-url]');
   const logoId = document.querySelector('[data-gelsendiele-logo-id]');
   const preview = document.querySelector('[data-gelsendiele-logo-preview]');
+  if (selectLogo && !window.wp?.media) selectLogo.hidden = true;
   selectLogo?.addEventListener('click', () => {
     if (!window.wp?.media) return;
     const frame = window.wp.media({ title: 'Logo auswählen', button: { text: 'Logo verwenden' }, multiple: false, library: { type: 'image' } });
