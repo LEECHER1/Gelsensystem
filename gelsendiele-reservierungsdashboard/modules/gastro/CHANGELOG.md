@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.2 – 2026-07-13
+
+- Gemeinsame Patchversion mit zuverlässig wiederhergestellten WordPress-Mediathek-Assets.
+
 ## 2.15.1 – 2026-07-13
 
 - Gemeinsame Patchversion mit korrigierter Ladefolge der Event-Mediathek.
