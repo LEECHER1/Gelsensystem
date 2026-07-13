@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.2
+
+- WordPress-Mediathek-Assets am Ende der Frontend-Enqueue-Phase wiederhergestellt, falls andere Erweiterungen sie zuvor entfernt haben.
+
 ## 2.15.1
 
 - Ladeabhängigkeit der WordPress-Mediathek korrigiert, damit sich die Bildauswahl in der Frontend-App zuverlässig öffnet.
