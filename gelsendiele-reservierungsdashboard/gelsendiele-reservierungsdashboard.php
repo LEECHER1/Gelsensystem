@@ -3,7 +3,7 @@
  * Plugin Name: Gelsensystem
  * Plugin URI: https://github.com/LEECHER1/Gelsensystem
  * Description: Zentrales Reservierungs-, Service-, Küchen- und Kassensystem für Gastronomiebetriebe.
- * Version: 2.13.2
+ * Version: 2.14.0
  * Author: Andreas Schwarz / Gelsensystem
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.13.2' );
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.14.0' );
 defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
 defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );
@@ -2614,6 +2614,11 @@ final class Gelsendiele_Reservierungsdashboard {
             </button>
             <a class="gelsensystem-sidebar-brand" href="<?php echo esc_url( $dashboard ); ?>"><span>GS</span><div><strong>Gelsensystem</strong><small><?php echo esc_html( $business_name ); ?></small></div></a>
             <nav><?php foreach ( $items as $item ) : if ( ! current_user_can( $item[2] ) || ! $item[3] ) { continue; } ?><a class="<?php echo $active === $item[0] ? 'is-active' : ''; ?>" href="<?php echo esc_url( $item[3] ); ?>" title="<?php echo esc_attr( $item[1] ); ?>"><span><?php echo esc_html( $item[4] ); ?></span><?php echo esc_html( $item[1] ); ?></a><?php endforeach; ?></nav>
+            <button type="button" class="gelsensystem-sidebar-theme" data-theme-button aria-label="Darstellung wechseln" aria-pressed="false" title="Hell-/Dunkelmodus">
+                <svg class="gd-theme-icon gd-theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
+                <svg class="gd-theme-icon gd-theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                <span>Hell-/Dunkelmodus</span>
+            </button>
             <div class="gelsensystem-sidebar-footer"><small>Angemeldet als</small><strong><?php echo esc_html( wp_get_current_user()->display_name ); ?></strong><a href="<?php echo esc_url( wp_logout_url( $dashboard ) ); ?>">Abmelden</a></div>
         </aside>
         <?php

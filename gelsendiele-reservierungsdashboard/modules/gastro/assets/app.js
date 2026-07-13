@@ -149,7 +149,7 @@
 
   function setupAppDrawer() {
     if (!appDrawer || !appDrawerToggle) return;
-    const mobileDrawer = window.matchMedia('(max-width: 790px)');
+    const mobileDrawer = window.matchMedia('(max-width: 1024px)');
 
     const setOpen = (open) => {
       const isOpen = Boolean(open && mobileDrawer.matches);

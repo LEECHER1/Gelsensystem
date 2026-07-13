@@ -57,14 +57,37 @@
 
   const centralSectionShell = document.querySelector('.gd-dashboard-shell[data-app-section]:not([data-default-view])');
   if (centralSectionShell) {
+    const centralSystemDarkMode = window.matchMedia('(prefers-color-scheme: dark)');
+    const centralThemeButtons = [...centralSectionShell.querySelectorAll('[data-theme-button]')];
     let centralTheme = '';
     try { centralTheme = window.localStorage.getItem('gd-dashboard-theme') || ''; } catch (error) {}
     if (centralTheme !== 'dark' && centralTheme !== 'light') {
-      centralTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      centralTheme = centralSystemDarkMode.matches ? 'dark' : 'light';
     }
-    document.documentElement.dataset.gdTheme = centralTheme;
-    const centralThemeColor = document.getElementById('gd-theme-color');
-    if (centralThemeColor) centralThemeColor.content = centralTheme === 'dark' ? '#111713' : '#315b2d';
+    const applyCentralTheme = (theme, persist = false) => {
+      centralTheme = theme === 'dark' ? 'dark' : 'light';
+      document.documentElement.dataset.gdTheme = centralTheme;
+      document.documentElement.classList.add('gd-dashboard-runtime');
+      centralThemeButtons.forEach((button) => {
+        button.setAttribute('aria-pressed', centralTheme === 'dark' ? 'true' : 'false');
+        button.setAttribute('aria-label', centralTheme === 'dark' ? 'Helle Darstellung aktivieren' : 'Dark Mode aktivieren');
+        button.setAttribute('title', centralTheme === 'dark' ? 'Helle Darstellung aktivieren' : 'Dark Mode aktivieren');
+      });
+      const centralThemeColor = document.getElementById('gd-theme-color');
+      if (centralThemeColor) centralThemeColor.content = centralTheme === 'dark' ? '#111713' : '#315b2d';
+      if (persist) {
+        try { window.localStorage.setItem('gd-dashboard-theme', centralTheme); } catch (error) {}
+      }
+    };
+    applyCentralTheme(centralTheme);
+    centralThemeButtons.forEach((button) => button.addEventListener('click', () => {
+      applyCentralTheme(centralTheme === 'dark' ? 'light' : 'dark', true);
+    }));
+    centralSystemDarkMode.addEventListener?.('change', (event) => {
+      let savedTheme = '';
+      try { savedTheme = window.localStorage.getItem('gd-dashboard-theme') || ''; } catch (error) {}
+      if (savedTheme !== 'dark' && savedTheme !== 'light') applyCentralTheme(event.matches ? 'dark' : 'light');
+    });
   }
 
   const sidebar = document.querySelector('.gelsensystem-sidebar');
@@ -135,6 +158,9 @@
       if (popupStart?.dataset.auto === '1' && eventStart?.value) popupStart.value = previousDay(eventStart.value);
       if (popupEnd?.dataset.auto === '1') popupEnd.value = eventEnd?.value || eventStart?.value || '';
     };
+    const syncEventDates = () => {
+      if (eventEnd?.dataset.auto === '1' && eventStart?.value) eventEnd.value = eventStart.value;
+    };
     const applyPopupState = () => {
       const enabled = Boolean(popupEnabled?.checked);
       if (popupSchedule) popupSchedule.hidden = !enabled;
@@ -145,9 +171,14 @@
     };
     popupStart?.addEventListener('input', () => { popupStart.dataset.auto = '0'; });
     popupEnd?.addEventListener('input', () => { popupEnd.dataset.auto = '0'; });
-    eventStart?.addEventListener('change', syncPopupDates);
+    eventEnd?.addEventListener('input', () => { eventEnd.dataset.auto = '0'; });
+    eventStart?.addEventListener('change', () => {
+      syncEventDates();
+      syncPopupDates();
+    });
     eventEnd?.addEventListener('change', syncPopupDates);
     popupEnabled?.addEventListener('change', applyPopupState);
+    syncEventDates();
     applyPopupState();
 
     form.addEventListener('submit', (event) => {

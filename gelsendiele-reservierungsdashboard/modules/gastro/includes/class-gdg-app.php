@@ -111,31 +111,35 @@ final class GDG_App {
 		$dashboard_page_id = (int) get_option( 'gd_reservierungsdashboard_page_id', 0 );
 		$dashboard_url     = $dashboard_page_id ? get_permalink( $dashboard_page_id ) : home_url( '/gelsensystem/' );
 		$business_name = Gelsendiele_Settings::get( 'general', 'business_name', 'Die Gelsendiele' );
-		$branding      = Gelsendiele_Settings::get( 'branding', null, array() );
-		$logo_url      = $branding['logo_url'];
-		if ( ! $logo_url && ! empty( $branding['logo_attachment_id'] ) ) {
-			$logo_url = wp_get_attachment_image_url( absint( $branding['logo_attachment_id'] ), 'thumbnail' );
-		}
 		$brand_style = Gelsendiele_Settings::css_variables();
+		$nav_items = array(
+			array( 'reservations', 'Reservierungen', current_user_can( 'manage_bookings' ), add_query_arg( 'gd-section', 'reservations', $dashboard_url ), 'R' ),
+			array( 'service', 'Service', self::can_view( 'service' ), $urls['service'] ?? '', 'S' ),
+			array( 'kitchen', 'Küche', self::can_view( 'kitchen' ), $urls['kitchen'] ?? '', 'K' ),
+			array( 'bar', 'Schank', self::can_view( 'bar' ), $urls['bar'] ?? '', 'B' ),
+			array( 'checkout', 'Kasse', self::can_view( 'checkout' ), $urls['checkout'] ?? '', '€' ),
+			array( 'tables', 'Tische & Bereiche', current_user_can( 'gdg_manage' ), add_query_arg( 'gd-section', 'tables', $dashboard_url ), 'T' ),
+			array( 'menu', 'Speisekarte', current_user_can( 'gdg_manage' ), add_query_arg( 'gd-section', 'menu', $dashboard_url ), 'M' ),
+			array( 'events', 'Events', current_user_can( 'gdg_manage' ), add_query_arg( 'gd-section', 'events', $dashboard_url ), 'V' ),
+			array( 'settings', 'Einstellungen', current_user_can( 'gelsendiele_manage_settings' ), add_query_arg( 'gd-section', 'settings', $dashboard_url ), 'E' ),
+			array( 'users', 'Benutzer & Rechte', current_user_can( 'manage_options' ), add_query_arg( 'gd-section', 'users', $dashboard_url ), 'U' ),
+		);
 
 		ob_start();
 		?>
 		<div class="gdg-app" data-view="<?php echo esc_attr( $view ); ?>" style="<?php echo esc_attr( $brand_style ); ?>">
 			<header class="gdg-topbar">
 				<div class="gdg-brand">
-					<span class="gdg-brand-mark"><?php if ( $logo_url ) : ?><img src="<?php echo esc_url( $logo_url ); ?>" alt=""><?php else : ?>G<?php endif; ?></span>
+					<span class="gdg-brand-mark">GS</span>
 					<div><strong>Gelsensystem</strong><span><?php echo esc_html( $business_name . ' · ' . $labels[ $view ] ); ?></span></div>
 				</div>
 				<button type="button" class="gdg-nav-toggle" data-gdg-nav-toggle aria-label="Menü einklappen" aria-expanded="true" title="Menü ein-/ausklappen"><span aria-hidden="true">‹</span></button>
 				<nav class="gdg-nav" id="gdg-app-drawer" aria-label="Arbeitsbereiche">
 					<div class="gdg-nav-head"><div><span>Gelsensystem</span><strong>Bereiche</strong></div><button type="button" data-gdg-drawer-close aria-label="Bereichsmenü schließen">×</button></div>
-					<?php if ( current_user_can( 'manage_bookings' ) ) : ?><a href="<?php echo esc_url( add_query_arg( 'gd-section', 'reservations', $dashboard_url ) ); ?>"><span aria-hidden="true">R</span><b>Reservierungen</b></a><?php endif; ?>
-					<?php foreach ( $labels as $nav_view => $label ) : ?>
-						<?php if ( self::can_view( $nav_view ) && ! empty( $urls[ $nav_view ] ) ) : ?>
-							<a class="<?php echo $nav_view === $view ? 'is-active' : ''; ?>" href="<?php echo esc_url( $urls[ $nav_view ] ); ?>"><span aria-hidden="true"><?php echo esc_html( strtoupper( substr( $label, 0, 1 ) ) ); ?></span><b><?php echo esc_html( $label ); ?></b></a>
-						<?php endif; ?>
+					<?php foreach ( $nav_items as $item ) : ?>
+						<?php if ( ! $item[2] || ! $item[3] ) { continue; } ?>
+						<a class="<?php echo $item[0] === $view ? 'is-active' : ''; ?>" href="<?php echo esc_url( $item[3] ); ?>" title="<?php echo esc_attr( $item[1] ); ?>"><span aria-hidden="true"><?php echo esc_html( $item[4] ); ?></span><b><?php echo esc_html( $item[1] ); ?></b></a>
 					<?php endforeach; ?>
-					<?php if ( current_user_can( 'gelsendiele_manage_settings' ) ) : ?><a href="<?php echo esc_url( add_query_arg( 'gd-section', 'settings', $dashboard_url ) ); ?>"><span aria-hidden="true">E</span><b>Einstellungen</b></a><?php endif; ?>
 				</nav>
 				<div class="gdg-top-actions">
 					<span class="gdg-connection" title="Verbindungsstatus"><i></i><span>Online</span></span>
@@ -145,8 +149,10 @@ final class GDG_App {
 					<button type="button" class="gdg-icon-button gdg-theme-button" data-gdg-theme-toggle aria-label="Darstellung wechseln" aria-pressed="false" title="Hell-/Dunkelmodus">
 						<svg class="gdg-theme-icon gdg-theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
 						<svg class="gdg-theme-icon gdg-theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+						<span class="gdg-theme-label">Hell-/Dunkelmodus</span>
 					</button>
 				</div>
+				<div class="gdg-sidebar-footer"><small>Angemeldet als</small><strong><?php echo esc_html( wp_get_current_user()->display_name ); ?></strong><a href="<?php echo esc_url( wp_logout_url( $dashboard_url ) ); ?>">Abmelden</a></div>
 			</header>
 			<button type="button" class="gdg-drawer-backdrop" data-gdg-drawer-close aria-label="Bereichsmenü schließen"></button>
 			<main class="gdg-main">

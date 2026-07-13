@@ -36,6 +36,7 @@ gdg_expect( true === GDG_App::hide_admin_bar_on_app_pages( true ), 'Adminleiste 
 
 $root     = dirname( __DIR__ ) . '/gelsendiele-reservierungsdashboard/modules/gastro/';
 $template = file_get_contents( $root . 'templates/gastro-app.php' );
+$app      = file_get_contents( $root . 'includes/class-gdg-app.php' );
 $css      = file_get_contents( $root . 'assets/app.css' );
 $js       = file_get_contents( $root . 'assets/app.js' );
 
@@ -47,7 +48,10 @@ gdg_expect( false !== strpos( $css, '.gdg-loading[hidden]' ), 'Lade-Layer respek
 gdg_expect( false !== strpos( $js, "localStorage.setItem('gd-dashboard-theme'" ), 'Theme-Auswahl wird nicht systemweit geteilt' );
 gdg_expect( false !== strpos( $js, 'document.documentElement.dataset.gdgTheme' ), 'Dokument-Theme wird nicht aktualisiert' );
 gdg_expect( false !== strpos( $css, '.gdg-app.is-nav-collapsed' ), 'einklappbarer Fokusmodus fehlt' );
-gdg_expect( false !== strpos( $css, '@media (min-width: 791px)' ), 'Tablet- und Desktop-Seitenleiste fehlt' );
+gdg_expect( false !== strpos( $css, '@media (min-width: 1025px)' ), 'Desktop-Seitenleiste fehlt' );
+gdg_expect( false !== strpos( $css, '@media (max-width: 1024px)' ), 'Tablet- und Smartphone-App-Drawer fehlt' );
+gdg_expect( false !== strpos( $app, "array( 'events', 'Events'" ) && false !== strpos( $app, "array( 'users', 'Benutzer & Rechte'" ), 'Gastro-Seitenleiste enthält nicht alle Zentralbereiche' );
+gdg_expect( false !== strpos( $app, 'class="gdg-theme-label"' ) && false !== strpos( $app, 'class="gdg-sidebar-footer"' ), 'einheitlicher Theme- und Benutzerbereich fehlt' );
 gdg_expect( false !== strpos( $js, "localStorage.getItem('gd-sidebar-collapsed')" ), 'Menüzustand wird nicht geteilt' );
 gdg_expect( false !== strpos( $js, "localStorage.setItem('gd-sidebar-collapsed'" ), 'Menüzustand wird nicht gespeichert' );
 gdg_expect( false !== strpos( $js, 'function setupAppDrawer()' ), 'mobiler App-Drawer fehlt' );

@@ -39,6 +39,8 @@ central_expect( false !== strpos( $css, '.gd-desktop-tabs { display:flex !import
 central_expect( false !== strpos( $css, '.gd-tab:not(.is-active) span[data-count]' ), 'Dark-Mode-Kontrast für inaktive Zähler fehlt' );
 central_expect( false !== strpos( $css, '@media (min-width:1025px)' ) && false !== strpos( $css, '.gd-sheet-layer.is-open' ), 'Desktop-Seitenmenü fehlt' );
 central_expect( false !== strpos( $entry, 'data-sidebar-toggle' ), 'einklappbare Desktop-Seitenleiste fehlt' );
+central_expect( false !== strpos( $entry, 'class="gelsensystem-sidebar-theme"' ), 'Theme-Schalter fehlt in der Desktop-Seitenleiste' );
+central_expect( false !== strpos( $js, 'const applyCentralTheme' ) && false !== strpos( $js, 'centralThemeButtons.forEach' ), 'Theme-Schalter zentraler Unterseiten ist nicht funktionsfähig' );
 central_expect( false !== strpos( $js, "window.localStorage.setItem('gd-sidebar-collapsed'" ), 'Seitenleistenstatus wird nicht gespeichert' );
 central_expect( false !== strpos( $js, 'const setAppDrawerOpen' ), 'App-Drawer-Steuerung fehlt' );
 central_expect( false !== strpos( $css, 'body.gd-app-drawer-open .gelsensystem-mobile-nav' ), 'App-Drawer-Öffnungszustand fehlt' );

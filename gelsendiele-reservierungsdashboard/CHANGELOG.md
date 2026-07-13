@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.14.0
+
+- Neue Events mit dem aktuellen Datum vorbelegt und Enddatum bei eintägigen Events automatisch mit dem Startdatum synchronisiert.
+- Optionales Webseitenfeld auf den Hinweis `www.*` reduziert.
+- Desktop-Seitenleiste um einen überall verfügbaren Hell-/Dunkelmodus-Schalter ergänzt.
+- Zentrale, Events, Einstellungen und Gastro-Arbeitsbereiche verwenden dieselbe vollständige Bereichsreihenfolge und gemeinsame Theme-Speicherung.
+- Gastro-App-Drawer auf Smartphones und Tablets bis 1024 Pixel vereinheitlicht.
+
 ## 2.13.2
 
 - Startseiten-Popup vor die Footer-Skripte verschoben, damit die Initialisierung das Markup zuverlässig findet.

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.14.0 – 2026-07-13
+
+- Gemeinsame vollständige Bereichsnavigation, einheitliche Desktop-Seitenleiste und Tablet-App-Drawer ergänzt.
+- Theme-Schalter und Benutzerbereich an die zentrale Gelsensystem-Oberfläche angeglichen.
+
 ## 2.13.2 – 2026-07-13
 
 - Gemeinsame Patchversion mit korrigierter Popup-Ausgabereihenfolge.

@@ -2061,6 +2061,8 @@ html[data-gd-theme="dark"] .gd-desktop-refresh-button {
   body.gd-sidebar-collapsed .gelsensystem-sidebar-footer { display:none; }
   body.gd-sidebar-collapsed .gelsensystem-sidebar nav a { justify-content:center;gap:0;padding:0;font-size:0; }
   body.gd-sidebar-collapsed .gelsensystem-sidebar nav a>span { width:38px;height:38px;flex-basis:38px;font-size:11px; }
+  body.gd-sidebar-collapsed .gelsensystem-sidebar-theme { justify-content:center;width:44px;padding:0; }
+  body.gd-sidebar-collapsed .gelsensystem-sidebar-theme>span { display:none; }
   body.gd-sidebar-collapsed .gd-dashboard-shell.gd-has-central-nav { padding-left:118px; }
   body.gd-sidebar-collapsed .gd-dashboard-shell.gd-has-central-nav>.gd-dashboard-header,
   body.gd-sidebar-collapsed .gd-dashboard-shell.gd-has-central-nav>.gd-tabs,
@@ -2135,7 +2137,13 @@ html[data-gd-theme="dark"] .gelsensystem-user-card small { color:#aab7ac; }
   .gelsensystem-sidebar nav a:hover { color:#fff;background:rgba(255,255,255,.07); }
   .gelsensystem-sidebar nav a.is-active { color:#fff;background:linear-gradient(135deg,#315b2d,#234b24);box-shadow:0 7px 18px rgba(0,0,0,.15); }
   .gelsensystem-sidebar nav a>span { display:grid;place-items:center;width:25px;height:25px;flex:0 0 25px;border-radius:8px;color:#cce4c9;background:rgba(255,255,255,.08);font-size:11px;font-weight:900; }
-  .gelsensystem-sidebar-footer { display:grid;gap:3px;margin-top:auto;padding:15px 12px 0;border-top:1px solid rgba(255,255,255,.09); }
+  .gelsensystem-sidebar-theme { display:flex;align-items:center;gap:11px;min-height:44px;margin-top:auto;padding:0 11px;border:1px solid rgba(255,255,255,.1);border-radius:11px;color:#d3dfd4;background:rgba(255,255,255,.05);font-size:12px;font-weight:750;cursor:pointer; }
+  .gelsensystem-sidebar-theme:hover { color:#fff;background:rgba(255,255,255,.1); }
+  .gelsensystem-sidebar-theme .gd-theme-icon { width:20px;height:20px;flex:0 0 20px; }
+  .gelsensystem-sidebar-theme .gd-theme-icon-sun { display:none; }
+  html[data-gd-theme="dark"] .gelsensystem-sidebar-theme .gd-theme-icon-moon { display:none; }
+  html[data-gd-theme="dark"] .gelsensystem-sidebar-theme .gd-theme-icon-sun { display:block; }
+  .gelsensystem-sidebar-footer { display:grid;gap:3px;margin-top:10px;padding:15px 12px 0;border-top:1px solid rgba(255,255,255,.09); }
   .gelsensystem-sidebar-footer small { color:#829087; }
   .gelsensystem-sidebar-footer strong { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
   .gelsensystem-sidebar-footer a { margin-top:4px;color:#b7c8b9;font-size:12px;text-decoration:none; }
