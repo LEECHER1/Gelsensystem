@@ -2,7 +2,7 @@
 Contributors: Andreas Schwarz / OpenAI
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.12.1
+Stable tag: 2.13.0
 
 Zentrales Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für Gastronomiebetriebe.
 
@@ -40,6 +40,12 @@ Das Zahlungsmodul dokumentiert Bar- und Kartenzahlungen, ist aber noch keine RKS
 Installierbare ZIP-Dateien werden aus einem geprüften Git-Tag erstellt. Vor jedem Produktivupdate sind WordPress-Dateien und Datenbank vollständig zu sichern.
 
 == Changelog ==
+
+= 2.13.0 =
+* Eventverwaltung im WordPress-Menü ergänzt.
+* Mehrere Eventbilder, aufklappbare Zusatzinfos, Eventfarben und optionales Startseiten-Popup ergänzt.
+* Ladeanzeige und Duplikatschutz verhindern mehrfaches Anlegen bei langsamen Bild-Uploads.
+* Öffentliche Eventliste erhält kommende, vergangene und alle Events sowie einen Kalenderfilter.
 
 = 2.12.1 =
 * Eventfotos lassen sich direkt in der Eventverwaltung hochladen, ersetzen und entfernen.

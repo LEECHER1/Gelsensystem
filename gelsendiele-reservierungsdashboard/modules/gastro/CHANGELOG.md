@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.13.0 – 2026-07-13
+
+- Gemeinsame Featureversion mit erweiterter Eventverwaltung, Galerie, Popup und Filtern.
+
 ## 2.12.1 – 2026-07-13
 
 - Gemeinsame Patchversion mit Eventfoto-Unterstützung.

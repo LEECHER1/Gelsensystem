@@ -3309,7 +3309,7 @@ html[data-gd-theme="dark"] .gd-button-edit-booking {
 }
 
 /* ==========================================================
-   Version 2.12.1 – schlanke Eventverwaltung mit Eventfotos
+   Version 2.13.0 – erweiterte Eventverwaltung mit Galerie und Speicherstatus
    ========================================================== */
 .gelsensystem-events-manager { display:grid; gap:23px; color:var(--gd-text); }
 .gelsensystem-events-manager * { box-sizing:border-box; }
@@ -3336,10 +3336,11 @@ html[data-gd-theme="dark"] .gd-button-edit-booking {
 .gelsensystem-events-form input:not([type="checkbox"]),.gelsensystem-events-form textarea { width:100%; min-height:44px; padding:9px 11px; border:1px solid var(--gd-border); border-radius:11px; color:var(--gd-text); background:#f9fbf9; font:inherit; }
 .gelsensystem-events-form input[type="file"] { padding:7px; }
 .gelsensystem-events-form textarea { resize:vertical; }
-.gelsensystem-events-image-field small { color:var(--gd-muted); font-size:10px; line-height:1.45; }
-.gelsensystem-events-image-preview { display:grid; grid-template-columns:96px minmax(0,1fr); align-items:center; gap:13px; padding:11px; border:1px solid var(--gd-border); border-radius:13px; background:#f9fbf9; }
-.gelsensystem-events-image-preview img { display:block; width:96px; height:68px; border-radius:9px; object-fit:cover; }
-.gelsensystem-events-image-preview label { display:flex; grid-template-columns:none; align-items:center; gap:8px; font-size:11px; font-weight:750; }
+.gelsensystem-events-form small { color:var(--gd-muted); font-size:10px; line-height:1.45; }
+.gelsensystem-events-image-preview { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); align-items:start; gap:11px; padding:11px; border:1px solid var(--gd-border); border-radius:13px; background:#f9fbf9; }
+.gelsensystem-events-image-preview img { display:block; width:100%; aspect-ratio:4/3; border-radius:9px; object-fit:cover; }
+.gelsensystem-events-image-preview label { display:grid; grid-template-columns:none; align-items:start; gap:7px; font-size:10px; font-weight:750; }
+.gelsensystem-events-image-preview label>span { display:flex; align-items:center; gap:6px; }
 .gelsensystem-events-image-preview input { width:19px; height:19px; margin:0; accent-color:var(--gd-green); }
 .gelsensystem-events-field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
 .gelsensystem-events-wide { grid-column:1/-1; }
@@ -3348,6 +3349,13 @@ html[data-gd-theme="dark"] .gd-button-edit-booking {
 .gelsensystem-events-checks input { width:19px; height:19px; margin:0; accent-color:var(--gd-green); }
 .gelsensystem-events-form .button,.gelsensystem-events-heading .button,.gelsensystem-events-list .button { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:0 14px; border:1px solid var(--gd-border); border-radius:11px; color:var(--gd-green); background:#fff; font-size:12px; font-weight:800; text-decoration:none; cursor:pointer; }
 .gelsensystem-events-form .button-primary { color:#fff; border-color:var(--gd-green); background:var(--gd-green); }
+.gelsensystem-events-form .button-primary:disabled { opacity:.68; cursor:wait; }
+.gelsensystem-events-save-progress { display:grid; gap:7px; color:var(--gd-muted); font-size:11px; font-weight:750; }
+.gelsensystem-events-save-progress[hidden] { display:none; }
+.gelsensystem-events-save-progress>div { overflow:hidden; height:7px; border-radius:999px; background:#e5ebe5; }
+.gelsensystem-events-save-progress i { display:block; width:34%; height:100%; border-radius:inherit; background:var(--gd-green); transform:translateX(-110%); }
+.gelsensystem-events-save-progress.is-active i { animation:gse-save-progress 1.1s ease-in-out infinite; }
+@keyframes gse-save-progress { 50% { transform:translateX(195%); } 100% { transform:translateX(410%); } }
 .gelsensystem-events-inventory { display:grid; gap:18px; }
 .gelsensystem-events-inventory>header p { max-width:390px; text-align:right; }
 .gelsensystem-events-list { display:grid; gap:9px; }

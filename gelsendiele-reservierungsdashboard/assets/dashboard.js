@@ -118,6 +118,27 @@
     appDrawerMobile.addEventListener?.('change', () => setAppDrawerOpen(false));
   }
 
+  document.querySelectorAll('.gelsensystem-events-form').forEach((form) => {
+    form.addEventListener('submit', (event) => {
+      if (form.dataset.submitting === '1') {
+        event.preventDefault();
+        return;
+      }
+      if (!form.checkValidity()) return;
+      form.dataset.submitting = '1';
+      const button = form.querySelector('[data-gse-submit]');
+      const progress = form.querySelector('[data-gse-progress]');
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Wird gespeichert …';
+      }
+      if (progress) {
+        progress.hidden = false;
+        window.requestAnimationFrame(() => progress.classList.add('is-active'));
+      }
+    });
+  });
+
   const shell = document.querySelector('.gd-dashboard-shell[data-default-view]');
   if (!shell || typeof GDReservations === 'undefined') return;
 
