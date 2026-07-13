@@ -19,7 +19,7 @@ final class GDG_App {
 				'title'        => 'Unsere Speisekarte',
 				'intro'        => '',
 				'category_nav' => 'yes',
-				'columns'      => '2',
+				'columns'      => '1',
 			),
 			$atts,
 			'gelsensystem_speisekarte'

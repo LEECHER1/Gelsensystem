@@ -90,6 +90,127 @@
     });
   }
 
+  const menuManager = document.querySelector('.gelsensystem-menu-manager');
+  if (menuManager) {
+    const categorySelect = menuManager.querySelector('[data-gdg-category-select]');
+    const categoryValue = categorySelect?.querySelector('[data-gdg-category-value]');
+    const categoryLabel = categorySelect?.querySelector('[data-gdg-category-label]');
+    const categoryToggle = categorySelect?.querySelector('[data-gdg-category-toggle]');
+    const categoryMenu = categorySelect?.querySelector('[data-gdg-category-menu]');
+    const categoryDialog = menuManager.querySelector('[data-gdg-category-dialog]');
+    const categoryName = categoryDialog?.querySelector('[data-gdg-category-name]');
+    const categoryOrder = categoryDialog?.querySelector('[data-gdg-category-order]');
+    const categoryActive = categoryDialog?.querySelector('[data-gdg-category-active]');
+    const categoryStatus = categoryDialog?.querySelector('[data-gdg-category-status]');
+    const categorySave = categoryDialog?.querySelector('[data-gdg-category-save]');
+    const itemForm = menuManager.querySelector('.gelsensystem-menu-item-form');
+    let categoryDialogReturnFocus = null;
+
+    const setCategoryMenuOpen = (open) => {
+      if (!categoryMenu || !categoryToggle) return;
+      categoryMenu.hidden = !open;
+      categoryToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      categorySelect?.classList.toggle('is-open', open);
+    };
+
+    const selectCategory = (id, name) => {
+      if (categoryValue) categoryValue.value = String(id || '');
+      if (categoryLabel) categoryLabel.textContent = name || 'Bitte wählen';
+      categoryMenu?.querySelectorAll('[data-gdg-category-option]').forEach((option) => {
+        option.setAttribute('aria-selected', option.dataset.categoryId === String(id) ? 'true' : 'false');
+      });
+      setCategoryMenuOpen(false);
+    };
+
+    const setCategoryDialogOpen = (open) => {
+      if (!categoryDialog) return;
+      categoryDialog.classList.toggle('is-open', open);
+      categoryDialog.setAttribute('aria-hidden', open ? 'false' : 'true');
+      document.body.classList.toggle('gd-dialog-open', open);
+      if (open) {
+        categoryDialogReturnFocus = document.activeElement;
+        if (categoryStatus) categoryStatus.textContent = '';
+        window.setTimeout(() => categoryName?.focus(), 30);
+      } else {
+        categoryDialogReturnFocus?.focus?.();
+      }
+    };
+
+    categoryToggle?.addEventListener('click', () => setCategoryMenuOpen(categoryMenu?.hidden !== false));
+    categoryMenu?.addEventListener('click', (event) => {
+      const option = event.target.closest('[data-gdg-category-option]');
+      if (option) selectCategory(option.dataset.categoryId, option.dataset.categoryName || option.textContent.trim());
+      if (event.target.closest('[data-gdg-category-add]')) {
+        setCategoryMenuOpen(false);
+        setCategoryDialogOpen(true);
+      }
+    });
+    categoryDialog?.querySelectorAll('[data-gdg-category-close]').forEach((button) => button.addEventListener('click', () => setCategoryDialogOpen(false)));
+
+    categorySave?.addEventListener('click', async () => {
+      const name = categoryName?.value.trim() || '';
+      if (!name) {
+        if (categoryStatus) categoryStatus.textContent = 'Bitte einen Kategorienamen eingeben.';
+        categoryName?.focus();
+        return;
+      }
+      categorySave.disabled = true;
+      categorySave.textContent = 'Wird erstellt …';
+      if (categoryStatus) categoryStatus.textContent = '';
+      try {
+        const response = await fetch(GDReservations.ajaxUrl, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+          body: new URLSearchParams({
+            action: 'gdg_save_menu_category',
+            nonce: GDReservations.menuNonce || '',
+            name,
+            sort_order: categoryOrder?.value || '0',
+            active: categoryActive?.checked ? '1' : ''
+          })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result?.data?.message || 'Die Kategorie konnte nicht erstellt werden.');
+        const data = result.data || {};
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.setAttribute('role', 'option');
+        option.setAttribute('data-gdg-category-option', '');
+        option.dataset.categoryId = String(data.id);
+        option.dataset.categoryName = String(data.name);
+        option.setAttribute('aria-selected', 'false');
+        option.textContent = String(data.name);
+        categoryMenu?.querySelector('[data-gdg-category-add]')?.before(option);
+        selectCategory(data.id, data.name);
+        itemForm?.querySelector('[data-gdg-item-submit]')?.removeAttribute('disabled');
+        itemForm?.querySelector('[data-gdg-category-hint]')?.remove();
+        if (categoryName) categoryName.value = '';
+        if (categoryOrder) categoryOrder.value = String((Number.parseInt(categoryOrder.value || '0', 10) || 0) + 10);
+        setCategoryDialogOpen(false);
+      } catch (error) {
+        if (categoryStatus) categoryStatus.textContent = error.message || 'Die Kategorie konnte nicht erstellt werden.';
+      } finally {
+        categorySave.disabled = false;
+        categorySave.textContent = 'Kategorie erstellen';
+      }
+    });
+
+    itemForm?.addEventListener('submit', (event) => {
+      if (!categoryValue?.value) {
+        event.preventDefault();
+        setCategoryMenuOpen(true);
+        categoryToggle?.focus();
+      }
+    });
+    menuManager.querySelectorAll('[data-gdg-delete-form]').forEach((form) => form.addEventListener('submit', (event) => {
+      if (!window.confirm(form.dataset.confirm || 'Diesen Eintrag wirklich löschen?')) event.preventDefault();
+    }));
+    document.addEventListener('click', (event) => {
+      if (categorySelect && !categorySelect.contains(event.target)) setCategoryMenuOpen(false);
+    });
+  }
+
   const sidebar = document.querySelector('.gelsensystem-sidebar');
   const sidebarToggle = sidebar?.querySelector('[data-sidebar-toggle]');
   const desktopSidebar = window.matchMedia('(min-width: 1025px)');
@@ -144,10 +265,18 @@
   document.querySelectorAll('.gelsensystem-events-form').forEach((form) => {
     const eventStart = form.querySelector('[data-gse-event-start]');
     const eventEnd = form.querySelector('[data-gse-event-end]');
+    const allDayInput = form.querySelector('[data-gse-all-day]');
+    const eventTimeInputs = [...form.querySelectorAll('[data-gse-event-time]')];
     const popupEnabled = form.querySelector('[data-gse-popup-enabled]');
     const popupStart = form.querySelector('[data-gse-popup-start]');
     const popupEnd = form.querySelector('[data-gse-popup-end]');
     const popupSchedule = form.querySelector('[data-gse-popup-schedule]');
+    const mediaOpenButton = form.querySelector('[data-gse-media-open]');
+    const imageIdsInput = form.querySelector('[data-gse-image-ids]');
+    const imagePreview = form.querySelector('[data-gse-image-preview]');
+    const pagePickerToggle = form.querySelector('[data-gse-page-picker-toggle]');
+    const pagePicker = form.querySelector('[data-gse-page-picker]');
+    const linkInput = form.querySelector('[data-gse-link-input]');
     const previousDay = (dateValue) => {
       if (!dateValue) return '';
       const date = new Date(`${dateValue}T12:00:00Z`);
@@ -160,6 +289,13 @@
     };
     const syncEventDates = () => {
       if (eventEnd?.dataset.auto === '1' && eventStart?.value) eventEnd.value = eventStart.value;
+    };
+    const applyAllDayState = () => {
+      const allDay = Boolean(allDayInput?.checked);
+      eventTimeInputs.forEach((input) => {
+        input.disabled = allDay;
+        input.setAttribute('aria-disabled', allDay ? 'true' : 'false');
+      });
     };
     const applyPopupState = () => {
       const enabled = Boolean(popupEnabled?.checked);
@@ -177,9 +313,97 @@
       syncPopupDates();
     });
     eventEnd?.addEventListener('change', syncPopupDates);
+    allDayInput?.addEventListener('change', applyAllDayState);
     popupEnabled?.addEventListener('change', applyPopupState);
     syncEventDates();
+    applyAllDayState();
     applyPopupState();
+
+    const selectedImageIds = () => (imageIdsInput?.value || '')
+      .split(',')
+      .map((value) => Number(value))
+      .filter((value, index, values) => value > 0 && values.indexOf(value) === index)
+      .slice(0, 12);
+    const refreshImageLabels = () => {
+      const cards = imagePreview ? [...imagePreview.querySelectorAll('[data-gse-image-id]')] : [];
+      cards.forEach((card, index) => {
+        const label = card.querySelector('div>span');
+        if (label) label.textContent = index === 0 ? 'Titelbild' : 'Eventfoto';
+      });
+      if (imagePreview) imagePreview.hidden = cards.length === 0;
+    };
+    const setSelectedImages = (attachments) => {
+      if (!imageIdsInput || !imagePreview) return;
+      const images = attachments.filter((attachment) => attachment?.id).slice(0, 12);
+      imageIdsInput.value = images.map((attachment) => attachment.id).join(',');
+      imagePreview.replaceChildren();
+      images.forEach((attachment, index) => {
+        const card = document.createElement('article');
+        card.dataset.gseImageId = String(attachment.id);
+        const image = document.createElement('img');
+        image.src = attachment.sizes?.medium?.url || attachment.sizes?.thumbnail?.url || attachment.url || '';
+        image.alt = attachment.alt || attachment.title || '';
+        const controls = document.createElement('div');
+        const label = document.createElement('span');
+        label.textContent = index === 0 ? 'Titelbild' : 'Eventfoto';
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.dataset.gseImageRemove = '';
+        remove.textContent = 'Entfernen';
+        controls.append(label, remove);
+        card.append(image, controls);
+        imagePreview.append(card);
+      });
+      refreshImageLabels();
+    };
+    imagePreview?.addEventListener('click', (event) => {
+      const remove = event.target.closest('[data-gse-image-remove]');
+      if (!remove || !imageIdsInput) return;
+      const card = remove.closest('[data-gse-image-id]');
+      const removeId = Number(card?.dataset.gseImageId || 0);
+      imageIdsInput.value = selectedImageIds().filter((id) => id !== removeId).join(',');
+      card?.remove();
+      refreshImageLabels();
+    });
+    if (mediaOpenButton && window.wp?.media) {
+      let mediaFrame = null;
+      mediaOpenButton.addEventListener('click', () => {
+        if (!mediaFrame) {
+          mediaFrame = window.wp.media({
+            title: 'Eventfotos auswählen',
+            button: { text: 'Für Event übernehmen' },
+            library: { type: 'image' },
+            multiple: true
+          });
+          mediaFrame.on('select', () => setSelectedImages(mediaFrame.state().get('selection').toJSON()));
+        }
+        mediaFrame.off('open');
+        mediaFrame.on('open', () => {
+          const selection = mediaFrame.state().get('selection');
+          selection.reset();
+          selectedImageIds().forEach((imageId) => {
+            const attachment = window.wp.media.attachment(imageId);
+            attachment.fetch();
+            selection.add(attachment);
+          });
+        });
+        mediaFrame.open();
+      });
+    }
+
+    pagePickerToggle?.addEventListener('click', () => {
+      if (!pagePicker) return;
+      pagePicker.hidden = !pagePicker.hidden;
+      pagePickerToggle.setAttribute('aria-expanded', pagePicker.hidden ? 'false' : 'true');
+    });
+    pagePicker?.addEventListener('click', (event) => {
+      const pageButton = event.target.closest('[data-gse-page-url]');
+      if (!pageButton || !linkInput) return;
+      linkInput.value = pageButton.dataset.gsePageUrl || '';
+      linkInput.dispatchEvent(new Event('input', { bubbles: true }));
+      pagePicker.hidden = true;
+      pagePickerToggle?.setAttribute('aria-expanded', 'false');
+    });
 
     form.addEventListener('submit', (event) => {
       if (form.dataset.submitting === '1') {

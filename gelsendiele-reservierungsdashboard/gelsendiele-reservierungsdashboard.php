@@ -3,7 +3,7 @@
  * Plugin Name: Gelsensystem
  * Plugin URI: https://github.com/LEECHER1/Gelsensystem
  * Description: Zentrales Reservierungs-, Service-, Küchen- und Kassensystem für Gastronomiebetriebe.
- * Version: 2.14.1
+ * Version: 2.15.0
  * Author: Andreas Schwarz / Gelsensystem
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.14.1' );
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.15.0' );
 defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
 defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );
@@ -415,6 +415,9 @@ final class Gelsendiele_Reservierungsdashboard {
             wp_enqueue_script( 'gelsendiele-settings', GELSENDIELE_URL . 'admin/assets/settings.js', array(), self::VERSION, false );
             wp_script_add_data( 'gelsendiele-settings', 'strategy', 'defer' );
         }
+        if ( 'events' === $app_section && current_user_can( 'upload_files' ) ) {
+            wp_enqueue_media();
+        }
 
         wp_enqueue_script(
             'gd-reservierungsdashboard',
@@ -430,6 +433,7 @@ final class Gelsendiele_Reservierungsdashboard {
         wp_localize_script( 'gd-reservierungsdashboard', 'GDReservations', array(
             'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
             'nonce'            => wp_create_nonce( 'gd_reservierungsdashboard' ),
+			'menuNonce'        => wp_create_nonce( 'gdg_menu_action' ),
             'loginNonce'       => wp_create_nonce( 'gd_dashboard_login' ),
             'dashboardUrl'     => $this->dashboard_url(),
             'autoConfirm'      => (bool) get_option( self::AUTO_CONFIRM_OPTION, false ),
