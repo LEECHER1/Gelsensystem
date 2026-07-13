@@ -50,5 +50,11 @@ gdg_expect( false !== strpos( $css, '.gdg-app.is-nav-collapsed' ), 'einklappbare
 gdg_expect( false !== strpos( $css, '@media (min-width: 791px)' ), 'Tablet- und Desktop-Seitenleiste fehlt' );
 gdg_expect( false !== strpos( $js, "localStorage.getItem('gd-sidebar-collapsed')" ), 'Menüzustand wird nicht geteilt' );
 gdg_expect( false !== strpos( $js, "localStorage.setItem('gd-sidebar-collapsed'" ), 'Menüzustand wird nicht gespeichert' );
+gdg_expect( false !== strpos( $js, 'function setupAppDrawer()' ), 'mobiler App-Drawer fehlt' );
+gdg_expect( false !== strpos( $js, "state.servicePane = 'order'" ), 'kompakte mobile Bestellansicht fehlt' );
+gdg_expect( false !== strpos( $js, 'data-service-pane="tables"' ) && false !== strpos( $js, 'data-service-pane="menu"' ) && false !== strpos( $js, 'data-service-pane="order"' ), 'mobile Servicebereiche fehlen' );
+gdg_expect( false !== strpos( $css, '.gdg-app.is-app-drawer-open .gdg-nav' ), 'App-Drawer-Stil fehlt' );
+gdg_expect( false !== strpos( $css, '.gdg-service-layout > .gdg-panel:not(.is-mobile-active)' ), 'mobile Servicefokussierung fehlt' );
+gdg_expect( false !== strpos( $css, '.gdg-ticket-items { gap: 8px' ), 'einheitliche Küchen-/Schankkarten fehlen' );
 
 echo "Gastro-Vollbild- und Theme-Tests erfolgreich.\n";

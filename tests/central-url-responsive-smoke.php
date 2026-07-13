@@ -24,6 +24,8 @@ central_expect( false !== strpos( $migrator, "add_action( 'init', array( __CLASS
 central_expect( false === strpos( $migrator, "add_action( 'plugins_loaded', array( __CLASS__, 'maybe_migrate' )" ), 'unsichere plugins_loaded-Migration ist noch aktiv' );
 central_expect( false !== strpos( $db, "get_option( 'gd_reservierungsdashboard_page_id'" ), 'Arbeitsseiten verwenden nicht die neue Zentrale' );
 central_expect( false !== strpos( $entry, 'class="gelsensystem-mobile-nav"' ), 'Touch-Navigation fehlt' );
+central_expect( false !== strpos( $entry, 'data-gd-app-drawer-toggle' ), 'zentraler App-Drawer-Button fehlt' );
+central_expect( false !== strpos( $entry, 'id="gelsensystem-app-drawer"' ), 'zentraler App-Drawer fehlt' );
 central_expect( false !== strpos( $entry, 'render_more_app_links' ), 'Arbeitsbereiche fehlen im mobilen Mehr-Menü' );
 central_expect( false !== strpos( $css, '@media (min-width:700px) and (max-width:1024px)' ), 'Tablet-Breakpoint fehlt' );
 central_expect( false !== strpos( $css, '@media (max-width:699px)' ), 'Smartphone-Breakpoint fehlt' );
@@ -38,6 +40,9 @@ central_expect( false !== strpos( $css, '.gd-tab:not(.is-active) span[data-count
 central_expect( false !== strpos( $css, '@media (min-width:1025px)' ) && false !== strpos( $css, '.gd-sheet-layer.is-open' ), 'Desktop-Seitenmenü fehlt' );
 central_expect( false !== strpos( $entry, 'data-sidebar-toggle' ), 'einklappbare Desktop-Seitenleiste fehlt' );
 central_expect( false !== strpos( $js, "window.localStorage.setItem('gd-sidebar-collapsed'" ), 'Seitenleistenstatus wird nicht gespeichert' );
+central_expect( false !== strpos( $js, 'const setAppDrawerOpen' ), 'App-Drawer-Steuerung fehlt' );
+central_expect( false !== strpos( $css, 'body.gd-app-drawer-open .gelsensystem-mobile-nav' ), 'App-Drawer-Öffnungszustand fehlt' );
+central_expect( false !== strpos( $css, 'grid-template-columns:repeat(3,minmax(0,1fr))' ), 'App-Drawer hat kein einheitliches App-Raster' );
 central_expect( false !== strpos( $css, 'body.gd-sidebar-collapsed .gelsensystem-sidebar' ), 'kompakter Seitenleistenstil fehlt' );
 central_expect( false === strpos( $js, "if (!card || window.matchMedia('(min-width: 1025px)').matches) return;" ), 'Desktop-Karten können noch nicht eingeklappt werden' );
 central_expect( false !== strpos( $css, '.gd-booking-card.is-expanded .gd-card-details' ), 'geöffneter Kartenzustand fehlt' );

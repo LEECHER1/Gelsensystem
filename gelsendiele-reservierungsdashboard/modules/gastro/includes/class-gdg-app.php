@@ -127,7 +127,8 @@ final class GDG_App {
 					<div><strong>Gelsensystem</strong><span><?php echo esc_html( $business_name . ' · ' . $labels[ $view ] ); ?></span></div>
 				</div>
 				<button type="button" class="gdg-nav-toggle" data-gdg-nav-toggle aria-label="Menü einklappen" aria-expanded="true" title="Menü ein-/ausklappen"><span aria-hidden="true">‹</span></button>
-				<nav class="gdg-nav" aria-label="Arbeitsbereiche">
+				<nav class="gdg-nav" id="gdg-app-drawer" aria-label="Arbeitsbereiche">
+					<div class="gdg-nav-head"><div><span>Gelsensystem</span><strong>Bereiche</strong></div><button type="button" data-gdg-drawer-close aria-label="Bereichsmenü schließen">×</button></div>
 					<?php if ( current_user_can( 'manage_bookings' ) ) : ?><a href="<?php echo esc_url( add_query_arg( 'gd-section', 'reservations', $dashboard_url ) ); ?>"><span aria-hidden="true">R</span><b>Reservierungen</b></a><?php endif; ?>
 					<?php foreach ( $labels as $nav_view => $label ) : ?>
 						<?php if ( self::can_view( $nav_view ) && ! empty( $urls[ $nav_view ] ) ) : ?>
@@ -138,12 +139,16 @@ final class GDG_App {
 				</nav>
 				<div class="gdg-top-actions">
 					<span class="gdg-connection" title="Verbindungsstatus"><i></i><span>Online</span></span>
+					<button type="button" class="gdg-icon-button gdg-apps-button" data-gdg-drawer-toggle aria-controls="gdg-app-drawer" aria-expanded="false" aria-label="Bereiche öffnen" title="Bereiche wechseln">
+						<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+					</button>
 					<button type="button" class="gdg-icon-button gdg-theme-button" data-gdg-theme-toggle aria-label="Darstellung wechseln" aria-pressed="false" title="Hell-/Dunkelmodus">
 						<svg class="gdg-theme-icon gdg-theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
 						<svg class="gdg-theme-icon gdg-theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
 					</button>
 				</div>
 			</header>
+			<button type="button" class="gdg-drawer-backdrop" data-gdg-drawer-close aria-label="Bereichsmenü schließen"></button>
 			<main class="gdg-main">
 				<div class="gdg-loading"><span class="gdg-spinner"></span><p>Daten werden geladen …</p></div>
 				<div class="gdg-screen" hidden></div>
