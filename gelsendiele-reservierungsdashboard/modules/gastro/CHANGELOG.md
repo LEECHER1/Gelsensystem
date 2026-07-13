@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.1 – 2026-07-13
+
+- Gemeinsame Patchversion mit korrigierter Ladefolge der Event-Mediathek.
+
 ## 2.15.0 – 2026-07-13
 
 - Gemeinsame Featureversion mit überarbeiteter Eventpflege und WordPress-Mediathek.

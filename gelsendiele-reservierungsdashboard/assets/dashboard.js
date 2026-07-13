@@ -365,9 +365,10 @@
       card?.remove();
       refreshImageLabels();
     });
-    if (mediaOpenButton && window.wp?.media) {
+    if (mediaOpenButton) {
       let mediaFrame = null;
       mediaOpenButton.addEventListener('click', () => {
+		if (!window.wp?.media) return;
         if (!mediaFrame) {
           mediaFrame = window.wp.media({
             title: 'Eventfotos auswählen',

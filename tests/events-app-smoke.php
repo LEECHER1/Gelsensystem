@@ -27,6 +27,7 @@ events_expect( false !== strpos( $events, "wp_trash_post" ), 'sicheres Löschen 
 events_expect( false !== strpos( $events, "self::META_ACTIVE" ), 'öffentliche Sichtbarkeitssteuerung fehlt' );
 events_expect( false !== strpos( $events, "self::META_IMAGE_ID" ), 'Eventfoto wird nicht dauerhaft gespeichert' );
 events_expect( false !== strpos( $entry, 'wp_enqueue_media()' ), 'WordPress-Mediathek wird im Eventbereich nicht geladen' );
+events_expect( false !== strpos( $entry, "array( 'media-editor' )" ), 'Dashboard wartet nicht auf die WordPress-Mediathek' );
 events_expect( false !== strpos( $events, 'name="event_image_ids"' ) && false !== strpos( $events, 'data-gse-media-open' ), 'Mehrfachauswahl aus der Mediathek fehlt' );
 events_expect( false !== strpos( $events, 'sanitize_selected_image_ids' ) && false !== strpos( $events, 'wp_attachment_is_image' ), 'Mediathek-Auswahl wird serverseitig nicht validiert' );
 events_expect( false !== strpos( $events, 'self::META_DETAILS' ) && false !== strpos( $events, 'gse-event-card__details' ), 'aufklappbare Zusatzinformationen fehlen' );
