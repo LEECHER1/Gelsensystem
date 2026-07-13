@@ -45,25 +45,33 @@
     });
   });
 
-  const popup = document.querySelector('[data-gse-popup]');
-  if (!popup) return;
-  const storageKey = `gse-event-popup-${popup.dataset.eventId || 'event'}-${popup.dataset.popupVersion || '1'}`;
-  let dismissed = false;
-  try { dismissed = window.sessionStorage.getItem(storageKey) === 'dismissed'; } catch (error) {}
-  const close = () => {
-    popup.hidden = true;
-    document.body.classList.remove('gse-popup-open');
-    try { window.sessionStorage.setItem(storageKey, 'dismissed'); } catch (error) {}
+  const initializePopup = () => {
+    const popup = document.querySelector('[data-gse-popup]');
+    if (!popup) return;
+    const storageKey = `gse-event-popup-${popup.dataset.eventId || 'event'}-${popup.dataset.popupVersion || '1'}`;
+    let dismissed = false;
+    try { dismissed = window.sessionStorage.getItem(storageKey) === 'dismissed'; } catch (error) {}
+    const close = () => {
+      popup.hidden = true;
+      document.body.classList.remove('gse-popup-open');
+      try { window.sessionStorage.setItem(storageKey, 'dismissed'); } catch (error) {}
+    };
+    if (!dismissed) {
+      window.setTimeout(() => {
+        popup.hidden = false;
+        document.body.classList.add('gse-popup-open');
+        popup.querySelector('.gse-event-popup__close')?.focus();
+      }, 350);
+    }
+    popup.querySelectorAll('[data-gse-popup-close]').forEach((button) => button.addEventListener('click', close));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !popup.hidden) close();
+    });
   };
-  if (!dismissed) {
-    window.setTimeout(() => {
-      popup.hidden = false;
-      document.body.classList.add('gse-popup-open');
-      popup.querySelector('.gse-event-popup__close')?.focus();
-    }, 650);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializePopup, { once: true });
+  } else {
+    initializePopup();
   }
-  popup.querySelectorAll('[data-gse-popup-close]').forEach((button) => button.addEventListener('click', close));
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !popup.hidden) close();
-  });
 })();

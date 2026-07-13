@@ -40,7 +40,7 @@ final class Gelsensystem_Events {
 		add_action( 'template_redirect', array( __CLASS__, 'handle_actions' ), 0 );
 		add_action( 'template_redirect', array( __CLASS__, 'render_public_route' ), 2 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_homepage_popup_assets' ), 20 );
-		add_action( 'wp_footer', array( __CLASS__, 'render_homepage_popup' ), 20 );
+		add_action( 'wp_footer', array( __CLASS__, 'render_homepage_popup' ), 5 );
 	}
 
 	public static function register() {
@@ -446,16 +446,16 @@ final class Gelsensystem_Events {
 						<?php endif; ?>
 						<label class="gelsensystem-events-wide"><span>Optionale Webseite</span><input type="text" inputmode="url" name="link" value="<?php echo esc_attr( $edit['link'] ?? '' ); ?>" placeholder="orf.at"><small>Domain genügt – https:// wird beim Speichern automatisch ergänzt.</small></label>
 						<label><span>Eventfarbe</span><input type="color" name="color" value="<?php echo esc_attr( $edit['color'] ?? '#149447' ); ?>"><small>Farbe für Datum, Akzente und Button.</small></label>
-						<div class="gelsensystem-events-popup-schedule gelsensystem-events-wide" data-gse-popup-schedule>
-							<div><strong>Popup-Zeitraum</strong><small>Standard: ein Tag vor dem Event bis zum Event-Enddatum.</small></div>
-							<label><span>Popup anzeigen ab *</span><input type="date" name="popup_start_date" data-gse-popup-start data-auto="<?php echo ! $edit || empty( $edit['popup_start_custom'] ) ? '1' : '0'; ?>" value="<?php echo esc_attr( self::date_part( $edit['popup_start'] ?? '' ) ); ?>"></label>
-							<label><span>Popup anzeigen bis *</span><input type="date" name="popup_end_date" data-gse-popup-end data-auto="<?php echo ! $edit || empty( $edit['popup_end_custom'] ) ? '1' : '0'; ?>" value="<?php echo esc_attr( self::date_part( $edit['popup_end'] ?? '' ) ); ?>"></label>
-						</div>
 					</div>
 					<div class="gelsensystem-events-checks">
 						<label><input type="checkbox" name="all_day" value="1" <?php checked( ! empty( $edit['all_day'] ) ); ?>> Ganztägig</label>
 						<label><input type="checkbox" name="active" value="1" <?php checked( ! $edit || ! empty( $edit['active'] ) ); ?>> Auf Webseite anzeigen</label>
 						<label><input type="checkbox" name="popup" value="1" data-gse-popup-enabled <?php checked( ! empty( $edit['popup'] ) ); ?>> Als Popup auf der Startseite anzeigen</label>
+						<div class="gelsensystem-events-popup-schedule" data-gse-popup-schedule <?php echo empty( $edit['popup'] ) ? 'hidden' : ''; ?>>
+							<div><strong>Popup-Zeitraum</strong><small>Standard: ein Tag vor dem Event bis zum Event-Enddatum.</small></div>
+							<label><span>Popup anzeigen ab *</span><input type="date" name="popup_start_date" data-gse-popup-start data-auto="<?php echo ! $edit || empty( $edit['popup_start_custom'] ) ? '1' : '0'; ?>" value="<?php echo esc_attr( self::date_part( $edit['popup_start'] ?? '' ) ); ?>"></label>
+							<label><span>Popup anzeigen bis *</span><input type="date" name="popup_end_date" data-gse-popup-end data-auto="<?php echo ! $edit || empty( $edit['popup_end_custom'] ) ? '1' : '0'; ?>" value="<?php echo esc_attr( self::date_part( $edit['popup_end'] ?? '' ) ); ?>"></label>
+						</div>
 					</div>
 					<button type="submit" class="button button-primary" data-gse-submit><?php echo $edit ? 'Event speichern' : 'Event anlegen'; ?></button>
 					<div class="gelsensystem-events-save-progress" data-gse-progress hidden aria-live="polite"><span>Event wird gespeichert und Bilder werden verarbeitet …</span><div><i></i></div></div>
