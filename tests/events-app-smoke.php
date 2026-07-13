@@ -26,12 +26,13 @@ events_expect( false !== strpos( $events, "check_admin_referer( 'gse_event_actio
 events_expect( false !== strpos( $events, "wp_trash_post" ), 'sicheres Löschen in den Papierkorb fehlt' );
 events_expect( false !== strpos( $events, "self::META_ACTIVE" ), 'öffentliche Sichtbarkeitssteuerung fehlt' );
 events_expect( false !== strpos( $events, "self::META_IMAGE_ID" ), 'Eventfoto wird nicht dauerhaft gespeichert' );
-events_expect( false !== strpos( $entry, 'wp_enqueue_media()' ), 'WordPress-Mediathek wird im Eventbereich nicht geladen' );
-events_expect( false !== strpos( $entry, "array( 'media-editor' )" ), 'Dashboard wartet nicht auf die WordPress-Mediathek' );
-events_expect( false !== strpos( $entry, "wp_enqueue_script( 'media-editor' )" ), 'Entfernte Mediathek-Skripte werden nicht wiederhergestellt' );
 events_expect( false !== strpos( $entry, "array( \$this, 'enqueue_assets' ), 999" ), 'Event-Assets werden nicht am Ende der Frontend-Ladephase gesichert' );
+events_expect( false !== strpos( $entry, "'eventMediaNonce'" ), 'Nonce für den Event-Mediathek-Dialog fehlt' );
 events_expect( false !== strpos( $events, 'name="event_image_ids"' ) && false !== strpos( $events, 'data-gse-media-open' ), 'Mehrfachauswahl aus der Mediathek fehlt' );
 events_expect( false !== strpos( $events, 'sanitize_selected_image_ids' ) && false !== strpos( $events, 'wp_attachment_is_image' ), 'Mediathek-Auswahl wird serverseitig nicht validiert' );
+events_expect( false !== strpos( $events, "wp_ajax_gse_media_library" ) && false !== strpos( $events, "wp_ajax_gse_media_upload" ), 'WordPress-Mediathek-AJAX-Endpunkte fehlen' );
+events_expect( false !== strpos( $events, "current_user_can( 'upload_files' )" ) && false !== strpos( $events, "check_ajax_referer( 'gse_event_media'" ), 'Mediathek-Endpunkte sind nicht ausreichend geschützt' );
+events_expect( false !== strpos( $events, 'media_handle_upload' ) && false !== strpos( $events, "'post_type'      => 'attachment'" ), 'echte WordPress-Anhänge werden nicht geladen oder erstellt' );
 events_expect( false !== strpos( $events, 'self::META_DETAILS' ) && false !== strpos( $events, 'gse-event-card__details' ), 'aufklappbare Zusatzinformationen fehlen' );
 events_expect( false !== strpos( $events, 'self::META_POPUP' ) && false !== strpos( $events, 'data-gse-popup' ), 'Startseiten-Popup fehlt' );
 events_expect( false !== strpos( $events, "render_homepage_popup' ), 5" ), 'Popup muss vor den Footer-Skripten ausgegeben werden' );
@@ -50,7 +51,8 @@ events_expect( false !== strpos( $wp_admin, "'gelsendiele-events'" ), 'WordPress
 events_expect( false !== strpos( $admin_css, '.gelsensystem-events-editor-grid' ), 'responsives Verwaltungs-Layout fehlt' );
 events_expect( false !== strpos( $admin_css, '.gelsensystem-events-save-progress' ), 'sichtbarer Speicherfortschritt fehlt' );
 events_expect( false !== strpos( $admin_js, "form.dataset.submitting === '1'" ), 'clientseitiger Mehrfachklickschutz fehlt' );
-events_expect( false !== strpos( $admin_js, 'window.wp.media' ) && false !== strpos( $admin_js, 'Eventfotos auswählen' ), 'Mediathek-Interaktion fehlt' );
+events_expect( false !== strpos( $admin_js, 'gse_media_library' ) && false !== strpos( $admin_js, 'gse_media_upload' ) && false !== strpos( $admin_js, 'Eventfotos auswählen' ), 'Mediathek-Interaktion fehlt' );
+events_expect( false !== strpos( $admin_css, '.gse-media-dialog__grid' ) && false !== strpos( $admin_css, 'html[data-gd-theme="dark"] .gse-media-dialog__panel' ), 'responsiver Mediathek-Dialog oder Dark Mode fehlt' );
 events_expect( false !== strpos( $admin_js, 'data-gse-popup-start' ) && false !== strpos( $admin_js, 'previousDay' ), 'Popup-Datumsautomatik fehlt' );
 events_expect( false !== strpos( $events, "current_datetime()->format( 'Y-m-d' )" ), 'Startdatum wird bei neuen Events nicht vorbelegt' );
 events_expect( false !== strpos( $events, '$end_date_value = $start_date_value' ) && false !== strpos( $admin_js, 'syncEventDates' ), 'Enddatum folgt dem Startdatum nicht automatisch' );

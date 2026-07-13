@@ -3,7 +3,7 @@
  * Plugin Name: Gelsensystem
  * Plugin URI: https://github.com/LEECHER1/Gelsensystem
  * Description: Zentrales Reservierungs-, Service-, Küchen- und Kassensystem für Gastronomiebetriebe.
- * Version: 2.15.2
+ * Version: 2.15.3
  * Author: Andreas Schwarz / Gelsensystem
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.15.2' );
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.15.3' );
 defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
 defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );
@@ -415,22 +415,10 @@ final class Gelsendiele_Reservierungsdashboard {
             wp_enqueue_script( 'gelsendiele-settings', GELSENDIELE_URL . 'admin/assets/settings.js', array(), self::VERSION, false );
             wp_script_add_data( 'gelsendiele-settings', 'strategy', 'defer' );
         }
-        if ( 'events' === $app_section && current_user_can( 'upload_files' ) ) {
-            wp_enqueue_media();
-			// Einige Frontend-Erweiterungen entfernen Admin-Media-Assets nach einem
-			// frühen wp_enqueue_media()-Aufruf wieder. Für die Event-App werden die
-			// Core-Handles deshalb am Ende der Frontend-Enqueue-Phase sichergestellt.
-			wp_enqueue_script( 'media-editor' );
-			wp_enqueue_script( 'media-audiovideo' );
-			wp_enqueue_style( 'media-views' );
-			wp_enqueue_style( 'imgareaselect' );
-        }
-
-		$dashboard_dependencies = 'events' === $app_section ? array( 'media-editor' ) : array();
         wp_enqueue_script(
             'gd-reservierungsdashboard',
             plugin_dir_url( __FILE__ ) . 'assets/dashboard.js',
-			$dashboard_dependencies,
+			array(),
             self::VERSION,
             ! $central_section
         );
@@ -442,6 +430,7 @@ final class Gelsendiele_Reservierungsdashboard {
             'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
             'nonce'            => wp_create_nonce( 'gd_reservierungsdashboard' ),
 			'menuNonce'        => wp_create_nonce( 'gdg_menu_action' ),
+			'eventMediaNonce'  => wp_create_nonce( 'gse_event_media' ),
             'loginNonce'       => wp_create_nonce( 'gd_dashboard_login' ),
             'dashboardUrl'     => $this->dashboard_url(),
             'autoConfirm'      => (bool) get_option( self::AUTO_CONFIRM_OPTION, false ),

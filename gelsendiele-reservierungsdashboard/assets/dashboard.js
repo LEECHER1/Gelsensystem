@@ -341,7 +341,7 @@
         const card = document.createElement('article');
         card.dataset.gseImageId = String(attachment.id);
         const image = document.createElement('img');
-        image.src = attachment.sizes?.medium?.url || attachment.sizes?.thumbnail?.url || attachment.url || '';
+        image.src = attachment.thumbnail || attachment.sizes?.medium?.url || attachment.sizes?.thumbnail?.url || attachment.url || '';
         image.alt = attachment.alt || attachment.title || '';
         const controls = document.createElement('div');
         const label = document.createElement('span');
@@ -365,30 +365,157 @@
       card?.remove();
       refreshImageLabels();
     });
-    if (mediaOpenButton) {
-      let mediaFrame = null;
-      mediaOpenButton.addEventListener('click', () => {
-		if (!window.wp?.media) return;
-        if (!mediaFrame) {
-          mediaFrame = window.wp.media({
-            title: 'Eventfotos auswählen',
-            button: { text: 'Für Event übernehmen' },
-            library: { type: 'image' },
-            multiple: true
-          });
-          mediaFrame.on('select', () => setSelectedImages(mediaFrame.state().get('selection').toJSON()));
-        }
-        mediaFrame.off('open');
-        mediaFrame.on('open', () => {
-          const selection = mediaFrame.state().get('selection');
-          selection.reset();
-          selectedImageIds().forEach((imageId) => {
-            const attachment = window.wp.media.attachment(imageId);
-            attachment.fetch();
-            selection.add(attachment);
-          });
+    if (mediaOpenButton && typeof GDReservations !== 'undefined') {
+      let mediaDialog = null;
+      let mediaItems = [];
+      let mediaSelection = new Set();
+      let mediaLastFocus = null;
+
+      const mediaRequest = async (body) => {
+        const response = await fetch(GDReservations.ajaxUrl, {
+          method: 'POST',
+          credentials: 'same-origin',
+          body
         });
-        mediaFrame.open();
+        const result = await response.json();
+        if (!response.ok || !result?.success) {
+          throw new Error(result?.data?.message || 'Die Mediathek konnte nicht geladen werden.');
+        }
+        return result.data;
+      };
+      const existingAttachment = (imageId) => {
+        const card = imagePreview?.querySelector(`[data-gse-image-id="${imageId}"]`);
+        const image = card?.querySelector('img');
+        return image ? { id: imageId, thumbnail: image.src, url: image.src, alt: image.alt, title: image.alt } : null;
+      };
+      const ensureMediaDialog = () => {
+        if (mediaDialog) return mediaDialog;
+        mediaDialog = document.createElement('div');
+        mediaDialog.className = 'gse-media-dialog';
+        mediaDialog.hidden = true;
+        mediaDialog.innerHTML = `
+          <button type="button" class="gse-media-dialog__backdrop" data-gse-media-close aria-label="Mediathek schließen"></button>
+          <section class="gse-media-dialog__panel" role="dialog" aria-modal="true" aria-labelledby="gse-media-dialog-title">
+            <header>
+              <div><span>WORDPRESS-MEDIATHEK</span><h2 id="gse-media-dialog-title">Eventfotos auswählen</h2></div>
+              <button type="button" class="gse-media-dialog__close" data-gse-media-close aria-label="Mediathek schließen">×</button>
+            </header>
+            <div class="gse-media-dialog__toolbar">
+              <label><span class="screen-reader-text">Mediathek durchsuchen</span><input type="search" data-gse-media-search placeholder="Mediathek durchsuchen"></label>
+              <button type="button" class="button" data-gse-media-search-submit>Suchen</button>
+              <label class="button button-primary gse-media-dialog__upload">Bilder hochladen<input type="file" accept="image/*" multiple data-gse-media-upload></label>
+            </div>
+            <p class="gse-media-dialog__status" data-gse-media-status role="status">Bilder werden geladen …</p>
+            <div class="gse-media-dialog__grid" data-gse-media-grid></div>
+            <footer><strong data-gse-media-count>0 von 12 ausgewählt</strong><button type="button" class="button button-primary" data-gse-media-apply>Für Event übernehmen</button></footer>
+          </section>`;
+        document.body.append(mediaDialog);
+        return mediaDialog;
+      };
+      const updateMediaCount = () => {
+        const count = mediaDialog?.querySelector('[data-gse-media-count]');
+        if (count) count.textContent = `${mediaSelection.size} von 12 ausgewählt`;
+      };
+      const renderMediaItems = () => {
+        const grid = mediaDialog?.querySelector('[data-gse-media-grid]');
+        const status = mediaDialog?.querySelector('[data-gse-media-status]');
+        if (!grid) return;
+        grid.replaceChildren();
+        mediaItems.forEach((attachment) => {
+          const selected = mediaSelection.has(Number(attachment.id));
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = selected ? 'is-selected' : '';
+          button.dataset.gseMediaId = String(attachment.id);
+          button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+          const image = document.createElement('img');
+          image.src = attachment.thumbnail || attachment.url || '';
+          image.alt = attachment.alt || '';
+          const title = document.createElement('span');
+          title.textContent = attachment.title || `Bild ${attachment.id}`;
+          button.append(image, title);
+          grid.append(button);
+        });
+        if (status) status.textContent = mediaItems.length ? `${mediaItems.length} Bilder in der Mediathek` : 'Keine Bilder gefunden.';
+        updateMediaCount();
+      };
+      const loadMediaItems = async (search = '') => {
+        const status = mediaDialog?.querySelector('[data-gse-media-status]');
+        if (status) status.textContent = 'Bilder werden geladen …';
+        const body = new URLSearchParams({ action: 'gse_media_library', nonce: GDReservations.eventMediaNonce, search });
+        try {
+          mediaItems = await mediaRequest(body);
+          renderMediaItems();
+        } catch (error) {
+          if (status) status.textContent = error.message;
+        }
+      };
+      const closeMediaDialog = () => {
+        if (!mediaDialog) return;
+        mediaDialog.hidden = true;
+        document.documentElement.classList.remove('gse-media-dialog-open');
+        mediaLastFocus?.focus();
+      };
+
+      mediaOpenButton.addEventListener('click', () => {
+        ensureMediaDialog();
+        mediaSelection = new Set(selectedImageIds());
+        mediaLastFocus = document.activeElement;
+        mediaDialog.hidden = false;
+        document.documentElement.classList.add('gse-media-dialog-open');
+        mediaDialog.querySelector('[data-gse-media-search]')?.focus();
+        loadMediaItems();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && mediaDialog && !mediaDialog.hidden) closeMediaDialog();
+      });
+      document.addEventListener('click', async (event) => {
+        if (!mediaDialog || mediaDialog.hidden || !event.target.closest('.gse-media-dialog')) return;
+        if (event.target.closest('[data-gse-media-close]')) {
+          closeMediaDialog();
+          return;
+        }
+        const imageButton = event.target.closest('[data-gse-media-id]');
+        if (imageButton) {
+          const imageId = Number(imageButton.dataset.gseMediaId);
+          if (mediaSelection.has(imageId)) mediaSelection.delete(imageId);
+          else if (mediaSelection.size < 12) mediaSelection.add(imageId);
+          renderMediaItems();
+          return;
+        }
+        if (event.target.closest('[data-gse-media-search-submit]')) {
+          loadMediaItems(mediaDialog.querySelector('[data-gse-media-search]')?.value || '');
+          return;
+        }
+        if (event.target.closest('[data-gse-media-apply]')) {
+          const attachments = [...mediaSelection].map((imageId) => mediaItems.find((item) => Number(item.id) === imageId) || existingAttachment(imageId)).filter(Boolean);
+          setSelectedImages(attachments);
+          closeMediaDialog();
+        }
+      });
+      document.addEventListener('change', async (event) => {
+        const input = event.target.closest('[data-gse-media-upload]');
+        if (!input || !mediaDialog || mediaDialog.hidden || !input.files?.length) return;
+        const status = mediaDialog.querySelector('[data-gse-media-status]');
+        const body = new FormData();
+        body.append('action', 'gse_media_upload');
+        body.append('nonce', GDReservations.eventMediaNonce);
+        [...input.files].slice(0, 12).forEach((file) => body.append('event_images[]', file));
+        input.disabled = true;
+        if (status) status.textContent = 'Bilder werden hochgeladen …';
+        try {
+          const uploaded = await mediaRequest(body);
+          mediaItems = [...uploaded, ...mediaItems.filter((item) => !uploaded.some((upload) => Number(upload.id) === Number(item.id)))];
+          uploaded.forEach((item) => {
+            if (mediaSelection.size < 12) mediaSelection.add(Number(item.id));
+          });
+          renderMediaItems();
+        } catch (error) {
+          if (status) status.textContent = error.message;
+        } finally {
+          input.disabled = false;
+          input.value = '';
+        }
       });
     }
 

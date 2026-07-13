@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.15.3
+
+- Eigenen responsiven Mediathek-Dialog für Eventfotos ergänzt, der die WordPress-Anhangsbibliothek direkt und zuverlässig lädt.
+- Suche, Mehrfachauswahl bis zwölf Bilder und Upload in die echte WordPress-Mediathek im Eventformular vereint.
+
 ## 2.15.2
 
 - WordPress-Mediathek-Assets am Ende der Frontend-Enqueue-Phase wiederhergestellt, falls andere Erweiterungen sie zuvor entfernt haben.

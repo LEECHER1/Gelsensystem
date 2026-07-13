@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.3 – 2026-07-13
+
+- Gemeinsame Patchversion mit zuverlässigem WordPress-Mediathek-Dialog für Eventfotos.
+
 ## 2.15.2 – 2026-07-13
 
 - Gemeinsame Patchversion mit zuverlässig wiederhergestellten WordPress-Mediathek-Assets.
