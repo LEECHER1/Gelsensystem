@@ -3309,7 +3309,7 @@ html[data-gd-theme="dark"] .gd-button-edit-booking {
 }
 
 /* ==========================================================
-   Version 2.12.0 – schlanke Eventverwaltung
+   Version 2.12.1 – schlanke Eventverwaltung mit Eventfotos
    ========================================================== */
 .gelsensystem-events-manager { display:grid; gap:23px; color:var(--gd-text); }
 .gelsensystem-events-manager * { box-sizing:border-box; }
@@ -3334,7 +3334,13 @@ html[data-gd-theme="dark"] .gd-button-edit-booking {
 .gelsensystem-events-form label { display:grid; gap:6px; }
 .gelsensystem-events-form label>span { font-size:12px; font-weight:800; }
 .gelsensystem-events-form input:not([type="checkbox"]),.gelsensystem-events-form textarea { width:100%; min-height:44px; padding:9px 11px; border:1px solid var(--gd-border); border-radius:11px; color:var(--gd-text); background:#f9fbf9; font:inherit; }
+.gelsensystem-events-form input[type="file"] { padding:7px; }
 .gelsensystem-events-form textarea { resize:vertical; }
+.gelsensystem-events-image-field small { color:var(--gd-muted); font-size:10px; line-height:1.45; }
+.gelsensystem-events-image-preview { display:grid; grid-template-columns:96px minmax(0,1fr); align-items:center; gap:13px; padding:11px; border:1px solid var(--gd-border); border-radius:13px; background:#f9fbf9; }
+.gelsensystem-events-image-preview img { display:block; width:96px; height:68px; border-radius:9px; object-fit:cover; }
+.gelsensystem-events-image-preview label { display:flex; grid-template-columns:none; align-items:center; gap:8px; font-size:11px; font-weight:750; }
+.gelsensystem-events-image-preview input { width:19px; height:19px; margin:0; accent-color:var(--gd-green); }
 .gelsensystem-events-field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
 .gelsensystem-events-wide { grid-column:1/-1; }
 .gelsensystem-events-checks { display:flex; flex-wrap:wrap; gap:10px 20px; }
@@ -3369,6 +3375,7 @@ html[data-gd-theme="dark"] .gelsensystem-events-inventory,
 html[data-gd-theme="dark"] .gelsensystem-events-manager>.notice { color:#eef3ee; border-color:#344137; background:#151d17; }
 html[data-gd-theme="dark"] .gelsensystem-events-form input:not([type="checkbox"]),
 html[data-gd-theme="dark"] .gelsensystem-events-form textarea,
+html[data-gd-theme="dark"] .gelsensystem-events-image-preview,
 html[data-gd-theme="dark"] .gelsensystem-events-list article,
 html[data-gd-theme="dark"] .gelsensystem-events-list .button { color:#eef3ee; border-color:#405442; background:#1b261d; }
 html[data-gd-theme="dark"] .gelsensystem-events-actions>span { background:#222d24; }

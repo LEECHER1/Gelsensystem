@@ -2,7 +2,7 @@
 Contributors: Andreas Schwarz / OpenAI
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.12.0
+Stable tag: 2.12.1
 
 Zentrales Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für Gastronomiebetriebe.
 
@@ -40,6 +40,10 @@ Das Zahlungsmodul dokumentiert Bar- und Kartenzahlungen, ist aber noch keine RKS
 Installierbare ZIP-Dateien werden aus einem geprüften Git-Tag erstellt. Vor jedem Produktivupdate sind WordPress-Dateien und Datenbank vollständig zu sichern.
 
 == Changelog ==
+
+= 2.12.1 =
+* Eventfotos lassen sich direkt in der Eventverwaltung hochladen, ersetzen und entfernen.
+* Öffentliche Eventkarten zeigen Fotos responsiv auf Smartphone, Tablet und Desktop.
 
 = 2.12.0 =
 * Neue Eventverwaltung als eigener Bereich der Gelsensystem-App.

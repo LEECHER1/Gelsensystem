@@ -7,9 +7,12 @@
 .gse-public-events__header p { margin:13px 0 0; color:var(--gse-muted); font-size:18px; }
 .gse-public-events__list { display:grid; gap:16px; }
 .gse-event-card { display:grid; grid-template-columns:105px minmax(0,1fr); overflow:hidden; border:1px solid rgba(23,34,27,.12); border-radius:22px; background:#fff; box-shadow:0 10px 34px rgba(20,40,26,.06); }
+.gse-event-card.has-image { grid-template-columns:105px minmax(220px,31%) minmax(0,1fr); }
 .gse-event-card__date { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:190px; padding:25px 18px; color:#fff; background:linear-gradient(150deg,#1ca552,#0d783a); text-align:center; }
 .gse-event-card__date strong { font-size:42px; line-height:.95; }
 .gse-event-card__date span { margin-top:9px; font-size:14px; font-weight:850; letter-spacing:.12em; text-transform:uppercase; }
+.gse-event-card__image { min-height:220px; margin:0; overflow:hidden; background:#dfe7e1; }
+.gse-event-card__image img { display:block; width:100%; height:100%; min-height:220px; object-fit:cover; }
 .gse-event-card__content { padding:27px 32px 29px; }
 .gse-event-card__time { color:var(--gse-green); font-size:12px; font-weight:800; letter-spacing:.035em; }
 .gse-event-card h2 { margin:7px 0 8px; color:var(--gse-text); font-size:clamp(23px,3vw,34px); line-height:1.12; }
@@ -19,6 +22,13 @@
 .gse-event-card__link { display:inline-flex; align-items:center; gap:8px; margin-top:14px; padding:11px 16px; border-radius:10px; color:#fff!important; background:var(--gse-green); font-weight:800; text-decoration:none!important; }
 .gse-public-events__empty { display:grid; gap:5px; padding:36px; border:1px dashed rgba(23,34,27,.2); border-radius:20px; background:#fff; text-align:center; }
 .gse-public-events__empty span { color:var(--gse-muted); }
+@media (max-width:900px) {
+  .gse-event-card.has-image { grid-template-columns:90px minmax(0,1fr); }
+  .gse-event-card.has-image .gse-event-card__date { grid-row:1/3; }
+  .gse-event-card__image { grid-column:2; min-height:190px; }
+  .gse-event-card__image img { min-height:190px; max-height:250px; }
+  .gse-event-card.has-image .gse-event-card__content { grid-column:2; }
+}
 @media (max-width:700px) {
   .gelsensystem-events-page { padding:34px 0 52px; }
   .gse-public-events__header { margin-bottom:24px; }
@@ -28,6 +38,8 @@
   .gse-event-card__date strong { font-size:31px; }
   .gse-event-card__date span { font-size:11px; }
   .gse-event-card__content { padding:20px 18px 22px; }
+  .gse-event-card__image { min-height:150px; }
+  .gse-event-card__image img { min-height:150px; max-height:185px; }
   .gse-event-card h2 { font-size:24px; }
   .gse-event-card__description { font-size:14px; }
 }

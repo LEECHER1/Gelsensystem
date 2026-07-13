@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.12.1
+
+- Bild-Upload für Events mit WordPress-Medienverarbeitung ergänzt.
+- Vorhandene Eventfotos können ersetzt oder aus dem Event entfernt werden.
+- Öffentliche Eventkarten zeigen Bilder responsiv und mit semantischer Bildauszeichnung.
+
 ## 2.12.0
 
 - Schlanke Eventverwaltung direkt in die zentrale Gelsensystem-App integriert.

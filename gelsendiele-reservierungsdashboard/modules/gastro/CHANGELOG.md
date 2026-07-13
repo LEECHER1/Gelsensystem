@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.12.1 – 2026-07-13
+
+- Gemeinsame Patchversion mit Eventfoto-Unterstützung.
+
 ## 2.12.0 – 2026-07-13
 
 - Gemeinsame Version mit integrierter Eventverwaltung und öffentlicher Eventseite.
