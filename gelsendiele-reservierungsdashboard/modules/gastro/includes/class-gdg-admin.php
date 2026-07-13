@@ -28,6 +28,12 @@ final class GDG_Admin {
 			case 'save_menu_item':
 				self::save_menu_item();
 				break;
+			case 'delete_category':
+				self::delete_category();
+				break;
+			case 'delete_menu_item':
+				self::delete_menu_item();
+				break;
 			case 'save_settings':
 				self::save_settings();
 				break;
@@ -128,6 +134,59 @@ final class GDG_Admin {
 		self::redirect( 'gdg-menu' );
 	}
 
+	/** Erstellt eine Kategorie direkt aus dem Artikel-Dialog, ohne Formulardaten zu verlieren. */
+	public static function ajax_save_category(): void {
+		if ( ! current_user_can( 'gdg_manage' ) ) {
+			wp_send_json_error( array( 'message' => 'Keine Berechtigung.' ), 403 );
+		}
+		check_ajax_referer( 'gdg_menu_action', 'nonce' );
+
+		global $wpdb;
+		$name       = sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) );
+		$sort_order = intval( $_POST['sort_order'] ?? 0 );
+		$active     = empty( $_POST['active'] ) ? 0 : 1;
+		if ( '' === $name ) {
+			wp_send_json_error( array( 'message' => 'Bitte einen Kategorienamen eingeben.' ), 400 );
+		}
+
+		$inserted = $wpdb->insert(
+			GDG_DB::table( 'menu_categories' ),
+			array( 'name' => $name, 'sort_order' => $sort_order, 'active' => $active ),
+			array( '%s', '%d', '%d' )
+		);
+		if ( false === $inserted ) {
+			wp_send_json_error( array( 'message' => 'Die Kategorie konnte nicht gespeichert werden.' ), 500 );
+		}
+
+		wp_send_json_success(
+			array(
+				'id'         => (int) $wpdb->insert_id,
+				'name'       => $name,
+				'sort_order' => $sort_order,
+				'active'     => $active,
+			)
+		);
+	}
+
+	private static function delete_menu_item(): void {
+		global $wpdb;
+		$id = absint( $_POST['id'] ?? 0 );
+		if ( $id ) {
+			$wpdb->delete( GDG_DB::table( 'menu_items' ), array( 'id' => $id ), array( '%d' ) );
+		}
+		self::redirect( 'gdg-menu', 'deleted' );
+	}
+
+	private static function delete_category(): void {
+		global $wpdb;
+		$id = absint( $_POST['id'] ?? 0 );
+		if ( $id ) {
+			$wpdb->delete( GDG_DB::table( 'menu_items' ), array( 'category_id' => $id ), array( '%d' ) );
+			$wpdb->delete( GDG_DB::table( 'menu_categories' ), array( 'id' => $id ), array( '%d' ) );
+		}
+		self::redirect( 'gdg-menu', 'deleted' );
+	}
+
 	private static function save_settings(): void {
 		$mode = sanitize_key( wp_unslash( $_POST['terminal_mode'] ?? 'manual' ) );
 		if ( ! in_array( $mode, array( 'manual', 'sumup', 'custom' ), true ) ) {
@@ -148,6 +207,8 @@ final class GDG_Admin {
 		if ( 'missing_name' === $notice ) {
 			$message = 'Bitte alle Pflichtfelder ausfüllen.';
 			$type = 'error';
+		} elseif ( 'deleted' === $notice ) {
+			$message = 'Eintrag gelöscht.';
 		}
 		echo '<div class="notice notice-' . esc_attr( $type ) . ' is-dismissible"><p>' . esc_html( $message ) . '</p></div>';
 	}
@@ -361,11 +422,17 @@ final class GDG_Admin {
 
 		$categories  = GDG_DB::get_categories( false );
 		$items       = GDG_DB::get_menu_items( false );
-		$edit_cat_id = isset( $_GET['edit_cat'] ) ? absint( $_GET['edit_cat'] ) : 0;
 		$edit_item_id = isset( $_GET['edit_item'] ) ? absint( $_GET['edit_item'] ) : 0;
-		$edit_cat    = $edit_cat_id ? $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . GDG_DB::table( 'menu_categories' ) . ' WHERE id = %d', $edit_cat_id ), ARRAY_A ) : null;
 		$edit_item   = $edit_item_id ? $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . GDG_DB::table( 'menu_items' ) . ' WHERE id = %d', $edit_item_id ), ARRAY_A ) : null;
 		$app_url     = add_query_arg( 'gd-section', 'menu', $dashboard_url );
+		$selected_category_name = '';
+		$next_category_order    = 10;
+		foreach ( $categories as $category ) {
+			$next_category_order = max( $next_category_order, (int) $category['sort_order'] + 10 );
+			if ( $edit_item && (int) $edit_item['category_id'] === (int) $category['id'] ) {
+				$selected_category_name = (string) $category['name'];
+			}
+		}
 		$active_items = count(
 			array_filter(
 				$items,
@@ -387,22 +454,21 @@ final class GDG_Admin {
 			</section>
 
 			<div class="gelsensystem-menu-editor-grid">
-				<form method="post" class="gelsensystem-menu-form">
-					<header><div><span>Kategorie</span><h2><?php echo esc_html( $edit_cat ? 'Kategorie bearbeiten' : 'Kategorie hinzufügen' ); ?></h2></div><?php if ( $edit_cat ) : ?><a href="<?php echo esc_url( $app_url ); ?>">Abbrechen</a><?php endif; ?></header>
-					<?php wp_nonce_field( 'gdg_admin_action', 'gdg_nonce' ); ?>
-					<input type="hidden" name="gdg_action" value="save_category"><input type="hidden" name="gdg_context" value="app"><input type="hidden" name="gdg_section" value="menu"><input type="hidden" name="id" value="<?php echo esc_attr( $edit_cat['id'] ?? 0 ); ?>">
-					<label><span>Name *</span><input name="name" required maxlength="120" value="<?php echo esc_attr( $edit_cat['name'] ?? '' ); ?>" placeholder="z. B. Hauptspeisen"></label>
-					<label><span>Reihenfolge</span><input type="number" name="sort_order" value="<?php echo esc_attr( $edit_cat['sort_order'] ?? 0 ); ?>" inputmode="numeric"><small>Kleinere Zahlen erscheinen zuerst.</small></label>
-					<label class="gelsensystem-menu-check"><input type="checkbox" name="active" value="1" <?php checked( ! isset( $edit_cat['active'] ) || (int) $edit_cat['active'] === 1 ); ?>><span>In der Speisekarte anzeigen</span></label>
-					<button type="submit" class="button button-primary"><?php echo esc_html( $edit_cat ? 'Kategorie speichern' : 'Kategorie hinzufügen' ); ?></button>
-				</form>
-
 				<form method="post" class="gelsensystem-menu-form gelsensystem-menu-item-form">
 					<header><div><span>Artikel</span><h2><?php echo esc_html( $edit_item ? 'Eintrag bearbeiten' : 'Gericht oder Getränk hinzufügen' ); ?></h2></div><?php if ( $edit_item ) : ?><a href="<?php echo esc_url( $app_url ); ?>">Abbrechen</a><?php endif; ?></header>
 					<?php wp_nonce_field( 'gdg_admin_action', 'gdg_nonce' ); ?>
 					<input type="hidden" name="gdg_action" value="save_menu_item"><input type="hidden" name="gdg_context" value="app"><input type="hidden" name="gdg_section" value="menu"><input type="hidden" name="id" value="<?php echo esc_attr( $edit_item['id'] ?? 0 ); ?>">
 					<div class="gelsensystem-menu-field-grid">
-						<label><span>Kategorie *</span><select name="category_id" required><option value="">Bitte wählen</option><?php foreach ( $categories as $category ) : ?><option value="<?php echo esc_attr( $category['id'] ); ?>" <?php selected( $edit_item['category_id'] ?? 0, $category['id'] ); ?>><?php echo esc_html( $category['name'] ); ?></option><?php endforeach; ?></select></label>
+						<label class="gelsensystem-category-field"><span>Kategorie *</span>
+							<div class="gelsensystem-category-select" data-gdg-category-select>
+								<input type="hidden" name="category_id" value="<?php echo esc_attr( $edit_item['category_id'] ?? 0 ); ?>" data-gdg-category-value>
+								<button type="button" class="gelsensystem-category-select__trigger" data-gdg-category-toggle aria-haspopup="listbox" aria-expanded="false"><span data-gdg-category-label><?php echo esc_html( $selected_category_name ?: 'Bitte wählen' ); ?></span><span aria-hidden="true">⌄</span></button>
+								<div class="gelsensystem-category-select__menu" data-gdg-category-menu role="listbox" hidden>
+									<?php foreach ( $categories as $category ) : ?><button type="button" role="option" data-gdg-category-option data-category-id="<?php echo esc_attr( $category['id'] ); ?>" data-category-name="<?php echo esc_attr( $category['name'] ); ?>" aria-selected="<?php echo (int) ( $edit_item['category_id'] ?? 0 ) === (int) $category['id'] ? 'true' : 'false'; ?>"><?php echo esc_html( $category['name'] ); ?></button><?php endforeach; ?>
+									<button type="button" class="gelsensystem-category-select__add" data-gdg-category-add><span aria-hidden="true">＋</span> Hinzufügen</button>
+								</div>
+							</div>
+						</label>
 						<label><span>Name *</span><input name="name" required maxlength="180" value="<?php echo esc_attr( $edit_item['name'] ?? '' ); ?>" placeholder="z. B. Wiener Schnitzel"></label>
 						<label class="gelsensystem-menu-wide"><span>Beschreibung</span><textarea rows="3" name="description" placeholder="Kurze Beschreibung oder Beilagen"><?php echo esc_textarea( $edit_item['description'] ?? '' ); ?></textarea></label>
 						<label><span>Preis (€) *</span><input type="number" step="0.01" min="0" name="price" required value="<?php echo esc_attr( $edit_item['price'] ?? '0.00' ); ?>" inputmode="decimal"></label>
@@ -410,20 +476,32 @@ final class GDG_Admin {
 						<label><span>Reihenfolge</span><input type="number" name="sort_order" value="<?php echo esc_attr( $edit_item['sort_order'] ?? 0 ); ?>" inputmode="numeric"></label>
 						<label class="gelsensystem-menu-check"><input type="checkbox" name="active" value="1" <?php checked( ! isset( $edit_item['active'] ) || (int) $edit_item['active'] === 1 ); ?>><span>Im Service anzeigen</span></label>
 					</div>
-					<button type="submit" class="button button-primary" <?php disabled( empty( $categories ) ); ?>><?php echo esc_html( $edit_item ? 'Eintrag speichern' : 'Eintrag hinzufügen' ); ?></button>
-					<?php if ( empty( $categories ) ) : ?><p class="gelsensystem-menu-hint">Lege zuerst eine Kategorie an.</p><?php endif; ?>
+					<button type="submit" class="button button-primary" data-gdg-item-submit <?php disabled( empty( $categories ) ); ?>><?php echo esc_html( $edit_item ? 'Eintrag speichern' : 'Eintrag hinzufügen' ); ?></button>
+					<?php if ( empty( $categories ) ) : ?><p class="gelsensystem-menu-hint" data-gdg-category-hint>Öffne die Kategorieauswahl und wähle „Hinzufügen“.</p><?php endif; ?>
 				</form>
 			</div>
 
+			<div class="gelsensystem-category-dialog" data-gdg-category-dialog aria-hidden="true">
+				<button type="button" class="gelsensystem-category-dialog__backdrop" data-gdg-category-close aria-label="Dialog schließen"></button>
+				<section role="dialog" aria-modal="true" aria-labelledby="gelsensystem-category-dialog-title">
+					<header><div><span>Kategorie</span><h2 id="gelsensystem-category-dialog-title">Kategorie hinzufügen</h2></div><button type="button" data-gdg-category-close aria-label="Dialog schließen">×</button></header>
+					<label><span>Name *</span><input type="text" maxlength="120" data-gdg-category-name placeholder="z. B. Hauptspeisen"></label>
+					<label><span>Reihenfolge</span><input type="number" value="<?php echo esc_attr( (string) $next_category_order ); ?>" inputmode="numeric" data-gdg-category-order><small>Kleinere Zahlen erscheinen zuerst.</small></label>
+					<label class="gelsensystem-menu-check"><input type="checkbox" checked data-gdg-category-active><span>In der Speisekarte anzeigen</span></label>
+					<p class="gelsensystem-category-dialog__status" data-gdg-category-status role="status"></p>
+					<button type="button" class="button button-primary" data-gdg-category-save>Kategorie erstellen</button>
+				</section>
+			</div>
+
 			<section class="gelsensystem-menu-inventory">
-				<header><div><span>Aktuelle Auswahl</span><h2>Vorhandene Einträge</h2></div><p>Einträge werden deaktiviert statt gelöscht, damit bestehende Bestellungen nachvollziehbar bleiben.</p></header>
+				<header><div><span>Aktuelle Auswahl</span><h2>Vorhandene Einträge</h2></div><p>Speisen und Getränke können bearbeitet oder dauerhaft gelöscht werden.</p></header>
 				<?php if ( $items ) : ?>
 					<div class="gelsensystem-menu-list">
 						<?php foreach ( $items as $item ) : ?>
 							<article class="<?php echo empty( $item['active'] ) ? 'is-inactive' : ''; ?>">
 								<div class="gelsensystem-menu-item-main"><span><?php echo esc_html( $item['category_name'] ?: 'Ohne Kategorie' ); ?></span><strong><?php echo esc_html( $item['name'] ); ?></strong><?php if ( $item['description'] ) : ?><small><?php echo esc_html( $item['description'] ); ?></small><?php endif; ?></div>
 								<div class="gelsensystem-menu-item-meta"><strong><?php echo esc_html( number_format_i18n( (float) $item['price'], 2 ) ); ?> €</strong><span><?php echo 'bar' === $item['station'] ? 'Schank' : 'Küche'; ?></span><span class="<?php echo empty( $item['active'] ) ? 'is-off' : 'is-on'; ?>"><?php echo empty( $item['active'] ) ? 'Deaktiviert' : 'Aktiv'; ?></span></div>
-								<a class="button" href="<?php echo esc_url( add_query_arg( 'edit_item', $item['id'], $app_url ) ); ?>">Bearbeiten</a>
+								<div class="gelsensystem-menu-actions"><a class="button" href="<?php echo esc_url( add_query_arg( 'edit_item', $item['id'], $app_url ) ); ?>">Bearbeiten</a><form method="post" data-gdg-delete-form data-confirm="<?php echo esc_attr( $item['name'] . ' wirklich löschen?' ); ?>"><?php wp_nonce_field( 'gdg_admin_action', 'gdg_nonce' ); ?><input type="hidden" name="gdg_action" value="delete_menu_item"><input type="hidden" name="gdg_context" value="app"><input type="hidden" name="gdg_section" value="menu"><input type="hidden" name="id" value="<?php echo esc_attr( $item['id'] ); ?>"><button type="submit" class="gelsensystem-menu-delete" aria-label="<?php echo esc_attr( $item['name'] . ' löschen' ); ?>">×</button></form></div>
 							</article>
 						<?php endforeach; ?>
 					</div>
@@ -432,7 +510,7 @@ final class GDG_Admin {
 
 			<section class="gelsensystem-category-list">
 				<header><span>Kategorien</span><h2>Sortierung und Sichtbarkeit</h2></header>
-				<div><?php foreach ( $categories as $category ) : ?><a class="<?php echo empty( $category['active'] ) ? 'is-inactive' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'edit_cat', $category['id'], $app_url ) ); ?>"><strong><?php echo esc_html( $category['name'] ); ?></strong><small><?php echo empty( $category['active'] ) ? 'Deaktiviert' : 'Aktiv'; ?> · Position <?php echo esc_html( (string) $category['sort_order'] ); ?></small></a><?php endforeach; ?></div>
+				<div data-gdg-category-list><?php foreach ( $categories as $category ) : ?><article class="<?php echo empty( $category['active'] ) ? 'is-inactive' : ''; ?>"><div><strong><?php echo esc_html( $category['name'] ); ?></strong><small><?php echo empty( $category['active'] ) ? 'Deaktiviert' : 'Aktiv'; ?> · Position <?php echo esc_html( (string) $category['sort_order'] ); ?></small></div><form method="post" data-gdg-delete-form data-confirm="<?php echo esc_attr( $category['name'] . ' und alle zugehörigen Einträge wirklich löschen?' ); ?>"><?php wp_nonce_field( 'gdg_admin_action', 'gdg_nonce' ); ?><input type="hidden" name="gdg_action" value="delete_category"><input type="hidden" name="gdg_context" value="app"><input type="hidden" name="gdg_section" value="menu"><input type="hidden" name="id" value="<?php echo esc_attr( $category['id'] ); ?>"><button type="submit" class="gelsensystem-menu-delete" aria-label="<?php echo esc_attr( $category['name'] . ' löschen' ); ?>">×</button></form></article><?php endforeach; ?></div>
 			</section>
 		</div>
 		<?php

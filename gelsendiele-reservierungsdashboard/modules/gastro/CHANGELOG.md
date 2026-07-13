@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.15.0 – 2026-07-13
+
+- Gemeinsame Featureversion mit überarbeiteter Eventpflege und WordPress-Mediathek.
+- Kategorien direkt aus der Artikelauswahl anlegen sowie Speisen, Getränke und Kategorien gezielt löschen.
+- Öffentliche Speisekarte einspaltig untereinander angeordnet.
+
 ## 2.14.1 – 2026-07-13
 
 - Gemeinsame Patchversion mit stabiler chronologischer Eventsortierung und aktuellem Kalenderdatum.

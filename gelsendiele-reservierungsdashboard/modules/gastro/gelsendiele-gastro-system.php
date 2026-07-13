@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Gelsensystem Gastro
  * Description: Service-, Küchen-, Schank- und Zahlungsmodul des Gelsensystems.
- * Version: 2.14.1
+ * Version: 2.15.0
  * Author: Andreas Schwarz / Gelsensystem
  * Text Domain: gelsendiele-gastro
  */
@@ -24,7 +24,7 @@ if ( class_exists( 'GDG_DB', false ) ) {
 	return;
 }
 
-defined( 'GDG_VERSION' ) || define( 'GDG_VERSION', defined( 'GELSENDIELE_VERSION' ) ? GELSENDIELE_VERSION : '2.14.1' );
+defined( 'GDG_VERSION' ) || define( 'GDG_VERSION', defined( 'GELSENDIELE_VERSION' ) ? GELSENDIELE_VERSION : '2.15.0' );
 defined( 'GDG_FILE' ) || define( 'GDG_FILE', __FILE__ );
 defined( 'GDG_DIR' ) || define( 'GDG_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GDG_URL' ) || define( 'GDG_URL', plugin_dir_url( __FILE__ ) );
@@ -55,6 +55,7 @@ final class GDG_Plugin {
 		add_action( 'admin_menu', array( 'GDG_Admin', 'register_menu' ) );
 		add_action( 'admin_init', array( 'GDG_Admin', 'handle_actions' ) );
 		add_action( 'template_redirect', array( 'GDG_Admin', 'handle_actions' ), 1 );
+		add_action( 'wp_ajax_gdg_save_menu_category', array( 'GDG_Admin', 'ajax_save_category' ) );
 		add_filter( 'post_row_actions', array( 'GDG_Reservation_Bridge', 'add_booking_row_action' ), 10, 2 );
 		add_action( 'template_redirect', array( 'GDG_App', 'disable_cache_on_app_pages' ) );
 		add_filter( 'show_admin_bar', array( 'GDG_App', 'hide_admin_bar_on_app_pages' ) );

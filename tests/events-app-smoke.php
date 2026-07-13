@@ -26,9 +26,9 @@ events_expect( false !== strpos( $events, "check_admin_referer( 'gse_event_actio
 events_expect( false !== strpos( $events, "wp_trash_post" ), 'sicheres Löschen in den Papierkorb fehlt' );
 events_expect( false !== strpos( $events, "self::META_ACTIVE" ), 'öffentliche Sichtbarkeitssteuerung fehlt' );
 events_expect( false !== strpos( $events, "self::META_IMAGE_ID" ), 'Eventfoto wird nicht dauerhaft gespeichert' );
-events_expect( false !== strpos( $events, "media_handle_upload( 'gse_event_image'" ), 'sicherer WordPress-Bildupload fehlt' );
-events_expect( false !== strpos( $events, 'enctype="multipart/form-data"' ), 'Eventformular unterstützt keine Bilddateien' );
-events_expect( false !== strpos( $events, 'name="event_images[]"' ) && false !== strpos( $events, 'multiple' ), 'Mehrfach-Bildupload fehlt' );
+events_expect( false !== strpos( $entry, 'wp_enqueue_media()' ), 'WordPress-Mediathek wird im Eventbereich nicht geladen' );
+events_expect( false !== strpos( $events, 'name="event_image_ids"' ) && false !== strpos( $events, 'data-gse-media-open' ), 'Mehrfachauswahl aus der Mediathek fehlt' );
+events_expect( false !== strpos( $events, 'sanitize_selected_image_ids' ) && false !== strpos( $events, 'wp_attachment_is_image' ), 'Mediathek-Auswahl wird serverseitig nicht validiert' );
 events_expect( false !== strpos( $events, 'self::META_DETAILS' ) && false !== strpos( $events, 'gse-event-card__details' ), 'aufklappbare Zusatzinformationen fehlen' );
 events_expect( false !== strpos( $events, 'self::META_POPUP' ) && false !== strpos( $events, 'data-gse-popup' ), 'Startseiten-Popup fehlt' );
 events_expect( false !== strpos( $events, "render_homepage_popup' ), 5" ), 'Popup muss vor den Footer-Skripten ausgegeben werden' );
@@ -47,10 +47,15 @@ events_expect( false !== strpos( $wp_admin, "'gelsendiele-events'" ), 'WordPress
 events_expect( false !== strpos( $admin_css, '.gelsensystem-events-editor-grid' ), 'responsives Verwaltungs-Layout fehlt' );
 events_expect( false !== strpos( $admin_css, '.gelsensystem-events-save-progress' ), 'sichtbarer Speicherfortschritt fehlt' );
 events_expect( false !== strpos( $admin_js, "form.dataset.submitting === '1'" ), 'clientseitiger Mehrfachklickschutz fehlt' );
+events_expect( false !== strpos( $admin_js, 'window.wp.media' ) && false !== strpos( $admin_js, 'Eventfotos auswählen' ), 'Mediathek-Interaktion fehlt' );
 events_expect( false !== strpos( $admin_js, 'data-gse-popup-start' ) && false !== strpos( $admin_js, 'previousDay' ), 'Popup-Datumsautomatik fehlt' );
 events_expect( false !== strpos( $events, "current_datetime()->format( 'Y-m-d' )" ), 'Startdatum wird bei neuen Events nicht vorbelegt' );
 events_expect( false !== strpos( $events, '$end_date_value = $start_date_value' ) && false !== strpos( $admin_js, 'syncEventDates' ), 'Enddatum folgt dem Startdatum nicht automatisch' );
 events_expect( false !== strpos( $events, 'placeholder="www.*"' ) && false === strpos( $events, 'Domain genügt' ), 'vereinfachter Webseitenhinweis fehlt' );
+events_expect( false !== strpos( $events, 'data-gse-page-picker-toggle' ) && false !== strpos( $events, 'get_linkable_pages' ), 'WordPress-Seitenauswahl fehlt' );
+events_expect( false !== strpos( $events, 'data-gse-all-day' ) && false !== strpos( $admin_js, 'applyAllDayState' ), 'Ganztägig-Schalter deaktiviert die Zeitfelder nicht' );
+events_expect( false !== strpos( $events, 'gelsensystem-events-overview' ) && false !== strpos( $events, 'Startseiten-Popup' ) && false !== strpos( $events, 'Weitere Informationen' ), 'vollständige Event-Kurzübersicht fehlt' );
+events_expect( strpos( $events, 'gelsensystem-events-color-field' ) > strpos( $events, 'gelsensystem-events-checks' ), 'Eventfarbe steht nicht am Ende des Formulars' );
 events_expect( false !== strpos( $events, 'usort(' ) && false !== strpos( $events, '$by_start = strcmp' ), 'Events werden nach einer nachträglichen Datumsänderung nicht erneut chronologisch sortiert' );
 events_expect( false !== strpos( $admin_js, 'popupSchedule.hidden = !enabled' ) && false !== strpos( $admin_css, '.gelsensystem-events-popup-schedule[hidden]' ), 'Popup-Zeitraum wird nicht bedingt ein- und ausgeblendet' );
 events_expect( false !== strpos( $admin_css, 'html[data-gd-theme="dark"] .gelsensystem-events-form' ), 'Dark-Mode-Stile fehlen' );

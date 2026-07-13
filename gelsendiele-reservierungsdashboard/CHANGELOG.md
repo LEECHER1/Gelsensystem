@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.15.0
+
+- Eventbilder auf die native WordPress-Mediathek mit Mehrfachauswahl, Titelbild-Reihenfolge und Entfernen umgestellt.
+- Schnellwähler für veröffentlichte WordPress-Seiten im optionalen Eventlink ergänzt.
+- Event-Kurzübersicht um Kurzbeschreibung, Zusatzinformationen, Bildanzahl, Link, Popup-Zeitraum und Farbe erweitert.
+- Ganztägig-Schalter direkt unter das Enddatum verschoben und Uhrzeitfelder bei Aktivierung deaktiviert.
+- Eventfarbe als letzten Einstellungsblock vor dem Speichern angeordnet.
+- Mehrtägige Events zeigen Start- und Enddatum vollständig an.
+- Kategorien werden direkt in der Artikelauswahl über einen Dialog angelegt; die separate Kategorie-Bearbeitung entfällt.
+- Speisen, Getränke und Kategorien lassen sich über rote Löschen-Schaltflächen mit Sicherheitsabfrage entfernen.
+- Die öffentliche Speisekarte zeigt alle Kategorien durchgehend einspaltig untereinander.
+
 ## 2.14.1
 
 - Eventlisten nach jeder Änderung explizit anhand des aktuellen Startdatums und der Startzeit neu sortiert.

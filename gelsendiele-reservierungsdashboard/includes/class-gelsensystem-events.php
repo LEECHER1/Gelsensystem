@@ -173,9 +173,13 @@ final class Gelsensystem_Events {
 			update_post_meta( $event_id, self::META_SUBMISSION, $submission_token );
 		}
 
-		$image_ids = self::get_image_ids( $event_id );
-		$remove_ids = array_map( 'absint', (array) ( $_POST['remove_images'] ?? array() ) );
-		$image_ids = array_values( array_diff( $image_ids, $remove_ids ) );
+		if ( isset( $_POST['event_image_ids'] ) ) {
+			$image_ids = self::sanitize_selected_image_ids( $_POST['event_image_ids'] );
+		} else {
+			$image_ids = self::get_image_ids( $event_id );
+			$remove_ids = array_map( 'absint', (array) ( $_POST['remove_images'] ?? array() ) );
+			$image_ids = array_values( array_diff( $image_ids, $remove_ids ) );
+		}
 		$upload = self::handle_image_uploads( $event_id );
 		$image_ids = array_slice( array_values( array_unique( array_merge( $image_ids, $upload['ids'] ) ) ), 0, 12 );
 		update_post_meta( $event_id, self::META_IMAGE_IDS, $image_ids );
@@ -239,6 +243,19 @@ final class Gelsensystem_Events {
 			array_unshift( $ids, $legacy_id );
 		}
 		return array_slice( array_values( array_unique( $ids ) ), 0, 12 );
+	}
+
+	private static function sanitize_selected_image_ids( $value ) {
+		$ids = is_array( $value ) ? $value : explode( ',', sanitize_text_field( wp_unslash( $value ) ) );
+		$ids = array_slice( array_values( array_unique( array_filter( array_map( 'absint', $ids ) ) ) ), 0, 12 );
+		return array_values(
+			array_filter(
+				$ids,
+				static function ( $image_id ) {
+					return 'attachment' === get_post_type( $image_id ) && wp_attachment_is_image( $image_id );
+				}
+			)
+		);
 	}
 
 	private static function handle_image_uploads( $event_id ) {
@@ -399,6 +416,33 @@ final class Gelsensystem_Events {
 		return $events;
 	}
 
+	private static function get_linkable_pages() {
+		$excluded_ids = array(
+			(int) get_option( 'gd_reservierungsdashboard_page_id', 0 ),
+			(int) get_option( 'gdg_parent_page', 0 ),
+			(int) get_option( 'gdg_page_service', 0 ),
+			(int) get_option( 'gdg_page_kitchen', 0 ),
+			(int) get_option( 'gdg_page_bar', 0 ),
+			(int) get_option( 'gdg_page_checkout', 0 ),
+		);
+		$excluded_ids = array_values( array_unique( array_filter( $excluded_ids ) ) );
+		$pages = get_pages(
+			array(
+				'post_status' => 'publish',
+				'sort_column' => 'post_title',
+				'sort_order'  => 'ASC',
+			)
+		);
+		return array_values(
+			array_filter(
+				$pages,
+				static function ( $page ) use ( $excluded_ids ) {
+					return ! in_array( (int) $page->ID, $excluded_ids, true ) && '' === (string) get_post_meta( $page->ID, '_gdg_view', true );
+				}
+			)
+		);
+	}
+
 	public static function render_app( $dashboard_url ) {
 		if ( ! current_user_can( 'gdg_manage' ) ) {
 			echo '<div class="gd-notice gd-notice-error">Kein Zugriff auf die Eventverwaltung.</div>';
@@ -423,6 +467,8 @@ final class Gelsensystem_Events {
 			$end_date_value = $start_date_value;
 		}
 		$end_date_is_automatic = ! $edit || $end_date_value === $start_date_value;
+		$selected_image_ids = ! empty( $edit['image_ids'] ) ? array_map( 'absint', $edit['image_ids'] ) : array();
+		$linkable_pages = self::get_linkable_pages();
 		?>
 		<div class="gelsensystem-events-manager">
 			<header class="gelsensystem-events-heading">
@@ -438,7 +484,7 @@ final class Gelsensystem_Events {
 				<div><strong><?php echo esc_html( (string) count( $events ) ); ?></strong><span>Gesamt</span></div>
 			</div>
 			<div class="gelsensystem-events-editor-grid">
-				<form method="post" enctype="multipart/form-data" class="gelsensystem-events-form">
+				<form method="post" class="gelsensystem-events-form">
 					<header><div><span>Event</span><h2><?php echo $edit ? 'Event bearbeiten' : 'Neues Event'; ?></h2></div><?php if ( $edit ) : ?><a href="<?php echo esc_url( $app_url ); ?>">Abbrechen</a><?php endif; ?></header>
 					<?php wp_nonce_field( 'gse_event_action', 'gse_nonce' ); ?>
 					<input type="hidden" name="gse_action" value="save_event">
@@ -447,25 +493,32 @@ final class Gelsensystem_Events {
 					<label class="gelsensystem-events-wide"><span>Titel *</span><input name="title" required value="<?php echo esc_attr( $edit['title'] ?? '' ); ?>" placeholder="z. B. Sommerfest"></label>
 					<div class="gelsensystem-events-field-grid">
 						<label><span>Startdatum *</span><input type="date" name="start_date" data-gse-event-start required value="<?php echo esc_attr( $start_date_value ); ?>"></label>
-						<label><span>Startzeit</span><input type="time" name="start_time" value="<?php echo esc_attr( self::time_part( $edit['start'] ?? '', '18:00' ) ); ?>"></label>
-						<label><span>Enddatum</span><input type="date" name="end_date" data-gse-event-end data-auto="<?php echo $end_date_is_automatic ? '1' : '0'; ?>" value="<?php echo esc_attr( $end_date_value ); ?>"></label>
-						<label><span>Endzeit</span><input type="time" name="end_time" value="<?php echo esc_attr( self::time_part( $edit['end'] ?? '', '22:00' ) ); ?>"></label>
+						<label><span>Startzeit</span><input type="time" name="start_time" data-gse-event-time value="<?php echo esc_attr( self::time_part( $edit['start'] ?? '', '18:00' ) ); ?>"></label>
+						<div class="gelsensystem-events-end-date-group"><label><span>Enddatum</span><input type="date" name="end_date" data-gse-event-end data-auto="<?php echo $end_date_is_automatic ? '1' : '0'; ?>" value="<?php echo esc_attr( $end_date_value ); ?>"></label><label class="gelsensystem-events-all-day"><input type="checkbox" name="all_day" value="1" data-gse-all-day <?php checked( ! empty( $edit['all_day'] ) ); ?>> <span>Ganztägig</span></label></div>
+						<label><span>Endzeit</span><input type="time" name="end_time" data-gse-event-time value="<?php echo esc_attr( self::time_part( $edit['end'] ?? '', '22:00' ) ); ?>"></label>
 						<label class="gelsensystem-events-wide"><span>Ort</span><input name="location" value="<?php echo esc_attr( $edit['location'] ?? 'Die Gelsendiele' ); ?>" placeholder="Die Gelsendiele"></label>
 						<label class="gelsensystem-events-wide"><span>Kurzbeschreibung</span><textarea name="description" rows="4" placeholder="Das Wichtigste auf einen Blick"><?php echo esc_textarea( $edit['description'] ?? '' ); ?></textarea></label>
 						<label class="gelsensystem-events-wide"><span>Weitere Informationen (aufklappbar)</span><textarea name="details" rows="6" placeholder="Programm, Eintritt, Reservierung, Bandinfos …"><?php echo esc_textarea( $edit['details'] ?? '' ); ?></textarea><small>Dieser Text erscheint erst nach „Mehr anzeigen“.</small></label>
-						<label class="gelsensystem-events-wide gelsensystem-events-image-field"><span>Eventfotos</span><input type="file" name="event_images[]" accept="image/jpeg,image/png,image/webp" multiple><small>Bis zu 12 Bilder als JPG, PNG oder WebP. Das erste Bild ist das Titelbild.</small></label>
-						<?php if ( ! empty( $edit['image_ids'] ) ) : ?>
-							<div class="gelsensystem-events-image-preview gelsensystem-events-wide">
-								<?php foreach ( $edit['image_ids'] as $index => $image_id ) : ?>
-									<label class="gelsensystem-events-image-preview__item"><?php echo wp_get_attachment_image( $image_id, 'medium', false, array( 'alt' => $edit['title'] ) ); ?><span><input type="checkbox" name="remove_images[]" value="<?php echo esc_attr( $image_id ); ?>"> Bild entfernen<?php echo 0 === $index ? ' (Titelbild)' : ''; ?></span></label>
+						<div class="gelsensystem-events-wide gelsensystem-events-image-field">
+							<span>Eventfotos</span>
+							<input type="hidden" name="event_image_ids" data-gse-image-ids value="<?php echo esc_attr( implode( ',', $selected_image_ids ) ); ?>">
+							<div class="gelsensystem-events-media-actions">
+								<?php if ( current_user_can( 'upload_files' ) ) : ?><button type="button" class="button" data-gse-media-open>Mediathek öffnen</button><?php endif; ?>
+								<small>Bis zu 12 Bilder aus der WordPress-Mediathek. Das erste Bild ist das Titelbild.</small>
+							</div>
+							<div class="gelsensystem-events-image-preview" data-gse-image-preview <?php echo $selected_image_ids ? '' : 'hidden'; ?>>
+								<?php foreach ( $selected_image_ids as $index => $image_id ) : ?>
+									<article data-gse-image-id="<?php echo esc_attr( $image_id ); ?>"><?php echo wp_get_attachment_image( $image_id, 'medium', false, array( 'alt' => $edit['title'] ?? '' ) ); ?><div><span><?php echo 0 === $index ? 'Titelbild' : 'Eventfoto'; ?></span><button type="button" data-gse-image-remove>Entfernen</button></div></article>
 								<?php endforeach; ?>
 							</div>
-						<?php endif; ?>
-						<label class="gelsensystem-events-wide"><span>Optionale Webseite</span><input type="text" inputmode="url" name="link" value="<?php echo esc_attr( $edit['link'] ?? '' ); ?>" placeholder="www.*"></label>
-						<label><span>Eventfarbe</span><input type="color" name="color" value="<?php echo esc_attr( $edit['color'] ?? '#149447' ); ?>"><small>Farbe für Datum, Akzente und Button.</small></label>
+						</div>
+						<div class="gelsensystem-events-wide gelsensystem-events-link-field">
+							<span>Optionale Webseite</span>
+							<div><input type="text" inputmode="url" name="link" data-gse-link-input value="<?php echo esc_attr( $edit['link'] ?? '' ); ?>" placeholder="www.*"><button type="button" class="button" data-gse-page-picker-toggle <?php disabled( empty( $linkable_pages ) ); ?>>WordPress-Seiten</button></div>
+							<?php if ( $linkable_pages ) : ?><div class="gelsensystem-events-page-picker" data-gse-page-picker hidden><strong>Veröffentlichte Seite auswählen</strong><?php foreach ( $linkable_pages as $page ) : ?><button type="button" data-gse-page-url="<?php echo esc_url( get_permalink( $page ) ); ?>"><?php echo esc_html( get_the_title( $page ) ); ?><span><?php echo esc_html( wp_make_link_relative( get_permalink( $page ) ) ); ?></span></button><?php endforeach; ?></div><?php endif; ?>
+						</div>
 					</div>
 					<div class="gelsensystem-events-checks">
-						<label><input type="checkbox" name="all_day" value="1" <?php checked( ! empty( $edit['all_day'] ) ); ?>> Ganztägig</label>
 						<label><input type="checkbox" name="active" value="1" <?php checked( ! $edit || ! empty( $edit['active'] ) ); ?>> Auf Webseite anzeigen</label>
 						<label><input type="checkbox" name="popup" value="1" data-gse-popup-enabled <?php checked( ! empty( $edit['popup'] ) ); ?>> Als Popup auf der Startseite anzeigen</label>
 						<div class="gelsensystem-events-popup-schedule" data-gse-popup-schedule <?php echo empty( $edit['popup'] ) ? 'hidden' : ''; ?>>
@@ -474,6 +527,7 @@ final class Gelsensystem_Events {
 							<label><span>Popup anzeigen bis *</span><input type="date" name="popup_end_date" data-gse-popup-end data-auto="<?php echo ! $edit || empty( $edit['popup_end_custom'] ) ? '1' : '0'; ?>" value="<?php echo esc_attr( self::date_part( $edit['popup_end'] ?? '' ) ); ?>"></label>
 						</div>
 					</div>
+					<label class="gelsensystem-events-color-field"><span>Eventfarbe</span><input type="color" name="color" value="<?php echo esc_attr( $edit['color'] ?? '#149447' ); ?>"><small>Farbe für Datum, Akzente und Button.</small></label>
 					<button type="submit" class="button button-primary" data-gse-submit><?php echo $edit ? 'Event speichern' : 'Event anlegen'; ?></button>
 					<div class="gelsensystem-events-save-progress" data-gse-progress hidden aria-live="polite"><span>Event wird gespeichert und Bilder werden verarbeitet …</span><div><i></i></div></div>
 				</form>
@@ -482,10 +536,24 @@ final class Gelsensystem_Events {
 					<div class="gelsensystem-events-list">
 						<?php if ( ! $events ) : ?><div class="gelsensystem-events-empty"><strong>Noch keine Events</strong><span>Lege links das erste Event an.</span></div><?php endif; ?>
 						<?php foreach ( $events as $event ) : ?>
-							<article class="<?php echo $event['active'] ? '' : 'is-inactive'; ?>">
+							<?php
+							$description_summary = trim( wp_strip_all_tags( $event['description'] ) );
+							$details_summary = trim( wp_strip_all_tags( $event['details'] ) );
+							$link_label = $event['link'] ? ( wp_parse_url( $event['link'], PHP_URL_HOST ) ?: $event['link'] ) : 'Nicht gesetzt';
+							$popup_label = $event['popup'] ? self::format_date( $event['popup_start'], 'd.m.Y' ) . '–' . self::format_date( $event['popup_end'], 'd.m.Y' ) : 'Deaktiviert';
+							?>
+							<article class="<?php echo $event['active'] ? '' : 'is-inactive'; ?>" style="--gse-admin-accent:<?php echo esc_attr( $event['color'] ); ?>">
 								<div class="gelsensystem-events-date"><strong><?php echo esc_html( self::format_date( $event['start'], 'd' ) ); ?></strong><span><?php echo esc_html( self::format_date( $event['start'], 'M' ) ); ?></span></div>
 								<div class="gelsensystem-events-main"><span><?php echo esc_html( self::format_event_time( $event ) ); ?></span><strong><?php echo esc_html( $event['title'] ); ?></strong><small><?php echo esc_html( $event['location'] ?: 'Kein Ort angegeben' ); ?></small></div>
 								<div class="gelsensystem-events-actions"><span class="<?php echo $event['active'] ? 'is-on' : 'is-off'; ?>"><?php echo $event['active'] ? 'Aktiv' : 'Ausgeblendet'; ?></span><a class="button" href="<?php echo esc_url( add_query_arg( array( 'gd-section' => 'events', 'edit_event' => $event['id'] ), $dashboard_url ) ); ?>">Bearbeiten</a><form method="post" onsubmit="return confirm('Event wirklich löschen?');"><?php wp_nonce_field( 'gse_event_action', 'gse_nonce' ); ?><input type="hidden" name="gse_action" value="delete_event"><input type="hidden" name="event_id" value="<?php echo esc_attr( $event['id'] ); ?>"><button type="submit" class="button button-link-delete">Löschen</button></form></div>
+								<div class="gelsensystem-events-overview">
+									<div class="is-wide"><span>Kurzbeschreibung</span><p><?php echo esc_html( $description_summary ?: 'Nicht eingetragen' ); ?></p></div>
+									<div class="is-wide"><span>Weitere Informationen</span><p><?php echo esc_html( $details_summary ?: 'Nicht eingetragen' ); ?></p></div>
+									<div><span>Bilder</span><strong><?php echo esc_html( $event['image_ids'] ? count( $event['image_ids'] ) . ( 1 === count( $event['image_ids'] ) ? ' Bild' : ' Bilder' ) : 'Keine' ); ?></strong></div>
+									<div><span>Webseite</span><?php if ( $event['link'] ) : ?><a href="<?php echo esc_url( $event['link'] ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $link_label ); ?></a><?php else : ?><strong><?php echo esc_html( $link_label ); ?></strong><?php endif; ?></div>
+									<div><span>Startseiten-Popup</span><strong><?php echo esc_html( $popup_label ); ?></strong></div>
+									<div><span>Eventfarbe</span><strong class="gelsensystem-events-color-value"><i></i><?php echo esc_html( strtoupper( $event['color'] ) ); ?></strong></div>
+								</div>
 							</article>
 						<?php endforeach; ?>
 					</div>
@@ -527,11 +595,16 @@ final class Gelsensystem_Events {
 
 	private static function format_event_time( $event ) {
 		$date = self::format_date( $event['start'], 'D, d. F Y' );
+		$end_date = self::format_date( $event['end'], 'D, d. F Y' );
+		$is_multi_day = self::date_part( $event['start'] ) !== self::date_part( $event['end'] );
 		if ( $event['all_day'] ) {
-			return $date . ' · ganztägig';
+			return $date . ( $is_multi_day ? '–' . $end_date : '' ) . ' · ganztägig';
 		}
 		$start_time = self::format_date( $event['start'], 'H:i' );
 		$end_time   = self::format_date( $event['end'], 'H:i' );
+		if ( $is_multi_day ) {
+			return $date . ' · ' . $start_time . ' Uhr–' . $end_date . ' · ' . $end_time . ' Uhr';
+		}
 		return $date . ' · ' . $start_time . ( $end_time ? '–' . $end_time . ' Uhr' : ' Uhr' );
 	}
 
