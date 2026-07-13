@@ -406,6 +406,15 @@ final class Gelsensystem_Events {
 		$app_url = add_query_arg( 'gd-section', 'events', $dashboard_url );
 		$notice  = sanitize_key( wp_unslash( $_GET['gse_notice'] ?? '' ) );
 		$submission_token = $edit && ! empty( $edit['submission_token'] ) ? $edit['submission_token'] : wp_generate_uuid4();
+		$start_date_value = self::date_part( $edit['start'] ?? '' );
+		if ( ! $start_date_value ) {
+			$start_date_value = current_datetime()->format( 'Y-m-d' );
+		}
+		$end_date_value = self::date_part( $edit['end'] ?? '' );
+		if ( ! $end_date_value ) {
+			$end_date_value = $start_date_value;
+		}
+		$end_date_is_automatic = ! $edit || $end_date_value === $start_date_value;
 		?>
 		<div class="gelsensystem-events-manager">
 			<header class="gelsensystem-events-heading">
@@ -429,9 +438,9 @@ final class Gelsensystem_Events {
 					<input type="hidden" name="submission_token" value="<?php echo esc_attr( $submission_token ); ?>">
 					<label class="gelsensystem-events-wide"><span>Titel *</span><input name="title" required value="<?php echo esc_attr( $edit['title'] ?? '' ); ?>" placeholder="z. B. Sommerfest"></label>
 					<div class="gelsensystem-events-field-grid">
-						<label><span>Startdatum *</span><input type="date" name="start_date" data-gse-event-start required value="<?php echo esc_attr( self::date_part( $edit['start'] ?? '' ) ); ?>"></label>
+						<label><span>Startdatum *</span><input type="date" name="start_date" data-gse-event-start required value="<?php echo esc_attr( $start_date_value ); ?>"></label>
 						<label><span>Startzeit</span><input type="time" name="start_time" value="<?php echo esc_attr( self::time_part( $edit['start'] ?? '', '18:00' ) ); ?>"></label>
-						<label><span>Enddatum</span><input type="date" name="end_date" data-gse-event-end value="<?php echo esc_attr( self::date_part( $edit['end'] ?? '' ) ); ?>"></label>
+						<label><span>Enddatum</span><input type="date" name="end_date" data-gse-event-end data-auto="<?php echo $end_date_is_automatic ? '1' : '0'; ?>" value="<?php echo esc_attr( $end_date_value ); ?>"></label>
 						<label><span>Endzeit</span><input type="time" name="end_time" value="<?php echo esc_attr( self::time_part( $edit['end'] ?? '', '22:00' ) ); ?>"></label>
 						<label class="gelsensystem-events-wide"><span>Ort</span><input name="location" value="<?php echo esc_attr( $edit['location'] ?? 'Die Gelsendiele' ); ?>" placeholder="Die Gelsendiele"></label>
 						<label class="gelsensystem-events-wide"><span>Kurzbeschreibung</span><textarea name="description" rows="4" placeholder="Das Wichtigste auf einen Blick"><?php echo esc_textarea( $edit['description'] ?? '' ); ?></textarea></label>
@@ -444,7 +453,7 @@ final class Gelsensystem_Events {
 								<?php endforeach; ?>
 							</div>
 						<?php endif; ?>
-						<label class="gelsensystem-events-wide"><span>Optionale Webseite</span><input type="text" inputmode="url" name="link" value="<?php echo esc_attr( $edit['link'] ?? '' ); ?>" placeholder="orf.at"><small>Domain genügt – https:// wird beim Speichern automatisch ergänzt.</small></label>
+						<label class="gelsensystem-events-wide"><span>Optionale Webseite</span><input type="text" inputmode="url" name="link" value="<?php echo esc_attr( $edit['link'] ?? '' ); ?>" placeholder="www.*"></label>
 						<label><span>Eventfarbe</span><input type="color" name="color" value="<?php echo esc_attr( $edit['color'] ?? '#149447' ); ?>"><small>Farbe für Datum, Akzente und Button.</small></label>
 					</div>
 					<div class="gelsensystem-events-checks">
