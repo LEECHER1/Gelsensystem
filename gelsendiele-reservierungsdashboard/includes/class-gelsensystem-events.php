@@ -22,6 +22,7 @@ final class Gelsensystem_Events {
 	const META_LINK        = '_gse_link';
 	const META_ALL_DAY     = '_gse_all_day';
 	const META_ACTIVE      = '_gse_active';
+	const META_IMAGE_ID    = '_gse_image_id';
 
 	public static function bootstrap() {
 		add_action( 'init', array( __CLASS__, 'register' ), 20 );
@@ -133,6 +134,21 @@ final class Gelsensystem_Events {
 		update_post_meta( $event_id, self::META_LINK, esc_url_raw( wp_unslash( $_POST['link'] ?? '' ) ) );
 		update_post_meta( $event_id, self::META_ALL_DAY, $all_day );
 		update_post_meta( $event_id, self::META_ACTIVE, empty( $_POST['active'] ) ? 0 : 1 );
+
+		if ( ! empty( $_POST['remove_image'] ) ) {
+			delete_post_meta( $event_id, self::META_IMAGE_ID );
+		}
+
+		if ( ! empty( $_FILES['event_image']['name'] ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once ABSPATH . 'wp-admin/includes/image.php';
+			require_once ABSPATH . 'wp-admin/includes/media.php';
+			$image_id = media_handle_upload( 'event_image', $event_id );
+			if ( is_wp_error( $image_id ) ) {
+				self::redirect( 'image_error' );
+			}
+			update_post_meta( $event_id, self::META_IMAGE_ID, (int) $image_id );
+		}
 		self::redirect( 'saved' );
 	}
 
@@ -174,6 +190,7 @@ final class Gelsensystem_Events {
 	}
 
 	private static function event_data( $post ) {
+		$image_id = absint( get_post_meta( $post->ID, self::META_IMAGE_ID, true ) );
 		return array(
 			'id'          => (int) $post->ID,
 			'title'       => (string) $post->post_title,
@@ -184,6 +201,8 @@ final class Gelsensystem_Events {
 			'link'        => (string) get_post_meta( $post->ID, self::META_LINK, true ),
 			'all_day'     => (bool) get_post_meta( $post->ID, self::META_ALL_DAY, true ),
 			'active'      => (bool) get_post_meta( $post->ID, self::META_ACTIVE, true ),
+			'image_id'    => $image_id,
+			'image_url'   => $image_id ? (string) wp_get_attachment_image_url( $image_id, 'large' ) : '',
 		);
 	}
 
@@ -239,7 +258,7 @@ final class Gelsensystem_Events {
 				<a class="button" href="<?php echo esc_url( home_url( '/events/' ) ); ?>" target="_blank" rel="noopener">Webseite ansehen</a>
 			</header>
 			<?php if ( $notice ) : ?>
-				<div class="notice <?php echo in_array( $notice, array( 'invalid', 'error' ), true ) ? 'notice-error' : 'notice-success'; ?>"><p><?php echo esc_html( self::notice_text( $notice ) ); ?></p></div>
+				<div class="notice <?php echo in_array( $notice, array( 'invalid', 'image_error', 'error' ), true ) ? 'notice-error' : 'notice-success'; ?>"><p><?php echo esc_html( self::notice_text( $notice ) ); ?></p></div>
 			<?php endif; ?>
 			<div class="gelsensystem-events-summary">
 				<div><strong><?php echo esc_html( (string) $future ); ?></strong><span>Kommend</span></div>
@@ -247,7 +266,7 @@ final class Gelsensystem_Events {
 				<div><strong><?php echo esc_html( (string) count( $events ) ); ?></strong><span>Gesamt</span></div>
 			</div>
 			<div class="gelsensystem-events-editor-grid">
-				<form method="post" class="gelsensystem-events-form">
+				<form method="post" enctype="multipart/form-data" class="gelsensystem-events-form">
 					<header><div><span>Event</span><h2><?php echo $edit ? 'Event bearbeiten' : 'Neues Event'; ?></h2></div><?php if ( $edit ) : ?><a href="<?php echo esc_url( $app_url ); ?>">Abbrechen</a><?php endif; ?></header>
 					<?php wp_nonce_field( 'gse_event_action', 'gse_nonce' ); ?>
 					<input type="hidden" name="gse_action" value="save_event">
@@ -260,6 +279,13 @@ final class Gelsensystem_Events {
 						<label><span>Endzeit</span><input type="time" name="end_time" value="<?php echo esc_attr( self::time_part( $edit['end'] ?? '', '22:00' ) ); ?>"></label>
 						<label class="gelsensystem-events-wide"><span>Ort</span><input name="location" value="<?php echo esc_attr( $edit['location'] ?? 'Die Gelsendiele' ); ?>" placeholder="Die Gelsendiele"></label>
 						<label class="gelsensystem-events-wide"><span>Beschreibung</span><textarea name="description" rows="5" placeholder="Was erwartet die Gäste?"><?php echo esc_textarea( $edit['description'] ?? '' ); ?></textarea></label>
+						<label class="gelsensystem-events-wide gelsensystem-events-image-field"><span>Eventfoto</span><input type="file" name="event_image" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG oder WebP. Das Bild wird auf der öffentlichen Eventseite angezeigt.</small></label>
+						<?php if ( ! empty( $edit['image_id'] ) ) : ?>
+							<div class="gelsensystem-events-image-preview gelsensystem-events-wide">
+								<?php echo wp_get_attachment_image( $edit['image_id'], 'medium', false, array( 'alt' => $edit['title'] ) ); ?>
+								<label><input type="checkbox" name="remove_image" value="1"> Bestehendes Eventfoto entfernen</label>
+							</div>
+						<?php endif; ?>
 						<label class="gelsensystem-events-wide"><span>Optionaler Link</span><input type="url" name="link" value="<?php echo esc_attr( $edit['link'] ?? '' ); ?>" placeholder="https://…"></label>
 					</div>
 					<div class="gelsensystem-events-checks">
@@ -291,6 +317,7 @@ final class Gelsensystem_Events {
 			'saved'   => 'Event wurde gespeichert.',
 			'deleted' => 'Event wurde gelöscht.',
 			'invalid' => 'Bitte Titel, Datum und Uhrzeit vollständig und korrekt ausfüllen.',
+			'image_error' => 'Das Event wurde gespeichert, aber das Foto konnte nicht hochgeladen werden. Bitte JPG, PNG oder WebP verwenden.',
 			'error'   => 'Das Event konnte nicht gespeichert werden.',
 		);
 		return $messages[ $notice ] ?? 'Änderung abgeschlossen.';
@@ -338,8 +365,9 @@ final class Gelsensystem_Events {
 			<?php else : ?>
 				<div class="gse-public-events__list">
 					<?php foreach ( $events as $event ) : ?>
-						<article class="gse-event-card" itemscope itemtype="https://schema.org/Event">
+						<article class="gse-event-card<?php echo $event['image_id'] ? ' has-image' : ''; ?>" itemscope itemtype="https://schema.org/Event">
 							<time class="gse-event-card__date" datetime="<?php echo esc_attr( str_replace( ' ', 'T', $event['start'] ) ); ?>" itemprop="startDate"><strong><?php echo esc_html( self::format_date( $event['start'], 'd' ) ); ?></strong><span><?php echo esc_html( self::format_date( $event['start'], 'M' ) ); ?></span></time>
+							<?php if ( $event['image_id'] ) : ?><figure class="gse-event-card__image"><?php echo wp_get_attachment_image( $event['image_id'], 'large', false, array( 'alt' => $event['title'], 'itemprop' => 'image', 'loading' => 'lazy' ) ); ?></figure><?php endif; ?>
 							<div class="gse-event-card__content">
 								<span class="gse-event-card__time"><?php echo esc_html( self::format_event_time( $event ) ); ?></span>
 								<h2 itemprop="name"><?php echo esc_html( $event['title'] ); ?></h2>

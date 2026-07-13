@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Führt idempotente Updates auch bei bereits aktivem Plugin aus. */
 final class Gelsendiele_Migrator {
 	const VERSION_OPTION = 'gelsendiele_migration_version';
-	const TARGET_VERSION = '2.12.0';
+	const TARGET_VERSION = '2.12.1';
 	const ERROR_OPTION   = 'gelsendiele_last_migration_error';
 
 	public static function bootstrap() {
