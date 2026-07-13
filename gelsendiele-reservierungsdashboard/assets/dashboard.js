@@ -137,6 +137,7 @@
     };
     const applyPopupState = () => {
       const enabled = Boolean(popupEnabled?.checked);
+      if (popupSchedule) popupSchedule.hidden = !enabled;
       popupSchedule?.classList.toggle('is-active', enabled);
       if (popupStart) popupStart.required = enabled;
       if (popupEnd) popupEnd.required = enabled;

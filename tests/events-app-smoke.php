@@ -31,6 +31,7 @@ events_expect( false !== strpos( $events, 'enctype="multipart/form-data"' ), 'Ev
 events_expect( false !== strpos( $events, 'name="event_images[]"' ) && false !== strpos( $events, 'multiple' ), 'Mehrfach-Bildupload fehlt' );
 events_expect( false !== strpos( $events, 'self::META_DETAILS' ) && false !== strpos( $events, 'gse-event-card__details' ), 'aufklappbare Zusatzinformationen fehlen' );
 events_expect( false !== strpos( $events, 'self::META_POPUP' ) && false !== strpos( $events, 'data-gse-popup' ), 'Startseiten-Popup fehlt' );
+events_expect( false !== strpos( $events, "render_homepage_popup' ), 5" ), 'Popup muss vor den Footer-Skripten ausgegeben werden' );
 events_expect( false !== strpos( $events, 'self::META_POPUP_START' ) && false !== strpos( $events, 'self::META_POPUP_END' ), 'Popup-Zeitraum fehlt' );
 events_expect( false !== strpos( $events, "default_popup_start_date" ) && false !== strpos( $events, "modify( '-1 day' )" ), 'automatischer Popup-Start fehlt' );
 events_expect( false !== strpos( $events, "self::normalize_url" ) && false !== strpos( $events, "'https://'" ), 'vereinfachte URL-Normalisierung fehlt' );
@@ -46,12 +47,14 @@ events_expect( false !== strpos( $admin_css, '.gelsensystem-events-editor-grid' 
 events_expect( false !== strpos( $admin_css, '.gelsensystem-events-save-progress' ), 'sichtbarer Speicherfortschritt fehlt' );
 events_expect( false !== strpos( $admin_js, "form.dataset.submitting === '1'" ), 'clientseitiger Mehrfachklickschutz fehlt' );
 events_expect( false !== strpos( $admin_js, 'data-gse-popup-start' ) && false !== strpos( $admin_js, 'previousDay' ), 'Popup-Datumsautomatik fehlt' );
+events_expect( false !== strpos( $admin_js, 'popupSchedule.hidden = !enabled' ) && false !== strpos( $admin_css, '.gelsensystem-events-popup-schedule[hidden]' ), 'Popup-Zeitraum wird nicht bedingt ein- und ausgeblendet' );
 events_expect( false !== strpos( $admin_css, 'html[data-gd-theme="dark"] .gelsensystem-events-form' ), 'Dark-Mode-Stile fehlen' );
 events_expect( false !== strpos( $public_css, '.gse-event-card' ), 'öffentliche Eventkarten fehlen' );
 events_expect( false !== strpos( $public_css, '.gse-event-card__image' ), 'responsive Eventfoto-Stile fehlen' );
 events_expect( false !== strpos( $public_css, '.gse-event-popup' ), 'responsive Popup-Stile fehlen' );
 events_expect( false !== strpos( $public_js, 'applyFilters' ) && false !== strpos( $public_js, 'sessionStorage' ), 'Filter- oder Popup-Interaktion fehlt' );
 events_expect( false !== strpos( $public_js, 'data-gse-details-toggle' ) && false !== strpos( $public_css, '.gse-event-card__actions' ), 'neue Mehr-Infos-Bedienung fehlt' );
+events_expect( false !== strpos( $public_js, 'DOMContentLoaded' ) && false !== strpos( $public_js, 'initializePopup' ), 'robuste Popup-Initialisierung fehlt' );
 events_expect( false !== strpos( $public_css, '@media (max-width:700px)' ), 'Smartphone-Layout fehlt' );
 
 echo "Event-App-Tests erfolgreich.\n";

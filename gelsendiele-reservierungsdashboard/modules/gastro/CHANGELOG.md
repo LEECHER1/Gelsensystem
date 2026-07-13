@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.13.2 – 2026-07-13
+
+- Gemeinsame Patchversion mit korrigierter Popup-Ausgabereihenfolge.
+
 ## 2.13.1 – 2026-07-13
 
 - Gemeinsame Patchversion mit vereinfachter Event-Linkeingabe und zeitgesteuertem Popup.

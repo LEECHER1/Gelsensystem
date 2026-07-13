@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.13.2
+
+- Startseiten-Popup vor die Footer-Skripte verschoben, damit die Initialisierung das Markup zuverlässig findet.
+- Zusätzliche DOM-Ladeinitialisierung schützt vor abweichenden Theme-Ausgabereihenfolgen.
+- Popup-Zeitraum direkt unter die Popup-Checkbox verschoben und bei deaktivierter Option vollständig ausgeblendet.
+
 ## 2.13.1
 
 - Linkeingabe akzeptiert Domains ohne `http://`, `https://` oder `www.` und ergänzt automatisch HTTPS.
