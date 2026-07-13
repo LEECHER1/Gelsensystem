@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.13.0
+
+- Events als eigenen Menüpunkt im WordPress-Backend ergänzt.
+- Bis zu zwölf Eventbilder mit Titelbild und öffentlicher Galerie ergänzt.
+- Aufklappbare Zusatzinformationen, frei wählbare Eventfarbe und optionales Startseiten-Popup ergänzt.
+- Sichtbarer Speicherfortschritt, deaktivierter Speicherbutton und serverseitiges Einmal-Token verhindern doppelte Events.
+- Öffentliche Filter für kommende, vergangene und alle Events sowie ein Kalenderfilter ergänzt.
+
 ## 2.12.1
 
 - Bild-Upload für Events mit WordPress-Medienverarbeitung ergänzt.

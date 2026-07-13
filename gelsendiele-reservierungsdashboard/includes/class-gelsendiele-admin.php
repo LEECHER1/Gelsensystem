@@ -29,6 +29,7 @@ final class Gelsendiele_Admin {
 		add_submenu_page( self::MENU_SLUG, 'Service', 'Service', 'gdg_use_service', 'gelsendiele-service', array( __CLASS__, 'render_workspace' ), 4 );
 		add_submenu_page( self::MENU_SLUG, 'Küche', 'Küche', 'gdg_use_kitchen', 'gelsendiele-kitchen', array( __CLASS__, 'render_workspace' ), 5 );
 		add_submenu_page( self::MENU_SLUG, 'Schank', 'Schank', 'gdg_use_bar', 'gelsendiele-bar', array( __CLASS__, 'render_workspace' ), 6 );
+		add_submenu_page( self::MENU_SLUG, 'Events', 'Events', 'gdg_manage', 'gelsendiele-events', array( __CLASS__, 'render_events' ), 7 );
 		add_submenu_page( self::MENU_SLUG, 'Kunden', 'Kunden', 'manage_bookings', 'gelsendiele-customers', array( __CLASS__, 'render_module_placeholder' ), 8 );
 		add_submenu_page( self::MENU_SLUG, 'Statistiken', 'Statistiken', 'manage_bookings', 'gelsendiele-statistics', array( __CLASS__, 'render_module_placeholder' ), 9 );
 		add_submenu_page( self::MENU_SLUG, 'Einstellungen', 'Einstellungen', 'gelsendiele_manage_settings', self::SETTINGS_SLUG, array( __CLASS__, 'render_settings' ), 10 );
@@ -55,6 +56,7 @@ final class Gelsendiele_Admin {
 			array( 'Küche', 'Live-Monitor für Speisen.', 'gdg_use_kitchen', self::workspace_url( 'kitchen' ) ),
 			array( 'Schank', 'Live-Monitor für Getränke.', 'gdg_use_bar', self::workspace_url( 'bar' ) ),
 			array( 'Speisekarte', 'Kategorien, Speisen, Getränke und Preise.', 'gdg_manage', admin_url( 'admin.php?page=gdg-menu' ) ),
+			array( 'Events', 'Veranstaltungen, Bilder, Popup und Farben verwalten.', 'gdg_manage', admin_url( 'admin.php?page=gelsendiele-events' ) ),
 			array( 'Einstellungen', 'Betrieb, Marke, Öffnungszeiten und System konfigurieren.', 'gelsendiele_manage_settings', admin_url( 'admin.php?page=' . self::SETTINGS_SLUG ) ),
 		);
 		?>
@@ -90,6 +92,16 @@ final class Gelsendiele_Admin {
 				<p><a class="button button-primary button-hero" href="<?php echo esc_url( $dashboard_url ); ?>">Reservierungsdashboard öffnen</a> <a class="button button-hero" href="<?php echo esc_url( admin_url( 'edit.php?post_type=rtb-booking' ) ); ?>">WordPress-Liste öffnen</a></p>
 			</div>
 		</div>
+		<?php
+	}
+
+	public static function render_events() {
+		self::guard( 'gdg_manage' );
+		$page_id = (int) get_option( 'gd_reservierungsdashboard_page_id', 0 );
+		$url     = $page_id ? get_permalink( $page_id ) : home_url( '/gelsensystem/' );
+		$url     = add_query_arg( 'gd-section', 'events', $url );
+		?>
+		<div class="wrap gelsendiele-admin-wrap"><h1>Events</h1><div class="gelsendiele-action-panel"><p>Events werden in der zentralen Gelsensystem-App gepflegt und automatisch auf der Webseite ausgegeben.</p><p><a class="button button-primary button-hero" href="<?php echo esc_url( $url ); ?>">Eventverwaltung öffnen</a></p></div></div>
 		<?php
 	}
 
