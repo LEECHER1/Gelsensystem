@@ -2,7 +2,7 @@
 Contributors: Andreas Schwarz / OpenAI
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.14.0
+Stable tag: 2.14.1
 
 Zentrales Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für Gastronomiebetriebe.
 
@@ -40,6 +40,10 @@ Das Zahlungsmodul dokumentiert Bar- und Kartenzahlungen, ist aber noch keine RKS
 Installierbare ZIP-Dateien werden aus einem geprüften Git-Tag erstellt. Vor jedem Produktivupdate sind WordPress-Dateien und Datenbank vollständig zu sichern.
 
 == Changelog ==
+
+= 2.14.1 =
+* Events werden nach jeder Datums- oder Uhrzeitänderung zuverlässig neu chronologisch sortiert.
+* Kalenderfilter zeigt standardmäßig das aktuelle Datum und filtert erst nach einer bewussten Auswahl.
 
 = 2.14.0 =
 * Neue Events erhalten sofort Start- und Enddatum; eintägige Events synchronisieren beide Datumsfelder automatisch.

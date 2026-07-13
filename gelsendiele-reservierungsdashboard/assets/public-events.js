@@ -9,9 +9,10 @@
     const dateClear = filters.querySelector('[data-gse-date-clear]');
     const empty = root.querySelector('[data-gse-filter-empty]');
     let status = 'upcoming';
+    let dateFilterActive = false;
 
     const applyFilters = () => {
-      const date = dateInput?.value || '';
+      const date = dateFilterActive ? (dateInput?.value || '') : '';
       let visible = 0;
       cards.forEach((card) => {
         const matchesStatus = status === 'all' || card.dataset.status === status;
@@ -27,9 +28,13 @@
       status = button.dataset.gseStatus || 'upcoming';
       applyFilters();
     }));
-    dateInput?.addEventListener('change', applyFilters);
+    dateInput?.addEventListener('change', () => {
+      dateFilterActive = true;
+      applyFilters();
+    });
     dateClear?.addEventListener('click', () => {
-      if (dateInput) dateInput.value = '';
+      dateFilterActive = false;
+      if (dateInput) dateInput.value = dateInput.dataset.defaultDate || '';
       applyFilters();
     });
     applyFilters();
