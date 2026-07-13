@@ -95,6 +95,29 @@
     desktopSidebar.addEventListener?.('change', () => applySidebarState(sidebarCollapsed));
   }
 
+  const appDrawer = document.getElementById('gelsensystem-app-drawer');
+  const appDrawerToggle = document.querySelector('[data-gd-app-drawer-toggle]');
+  const appDrawerMobile = window.matchMedia('(max-width: 1024px)');
+  if (appDrawer && appDrawerToggle) {
+    const setAppDrawerOpen = (open) => {
+      const isOpen = Boolean(open && appDrawerMobile.matches);
+      document.body.classList.toggle('gd-app-drawer-open', isOpen);
+      appDrawerToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      appDrawerToggle.setAttribute('aria-label', isOpen ? 'Bereiche schließen' : 'Bereiche öffnen');
+      if (appDrawerMobile.matches) appDrawer.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+      else appDrawer.removeAttribute('aria-hidden');
+    };
+
+    setAppDrawerOpen(false);
+    appDrawerToggle.addEventListener('click', () => setAppDrawerOpen(!document.body.classList.contains('gd-app-drawer-open')));
+    document.querySelectorAll('[data-gd-app-drawer-close]').forEach((button) => button.addEventListener('click', () => setAppDrawerOpen(false)));
+    appDrawer.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setAppDrawerOpen(false)));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && document.body.classList.contains('gd-app-drawer-open')) setAppDrawerOpen(false);
+    });
+    appDrawerMobile.addEventListener?.('change', () => setAppDrawerOpen(false));
+  }
+
   const shell = document.querySelector('.gd-dashboard-shell[data-default-view]');
   if (!shell || typeof GDReservations === 'undefined') return;
 

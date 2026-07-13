@@ -10,6 +10,8 @@
   const connection = app.querySelector('.gdg-connection');
   const themeButton = app.querySelector('[data-gdg-theme-toggle]');
   const navToggle = app.querySelector('[data-gdg-nav-toggle]');
+  const appDrawer = app.querySelector('#gdg-app-drawer');
+  const appDrawerToggle = app.querySelector('[data-gdg-drawer-toggle]');
   const themeColorMeta = document.getElementById('gdg-theme-color');
   const systemDarkMode = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
   let followsSystemTheme = false;
@@ -18,6 +20,7 @@
     selectedTableId: Number(config.prefill?.tableId || 0),
     selectedCategoryId: 0,
     menuSearch: '',
+    servicePane: 'tables',
     selectedOrderId: 0,
     queue: [],
     paySelection: {},
@@ -144,6 +147,30 @@
     });
   }
 
+  function setupAppDrawer() {
+    if (!appDrawer || !appDrawerToggle) return;
+    const mobileDrawer = window.matchMedia('(max-width: 790px)');
+
+    const setOpen = (open) => {
+      const isOpen = Boolean(open && mobileDrawer.matches);
+      app.classList.toggle('is-app-drawer-open', isOpen);
+      document.body?.classList.toggle('gdg-drawer-open', isOpen);
+      appDrawerToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      appDrawerToggle.setAttribute('aria-label', isOpen ? 'Bereiche schließen' : 'Bereiche öffnen');
+      if (mobileDrawer.matches) appDrawer.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+      else appDrawer.removeAttribute('aria-hidden');
+    };
+
+    setOpen(false);
+    appDrawerToggle.addEventListener('click', () => setOpen(!app.classList.contains('is-app-drawer-open')));
+    app.querySelectorAll('[data-gdg-drawer-close]').forEach((button) => button.addEventListener('click', () => setOpen(false)));
+    appDrawer.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && app.classList.contains('is-app-drawer-open')) setOpen(false);
+    });
+    mobileDrawer.addEventListener?.('change', () => setOpen(false));
+  }
+
   function storedTheme() {
     try {
       const shared = window.localStorage.getItem('gd-dashboard-theme');
@@ -217,6 +244,7 @@
   async function init() {
     setupTheme();
     setupNavigation();
+    setupAppDrawer();
     try {
       await refreshBootstrap(false);
       showScreen();
@@ -239,6 +267,7 @@
           if (!state.selectedTableId && state.bootstrap.tables?.length) {
             state.selectedTableId = Number(state.bootstrap.tables[0].id);
           }
+          state.servicePane = getOrderByTable(state.selectedTableId) ? 'order' : 'tables';
           renderService();
           startOrdersPolling();
           break;
@@ -284,8 +313,13 @@
 
     screen.innerHTML = `
       ${reservationBanner}
+      <nav class="gdg-service-mobile-tabs" aria-label="Servicebereiche">
+        <button type="button" class="${state.servicePane === 'tables' ? 'is-active' : ''}" data-service-pane="tables"><span>T</span><b>Tische</b></button>
+        <button type="button" class="${state.servicePane === 'menu' ? 'is-active' : ''}" data-service-pane="menu"><span>M</span><b>Speisekarte</b></button>
+        <button type="button" class="${state.servicePane === 'order' ? 'is-active' : ''}" data-service-pane="order"><span>B</span><b>Bestellung</b></button>
+      </nav>
       <div class="gdg-service-layout">
-        <section class="gdg-panel gdg-table-panel">
+        <section class="gdg-panel gdg-table-panel ${state.servicePane === 'tables' ? 'is-mobile-active' : ''}">
           <div class="gdg-panel-head"><div><span class="gdg-kicker">Tischplan</span><h2>Service</h2></div><span class="gdg-count">${tables.length} Tische</span></div>
           <div class="gdg-table-grid">
             ${tables.map((table) => {
@@ -301,12 +335,12 @@
           </div>
         </section>
 
-        <section class="gdg-panel gdg-menu-panel">
+        <section class="gdg-panel gdg-menu-panel ${state.servicePane === 'menu' ? 'is-mobile-active' : ''}">
           <div class="gdg-panel-head"><div><span class="gdg-kicker">Bestellung</span><h2>Speisekarte</h2></div></div>
           ${renderMenu(categories, menuItems, !!order)}
         </section>
 
-        <section class="gdg-panel gdg-order-panel">
+        <section class="gdg-panel gdg-order-panel ${state.servicePane === 'order' ? 'is-mobile-active' : ''}">
           ${renderOrderPanel(order)}
         </section>
       </div>`;
@@ -385,9 +419,17 @@
   }
 
   function bindServiceEvents() {
+    screen.querySelectorAll('[data-service-pane]').forEach((button) => {
+      button.addEventListener('click', () => {
+        state.servicePane = button.dataset.servicePane;
+        renderService();
+      });
+    });
+
     screen.querySelectorAll('[data-table-id]').forEach((button) => {
       button.addEventListener('click', () => {
         state.selectedTableId = Number(button.dataset.tableId);
+        state.servicePane = 'order';
         renderService();
       });
     });
@@ -523,7 +565,7 @@
   function renderQueue(station) {
     const label = station === 'bar' ? 'Schank' : 'Küche';
     const itemCount = state.queue.reduce((sum, order) => sum + order.items.length, 0);
-    screen.innerHTML = `<div class="gdg-queue-head"><div><span class="gdg-kicker">Live-Monitor</span><h1>${label}</h1></div><div class="gdg-queue-stats"><span><b>${state.queue.length}</b> Tische</span><span><b>${itemCount}</b> Positionen</span></div></div>
+    screen.innerHTML = `<section class="gdg-panel gdg-queue-summary"><div class="gdg-queue-head"><div><span class="gdg-kicker">Live-Monitor</span><h1>${label}</h1><p>Bestellungen nach Tisch, klar und direkt bearbeitbar.</p></div><div class="gdg-queue-stats"><span><b>${state.queue.length}</b> Tische</span><span><b>${itemCount}</b> Positionen</span></div></div></section>
       <div class="gdg-queue-grid">
         ${state.queue.length ? state.queue.map((order) => renderQueueCard(order)).join('') : `<div class="gdg-empty-state is-wide"><div class="gdg-empty-icon">✓</div><strong>Alles erledigt</strong><p>Zurzeit sind keine offenen ${label === 'Küche' ? 'Küchen-' : 'Schank-'}Bestellungen vorhanden.</p></div>`}
       </div>`;

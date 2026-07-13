@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.11.0
+
+- Einheitlichen App-Drawer für den schnellen Bereichswechsel auf Smartphone und Tablet ergänzt.
+- Zentrale, Einstellungen und alle Gastro-Arbeitsbereiche verwenden denselben Bereichswechsler.
+- Service mobil in Tische, Speisekarte und Bestellung gegliedert, damit keine langen Gesamtseiten mehr nötig sind.
+- Küchen- und Schanktickets an die Kartenoptik und großen Touch-Aktionen von Bestellung/Kasse angeglichen.
+
 ## 2.10.1
 
 - Fokusmodus auf Tablet-Queransichten erweitert und schmale Arbeitsflächen einspaltig optimiert.

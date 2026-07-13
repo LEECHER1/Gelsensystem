@@ -2,7 +2,7 @@
 Contributors: Andreas Schwarz / OpenAI
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.10.1
+Stable tag: 2.11.0
 
 Zentrales Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für Gastronomiebetriebe.
 
@@ -39,6 +39,12 @@ Das Zahlungsmodul dokumentiert Bar- und Kartenzahlungen, ist aber noch keine RKS
 Installierbare ZIP-Dateien werden aus einem geprüften Git-Tag erstellt. Vor jedem Produktivupdate sind WordPress-Dateien und Datenbank vollständig zu sichern.
 
 == Changelog ==
+
+= 2.11.0 =
+* Einheitlicher Bereichswechsler als App-Drawer auf Smartphone und Tablet.
+* Reservierungen, Service, Küche, Schank, Kasse und Einstellungen sind über denselben Schnellwechsler erreichbar.
+* Service erhält eine kompakte Smartphone-Navigation für Tische, Speisekarte und Bestellung.
+* Küche und Schank verwenden dieselbe Karten- und Aktionslogik wie Bestellung und Kasse.
 
 = 2.10.1 =
 * Der einklappbare Fokusmodus greift nun auch zuverlässig in der Tablet-Queransicht.

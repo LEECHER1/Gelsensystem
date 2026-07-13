@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.11.0 – 2026-07-13
+
+- Gemeinsamer Smartphone-/Tablet-App-Drawer für alle Arbeitsbereiche ergänzt.
+- Service mobil in drei kompakte Arbeitsansichten aufgeteilt.
+- Küche und Schank visuell an Bestellung und Kasse angeglichen.
+
 ## 2.10.1 – 2026-07-12
 
 - Einklappbare Seitenleiste und einspaltiges Arbeitslayout für Tablet-Queransichten korrigiert.

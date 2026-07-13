@@ -3,7 +3,7 @@
  * Plugin Name: Gelsensystem
  * Plugin URI: https://github.com/LEECHER1/Gelsensystem
  * Description: Zentrales Reservierungs-, Service-, Küchen- und Kassensystem für Gastronomiebetriebe.
- * Version: 2.10.1
+ * Version: 2.11.0
  * Author: Andreas Schwarz / Gelsensystem
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.10.1' );
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.11.0' );
 defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
 defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );
@@ -512,6 +512,9 @@ final class Gelsendiele_Reservierungsdashboard {
                     </div>
                 </div>
                 <div class="gd-appbar-actions">
+                    <button type="button" class="gd-icon-button gd-app-drawer-button" data-gd-app-drawer-toggle aria-controls="gelsensystem-app-drawer" aria-expanded="false" aria-label="Bereiche öffnen" title="Bereiche wechseln">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+                    </button>
                     <button type="button" class="gd-icon-button gd-add-booking-button" data-open-manual-booking aria-label="Reservierung manuell hinzufügen" title="Neue Reservierung">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
                     </button>
@@ -528,6 +531,7 @@ final class Gelsendiele_Reservierungsdashboard {
                     </button>
                 </div>
             </header>
+            <?php $this->render_central_mobile_navigation( 'reservations' ); ?>
 
             <header class="gd-dashboard-header">
                 <div>
@@ -2636,17 +2640,24 @@ final class Gelsendiele_Reservierungsdashboard {
         ?>
         <header class="gd-central-mobile-header">
             <div><small>Gelsensystem · <?php echo esc_html( $business_name ); ?></small><strong><?php echo esc_html( $label ); ?></strong></div>
-            <button type="button" class="gd-icon-button gd-theme-button" data-theme-button aria-label="Darstellung wechseln" title="Hell-/Dunkelmodus">
-                <svg class="gd-theme-icon gd-theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
-                <svg class="gd-theme-icon gd-theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-            </button>
+            <div class="gd-central-mobile-actions">
+                <button type="button" class="gd-icon-button gd-app-drawer-button" data-gd-app-drawer-toggle aria-controls="gelsensystem-app-drawer" aria-expanded="false" aria-label="Bereiche öffnen" title="Bereiche wechseln">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+                </button>
+                <button type="button" class="gd-icon-button gd-theme-button" data-theme-button aria-label="Darstellung wechseln" title="Hell-/Dunkelmodus">
+                    <svg class="gd-theme-icon gd-theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
+                    <svg class="gd-theme-icon gd-theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                </button>
+            </div>
         </header>
         <?php
     }
 
     private function render_central_mobile_navigation( $active ) {
         ?>
-        <nav class="gelsensystem-mobile-nav" aria-label="Gelsensystem Bereiche">
+        <button type="button" class="gelsensystem-drawer-backdrop" data-gd-app-drawer-close aria-label="Bereichsmenü schließen"></button>
+        <nav class="gelsensystem-mobile-nav" id="gelsensystem-app-drawer" aria-label="Gelsensystem Bereiche">
+            <div class="gelsensystem-mobile-nav-head"><div><span>Gelsensystem</span><strong>Bereiche</strong></div><button type="button" data-gd-app-drawer-close aria-label="Bereichsmenü schließen">×</button></div>
             <?php foreach ( $this->central_navigation_items() as $item ) : if ( ! current_user_can( $item[2] ) || ! $item[3] ) { continue; } ?>
                 <a class="<?php echo $active === $item[0] ? 'is-active' : ''; ?>" href="<?php echo esc_url( $item[3] ); ?>"><span><?php echo esc_html( $item[4] ); ?></span><strong><?php echo esc_html( $item[1] ); ?></strong></a>
             <?php endforeach; ?>
