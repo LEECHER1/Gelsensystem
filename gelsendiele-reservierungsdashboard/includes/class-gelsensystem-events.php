@@ -41,6 +41,75 @@ final class Gelsensystem_Events {
 		add_action( 'template_redirect', array( __CLASS__, 'render_public_route' ), 2 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_homepage_popup_assets' ), 20 );
 		add_action( 'wp_footer', array( __CLASS__, 'render_homepage_popup' ), 5 );
+		add_action( 'wp_ajax_gse_media_library', array( __CLASS__, 'ajax_media_library' ) );
+		add_action( 'wp_ajax_gse_media_upload', array( __CLASS__, 'ajax_media_upload' ) );
+	}
+
+	private static function media_payload( $attachment_id ) {
+		$attachment_id = absint( $attachment_id );
+		return array(
+			'id'        => $attachment_id,
+			'url'       => (string) wp_get_attachment_url( $attachment_id ),
+			'thumbnail' => (string) wp_get_attachment_image_url( $attachment_id, 'medium' ),
+			'alt'       => (string) get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+			'title'     => (string) get_the_title( $attachment_id ),
+		);
+	}
+
+	public static function ajax_media_library() {
+		if ( ! current_user_can( 'upload_files' ) || ! current_user_can( 'gdg_manage' ) ) {
+			wp_send_json_error( array( 'message' => 'Keine Berechtigung.' ), 403 );
+		}
+		check_ajax_referer( 'gse_event_media', 'nonce' );
+		$search = sanitize_text_field( wp_unslash( $_POST['search'] ?? '' ) );
+		$images = get_posts(
+			array(
+				'post_type'      => 'attachment',
+				'post_status'    => 'inherit',
+				'post_mime_type' => 'image',
+				'posts_per_page' => 120,
+				'orderby'        => 'date',
+				'order'          => 'DESC',
+				's'              => $search,
+				'fields'         => 'ids',
+			)
+		);
+		wp_send_json_success( array_map( array( __CLASS__, 'media_payload' ), $images ) );
+	}
+
+	public static function ajax_media_upload() {
+		if ( ! current_user_can( 'upload_files' ) || ! current_user_can( 'gdg_manage' ) ) {
+			wp_send_json_error( array( 'message' => 'Keine Berechtigung.' ), 403 );
+		}
+		check_ajax_referer( 'gse_event_media', 'nonce' );
+		if ( empty( $_FILES['event_images'] ) ) {
+			wp_send_json_error( array( 'message' => 'Bitte Bilder auswählen.' ), 400 );
+		}
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+
+		$files    = $_FILES['event_images'];
+		$uploaded = array();
+		$count    = min( 12, is_array( $files['name'] ?? null ) ? count( $files['name'] ) : 0 );
+		for ( $index = 0; $index < $count; $index++ ) {
+			$_FILES['gse_event_image'] = array(
+				'name'     => $files['name'][ $index ],
+				'type'     => $files['type'][ $index ],
+				'tmp_name' => $files['tmp_name'][ $index ],
+				'error'    => $files['error'][ $index ],
+				'size'     => $files['size'][ $index ],
+			);
+			$attachment_id = media_handle_upload( 'gse_event_image', 0 );
+			if ( ! is_wp_error( $attachment_id ) && wp_attachment_is_image( $attachment_id ) ) {
+				$uploaded[] = self::media_payload( $attachment_id );
+			}
+		}
+		unset( $_FILES['gse_event_image'] );
+		if ( empty( $uploaded ) ) {
+			wp_send_json_error( array( 'message' => 'Die Bilder konnten nicht hochgeladen werden.' ), 400 );
+		}
+		wp_send_json_success( $uploaded );
 	}
 
 	public static function register() {
