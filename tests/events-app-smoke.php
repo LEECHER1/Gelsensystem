@@ -40,6 +40,7 @@ events_expect( false !== strpos( $events, '>Mehr Infos <' ) && false !== strpos(
 events_expect( false !== strpos( $events, 'self::META_COLOR' ) && false !== strpos( $events, 'type="color"' ), 'Event-Farbauswahl fehlt' );
 events_expect( false !== strpos( $events, 'self::META_SUBMISSION' ) && false !== strpos( $events, 'submission_exists' ), 'serverseitiger Duplikatschutz fehlt' );
 events_expect( false !== strpos( $events, 'data-gse-filters' ) && false !== strpos( $events, 'data-gse-date' ), 'Status- und Kalenderfilter fehlen' );
+events_expect( false !== strpos( $events, 'data-default-date=' ) && false !== strpos( $public_js, 'let dateFilterActive = false' ), 'Kalenderfilter zeigt das aktuelle Datum nicht ohne anfängliche Filterung an' );
 events_expect( false !== strpos( $events, 'gse-event-card__image' ), 'Eventfoto fehlt in der öffentlichen Ausgabe' );
 events_expect( false !== strpos( $events, "wp_enqueue_style( 'gelsensystem-public-events'" ), 'öffentliche Stile werden nicht bedarfsgerecht geladen' );
 events_expect( false !== strpos( $wp_admin, "'gelsendiele-events'" ), 'WordPress-Untermenü für Events fehlt' );
@@ -50,6 +51,7 @@ events_expect( false !== strpos( $admin_js, 'data-gse-popup-start' ) && false !=
 events_expect( false !== strpos( $events, "current_datetime()->format( 'Y-m-d' )" ), 'Startdatum wird bei neuen Events nicht vorbelegt' );
 events_expect( false !== strpos( $events, '$end_date_value = $start_date_value' ) && false !== strpos( $admin_js, 'syncEventDates' ), 'Enddatum folgt dem Startdatum nicht automatisch' );
 events_expect( false !== strpos( $events, 'placeholder="www.*"' ) && false === strpos( $events, 'Domain genügt' ), 'vereinfachter Webseitenhinweis fehlt' );
+events_expect( false !== strpos( $events, 'usort(' ) && false !== strpos( $events, '$by_start = strcmp' ), 'Events werden nach einer nachträglichen Datumsänderung nicht erneut chronologisch sortiert' );
 events_expect( false !== strpos( $admin_js, 'popupSchedule.hidden = !enabled' ) && false !== strpos( $admin_css, '.gelsensystem-events-popup-schedule[hidden]' ), 'Popup-Zeitraum wird nicht bedingt ein- und ausgeblendet' );
 events_expect( false !== strpos( $admin_css, 'html[data-gd-theme="dark"] .gelsensystem-events-form' ), 'Dark-Mode-Stile fehlen' );
 events_expect( false !== strpos( $public_css, '.gse-event-card' ), 'öffentliche Eventkarten fehlen' );

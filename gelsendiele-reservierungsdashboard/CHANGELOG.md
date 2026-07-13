@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.14.1
+
+- Eventlisten nach jeder Änderung explizit anhand des aktuellen Startdatums und der Startzeit neu sortiert.
+- Bei identischem Startzeitpunkt sorgt die Event-ID für eine stabile Reihenfolge.
+- Kalenderfilter zeigt immer das aktuelle Datum, ohne die kommende Eventliste beim ersten Laden einzuschränken.
+
 ## 2.14.0
 
 - Neue Events mit dem aktuellen Datum vorbelegt und Enddatum bei eintägigen Events automatisch mit dem Startdatum synchronisiert.

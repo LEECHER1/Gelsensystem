@@ -387,8 +387,16 @@ final class Gelsensystem_Events {
 			$args['meta_query'] = $meta_query;
 		}
 
-		$posts = get_posts( $args );
-		return array_map( array( __CLASS__, 'event_data' ), $posts );
+		$posts  = get_posts( $args );
+		$events = array_map( array( __CLASS__, 'event_data' ), $posts );
+		usort(
+			$events,
+			static function ( $left, $right ) {
+				$by_start = strcmp( (string) $left['start'], (string) $right['start'] );
+				return 0 !== $by_start ? $by_start : (int) $left['id'] <=> (int) $right['id'];
+			}
+		);
+		return $events;
 	}
 
 	public static function render_app( $dashboard_url ) {
@@ -534,6 +542,7 @@ final class Gelsensystem_Events {
 		$show_past  = $filterable || 'yes' === $mode;
 		$events     = self::get_events( true, absint( $attributes['limit'] ), $show_past );
 		$now        = current_datetime()->format( 'Y-m-d H:i:s' );
+		$today      = self::date_part( $now );
 		$upcoming   = count( array_filter( $events, static function ( $event ) use ( $now ) { return $event['end'] >= $now; } ) );
 		$past       = count( $events ) - $upcoming;
 		wp_enqueue_style( 'gelsensystem-public-events', GELSENDIELE_URL . 'assets/public-events.css', array(), GELSENDIELE_VERSION );
@@ -550,7 +559,7 @@ final class Gelsensystem_Events {
 						<button type="button" data-gse-status="past">Vergangen <span><?php echo esc_html( (string) $past ); ?></span></button>
 						<button type="button" data-gse-status="all">Alle <span><?php echo esc_html( (string) count( $events ) ); ?></span></button>
 					</div>
-					<label><span>Datum auswählen</span><input type="date" data-gse-date><button type="button" data-gse-date-clear aria-label="Datumsfilter zurücksetzen">×</button></label>
+					<label><span>Datum auswählen</span><input type="date" data-gse-date data-default-date="<?php echo esc_attr( $today ); ?>" value="<?php echo esc_attr( $today ); ?>"><button type="button" data-gse-date-clear aria-label="Datumsfilter auf heute zurücksetzen">×</button></label>
 				</div>
 			<?php endif; ?>
 			<?php if ( ! $events ) : ?>

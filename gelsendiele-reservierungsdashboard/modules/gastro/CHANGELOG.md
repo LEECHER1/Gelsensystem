@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.14.1 – 2026-07-13
+
+- Gemeinsame Patchversion mit stabiler chronologischer Eventsortierung und aktuellem Kalenderdatum.
+
 ## 2.14.0 – 2026-07-13
 
 - Gemeinsame vollständige Bereichsnavigation, einheitliche Desktop-Seitenleiste und Tablet-App-Drawer ergänzt.
