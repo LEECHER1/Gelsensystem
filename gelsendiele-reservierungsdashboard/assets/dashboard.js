@@ -119,6 +119,36 @@
   }
 
   document.querySelectorAll('.gelsensystem-events-form').forEach((form) => {
+    const eventStart = form.querySelector('[data-gse-event-start]');
+    const eventEnd = form.querySelector('[data-gse-event-end]');
+    const popupEnabled = form.querySelector('[data-gse-popup-enabled]');
+    const popupStart = form.querySelector('[data-gse-popup-start]');
+    const popupEnd = form.querySelector('[data-gse-popup-end]');
+    const popupSchedule = form.querySelector('[data-gse-popup-schedule]');
+    const previousDay = (dateValue) => {
+      if (!dateValue) return '';
+      const date = new Date(`${dateValue}T12:00:00Z`);
+      date.setUTCDate(date.getUTCDate() - 1);
+      return date.toISOString().slice(0, 10);
+    };
+    const syncPopupDates = () => {
+      if (popupStart?.dataset.auto === '1' && eventStart?.value) popupStart.value = previousDay(eventStart.value);
+      if (popupEnd?.dataset.auto === '1') popupEnd.value = eventEnd?.value || eventStart?.value || '';
+    };
+    const applyPopupState = () => {
+      const enabled = Boolean(popupEnabled?.checked);
+      popupSchedule?.classList.toggle('is-active', enabled);
+      if (popupStart) popupStart.required = enabled;
+      if (popupEnd) popupEnd.required = enabled;
+      if (enabled) syncPopupDates();
+    };
+    popupStart?.addEventListener('input', () => { popupStart.dataset.auto = '0'; });
+    popupEnd?.addEventListener('input', () => { popupEnd.dataset.auto = '0'; });
+    eventStart?.addEventListener('change', syncPopupDates);
+    eventEnd?.addEventListener('change', syncPopupDates);
+    popupEnabled?.addEventListener('change', applyPopupState);
+    applyPopupState();
+
     form.addEventListener('submit', (event) => {
       if (form.dataset.submitting === '1') {
         event.preventDefault();

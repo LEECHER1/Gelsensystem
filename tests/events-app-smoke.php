@@ -31,6 +31,11 @@ events_expect( false !== strpos( $events, 'enctype="multipart/form-data"' ), 'Ev
 events_expect( false !== strpos( $events, 'name="event_images[]"' ) && false !== strpos( $events, 'multiple' ), 'Mehrfach-Bildupload fehlt' );
 events_expect( false !== strpos( $events, 'self::META_DETAILS' ) && false !== strpos( $events, 'gse-event-card__details' ), 'aufklappbare Zusatzinformationen fehlen' );
 events_expect( false !== strpos( $events, 'self::META_POPUP' ) && false !== strpos( $events, 'data-gse-popup' ), 'Startseiten-Popup fehlt' );
+events_expect( false !== strpos( $events, 'self::META_POPUP_START' ) && false !== strpos( $events, 'self::META_POPUP_END' ), 'Popup-Zeitraum fehlt' );
+events_expect( false !== strpos( $events, "default_popup_start_date" ) && false !== strpos( $events, "modify( '-1 day' )" ), 'automatischer Popup-Start fehlt' );
+events_expect( false !== strpos( $events, "self::normalize_url" ) && false !== strpos( $events, "'https://'" ), 'vereinfachte URL-Normalisierung fehlt' );
+events_expect( false !== strpos( $events, 'inputmode="url"' ) && false === strpos( $events, 'type="url" name="link"' ), 'vereinfachtes Linkfeld fehlt' );
+events_expect( false !== strpos( $events, '>Mehr Infos <' ) && false !== strpos( $events, '>Zur Webseite <' ), 'öffentliche Eventaktionen fehlen' );
 events_expect( false !== strpos( $events, 'self::META_COLOR' ) && false !== strpos( $events, 'type="color"' ), 'Event-Farbauswahl fehlt' );
 events_expect( false !== strpos( $events, 'self::META_SUBMISSION' ) && false !== strpos( $events, 'submission_exists' ), 'serverseitiger Duplikatschutz fehlt' );
 events_expect( false !== strpos( $events, 'data-gse-filters' ) && false !== strpos( $events, 'data-gse-date' ), 'Status- und Kalenderfilter fehlen' );
@@ -40,11 +45,13 @@ events_expect( false !== strpos( $wp_admin, "'gelsendiele-events'" ), 'WordPress
 events_expect( false !== strpos( $admin_css, '.gelsensystem-events-editor-grid' ), 'responsives Verwaltungs-Layout fehlt' );
 events_expect( false !== strpos( $admin_css, '.gelsensystem-events-save-progress' ), 'sichtbarer Speicherfortschritt fehlt' );
 events_expect( false !== strpos( $admin_js, "form.dataset.submitting === '1'" ), 'clientseitiger Mehrfachklickschutz fehlt' );
+events_expect( false !== strpos( $admin_js, 'data-gse-popup-start' ) && false !== strpos( $admin_js, 'previousDay' ), 'Popup-Datumsautomatik fehlt' );
 events_expect( false !== strpos( $admin_css, 'html[data-gd-theme="dark"] .gelsensystem-events-form' ), 'Dark-Mode-Stile fehlen' );
 events_expect( false !== strpos( $public_css, '.gse-event-card' ), 'öffentliche Eventkarten fehlen' );
 events_expect( false !== strpos( $public_css, '.gse-event-card__image' ), 'responsive Eventfoto-Stile fehlen' );
 events_expect( false !== strpos( $public_css, '.gse-event-popup' ), 'responsive Popup-Stile fehlen' );
 events_expect( false !== strpos( $public_js, 'applyFilters' ) && false !== strpos( $public_js, 'sessionStorage' ), 'Filter- oder Popup-Interaktion fehlt' );
+events_expect( false !== strpos( $public_js, 'data-gse-details-toggle' ) && false !== strpos( $public_css, '.gse-event-card__actions' ), 'neue Mehr-Infos-Bedienung fehlt' );
 events_expect( false !== strpos( $public_css, '@media (max-width:700px)' ), 'Smartphone-Layout fehlt' );
 
 echo "Event-App-Tests erfolgreich.\n";

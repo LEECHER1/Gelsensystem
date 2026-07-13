@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.13.1
+
+- Linkeingabe akzeptiert Domains ohne `http://`, `https://` oder `www.` und ergänzt automatisch HTTPS.
+- Öffentliche Eventkarten zeigen „Mehr Infos“ und „Zur Webseite“ als gemeinsame Buttonzeile.
+- Popup-Anzeigezeitraum mit Start- und Enddatum ergänzt; Standard ist ein Tag vor dem Event bis zum Event-Enddatum.
+- Homepage-Erkennung und Popup-Sitzungsschlüssel stabilisiert.
+
 ## 2.13.0
 
 - Events als eigenen Menüpunkt im WordPress-Backend ergänzt.
