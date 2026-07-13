@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.12.0
+
+- Schlanke Eventverwaltung direkt in die zentrale Gelsensystem-App integriert.
+- Titel, Datum, Uhrzeit, Ort, Beschreibung, Link und öffentliche Sichtbarkeit lassen sich ohne EventON pflegen.
+- Responsive öffentliche Eventliste über `[gelsensystem_events]` ergänzt.
+- Bestehende Enfold-Menüadresse `/events/` zeigt automatisch die Gelsensystem-Events statt der fehlerhaften EventON-Archivseite.
+- Smartphone-, Tablet-, Desktop- und Dark-Mode-Layouts für die Eventpflege ergänzt.
+
 ## 2.11.0
 
 - Einheitlichen App-Drawer für den schnellen Bereichswechsel auf Smartphone und Tablet ergänzt.

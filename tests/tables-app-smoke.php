@@ -12,7 +12,7 @@ function tables_expect( $condition, $message ) {
 	}
 }
 
-tables_expect( false !== strpos( $entry, "array( 'reservations', 'settings', 'users', 'menu', 'tables' )" ), 'Tische sind keine zentrale App-Sektion' );
+tables_expect( false !== strpos( $entry, "array( 'reservations', 'settings', 'users', 'menu', 'tables', 'events' )" ), 'Tische sind keine zentrale App-Sektion' );
 tables_expect( false !== strpos( $entry, 'GDG_Admin::render_app_tables' ), 'App-Renderer wird nicht aufgerufen' );
 tables_expect( false !== strpos( $entry, "add_query_arg( 'gd-section', 'tables', \$dashboard )" ), 'Navigation führt nicht in die zentrale App' );
 tables_expect( false !== strpos( $admin, 'public static function render_app_tables' ), 'Tisch-Renderer fehlt' );

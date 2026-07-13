@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.12.0 – 2026-07-13
+
+- Gemeinsame Version mit integrierter Eventverwaltung und öffentlicher Eventseite.
+
 ## 2.11.0 – 2026-07-13
 
 - Gemeinsamer Smartphone-/Tablet-App-Drawer für alle Arbeitsbereiche ergänzt.
