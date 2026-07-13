@@ -29,14 +29,16 @@
 .gse-event-card__location { margin:0; color:var(--gse-muted); font-size:14px; font-weight:700; }
 .gse-event-card__description,.gse-event-card__details-text { max-width:780px; margin-top:15px; color:#455149; font-size:15px; line-height:1.65; }
 .gse-event-card__description p,.gse-event-card__details-text p { margin:0 0 8px; }
-.gse-event-card__details { margin-top:14px; padding-top:12px; border-top:1px solid rgba(23,34,27,.1); }
-.gse-event-card__details summary { display:inline-flex; align-items:center; gap:7px; color:var(--gse-accent); font-size:13px; font-weight:850; cursor:pointer; list-style:none; }
-.gse-event-card__details summary::-webkit-details-marker { display:none; }
-.gse-event-card__details summary span { transition:transform .2s ease; }
-.gse-event-card__details[open] summary span { transform:rotate(180deg); }
+.gse-event-card__actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:18px; padding-top:15px; border-top:1px solid rgba(23,34,27,.1); }
+.gse-event-card__info-button,.gse-event-card__link { display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:46px; margin:0; padding:0 17px; border:1px solid var(--gse-accent); border-radius:11px; font:inherit; font-size:14px; font-weight:850; text-decoration:none!important; cursor:pointer; }
+.gse-event-card__info-button { color:var(--gse-accent); background:#fff; }
+.gse-event-card__info-button span { font-size:18px; transition:transform .2s ease; }
+.gse-event-card__info-button[aria-expanded="true"] span { transform:rotate(180deg); }
+.gse-event-card__details { margin-top:15px; padding:16px; border-radius:12px; background:color-mix(in srgb,var(--gse-accent),#fff 94%); }
+.gse-event-card__details[hidden] { display:none; }
 .gse-event-card__gallery { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin-top:14px; }
 .gse-event-card__gallery img { display:block; width:100%; aspect-ratio:4/3; border-radius:10px; object-fit:cover; }
-.gse-event-card__link { display:inline-flex; align-items:center; gap:8px; margin-top:14px; padding:11px 16px; border-radius:10px; color:#fff!important; background:var(--gse-accent); font-weight:800; text-decoration:none!important; }
+.gse-event-card__link { color:#fff!important; background:var(--gse-accent); }
 .gse-public-events__empty { display:grid; gap:5px; padding:36px; border:1px dashed rgba(23,34,27,.2); border-radius:20px; background:#fff; text-align:center; }
 .gse-public-events__empty[hidden] { display:none; }
 .gse-public-events__empty span { color:var(--gse-muted); }

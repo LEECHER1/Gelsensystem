@@ -3,7 +3,7 @@ Contributors: Andreas Schwarz / Gelsendiele
 Tags: gastronomie, bestellung, küche, schank, tische, reservierung
 Requires at least: 6.4
 Requires PHP: 7.4
-Stable tag: 2.13.0
+Stable tag: 2.13.1
 
 Service-, Küchen-, Schank- und Zahlungsmodul des Gelsensystems.
 

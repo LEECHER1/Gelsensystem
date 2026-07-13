@@ -35,9 +35,19 @@
     applyFilters();
   });
 
+  document.querySelectorAll('[data-gse-details-toggle]').forEach((button) => {
+    const panel = document.getElementById(button.getAttribute('aria-controls') || '');
+    if (!panel) return;
+    button.addEventListener('click', () => {
+      const expanded = button.getAttribute('aria-expanded') === 'true';
+      button.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+      panel.hidden = expanded;
+    });
+  });
+
   const popup = document.querySelector('[data-gse-popup]');
   if (!popup) return;
-  const storageKey = `gse-event-popup-${popup.dataset.eventId || 'event'}`;
+  const storageKey = `gse-event-popup-${popup.dataset.eventId || 'event'}-${popup.dataset.popupVersion || '1'}`;
   let dismissed = false;
   try { dismissed = window.sessionStorage.getItem(storageKey) === 'dismissed'; } catch (error) {}
   const close = () => {

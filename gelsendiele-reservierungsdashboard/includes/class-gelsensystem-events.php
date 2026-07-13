@@ -26,6 +26,8 @@ final class Gelsensystem_Events {
 	const META_IMAGE_IDS   = '_gse_image_ids';
 	const META_DETAILS     = '_gse_details';
 	const META_POPUP       = '_gse_popup';
+	const META_POPUP_START = '_gse_popup_start';
+	const META_POPUP_END   = '_gse_popup_end';
 	const META_COLOR       = '_gse_color';
 	const META_SUBMISSION  = '_gse_submission_token';
 
@@ -120,6 +122,19 @@ final class Gelsensystem_Events {
 			self::redirect( 'invalid' );
 		}
 
+		$popup       = empty( $_POST['popup'] ) ? 0 : 1;
+		$popup_start = self::sanitize_date( $_POST['popup_start_date'] ?? '' );
+		$popup_end   = self::sanitize_date( $_POST['popup_end_date'] ?? '' );
+		if ( ! $popup_start ) {
+			$popup_start = self::default_popup_start_date( $start );
+		}
+		if ( ! $popup_end ) {
+			$popup_end = self::date_part( $end );
+		}
+		if ( $popup && ( ! $popup_start || ! $popup_end || $popup_end < $popup_start ) ) {
+			self::redirect( 'invalid_popup' );
+		}
+
 		$event_id = absint( $_POST['event_id'] ?? 0 );
 		$submission_token = sanitize_text_field( wp_unslash( $_POST['submission_token'] ?? '' ) );
 		if ( ! $event_id && $submission_token && self::submission_exists( $submission_token ) ) {
@@ -146,11 +161,13 @@ final class Gelsensystem_Events {
 		update_post_meta( $event_id, self::META_START, $start );
 		update_post_meta( $event_id, self::META_END, $end );
 		update_post_meta( $event_id, self::META_LOCATION, sanitize_text_field( wp_unslash( $_POST['location'] ?? '' ) ) );
-		update_post_meta( $event_id, self::META_LINK, esc_url_raw( wp_unslash( $_POST['link'] ?? '' ) ) );
+		update_post_meta( $event_id, self::META_LINK, self::normalize_url( $_POST['link'] ?? '' ) );
 		update_post_meta( $event_id, self::META_ALL_DAY, $all_day );
 		update_post_meta( $event_id, self::META_ACTIVE, empty( $_POST['active'] ) ? 0 : 1 );
 		update_post_meta( $event_id, self::META_DETAILS, $details );
-		update_post_meta( $event_id, self::META_POPUP, empty( $_POST['popup'] ) ? 0 : 1 );
+		update_post_meta( $event_id, self::META_POPUP, $popup );
+		update_post_meta( $event_id, self::META_POPUP_START, $popup_start . ' 00:00:00' );
+		update_post_meta( $event_id, self::META_POPUP_END, $popup_end . ' 23:59:59' );
 		update_post_meta( $event_id, self::META_COLOR, self::sanitize_color( $_POST['color'] ?? '' ) );
 		if ( $submission_token ) {
 			update_post_meta( $event_id, self::META_SUBMISSION, $submission_token );
@@ -190,6 +207,28 @@ final class Gelsensystem_Events {
 	private static function sanitize_color( $value ) {
 		$color = sanitize_hex_color( wp_unslash( $value ) );
 		return $color ?: '#149447';
+	}
+
+	private static function normalize_url( $value ) {
+		$value = is_string( $value ) ? trim( wp_unslash( $value ) ) : '';
+		if ( '' === $value ) {
+			return '';
+		}
+		if ( 0 === strpos( $value, '//' ) ) {
+			$value = 'https:' . $value;
+		} elseif ( ! preg_match( '#^[a-z][a-z0-9+.-]*://#i', $value ) ) {
+			$value = 'https://' . ltrim( $value, '/' );
+		}
+		return esc_url_raw( $value, array( 'http', 'https' ) );
+	}
+
+	private static function default_popup_start_date( $event_start ) {
+		try {
+			$date = new DateTimeImmutable( $event_start, wp_timezone() );
+			return $date->modify( '-1 day' )->format( 'Y-m-d' );
+		} catch ( Exception $exception ) {
+			return '';
+		}
 	}
 
 	private static function get_image_ids( $event_id ) {
@@ -287,18 +326,32 @@ final class Gelsensystem_Events {
 	private static function event_data( $post ) {
 		$image_ids = self::get_image_ids( $post->ID );
 		$image_id  = $image_ids ? $image_ids[0] : 0;
+		$start     = (string) get_post_meta( $post->ID, self::META_START, true );
+		$end       = (string) get_post_meta( $post->ID, self::META_END, true );
+		$popup_start = (string) get_post_meta( $post->ID, self::META_POPUP_START, true );
+		$popup_end   = (string) get_post_meta( $post->ID, self::META_POPUP_END, true );
+		if ( ! $popup_start && $start ) {
+			$popup_start = self::default_popup_start_date( $start ) . ' 00:00:00';
+		}
+		if ( ! $popup_end && $end ) {
+			$popup_end = self::date_part( $end ) . ' 23:59:59';
+		}
 		return array(
 			'id'          => (int) $post->ID,
 			'title'       => (string) $post->post_title,
 			'description' => (string) $post->post_content,
-			'start'       => (string) get_post_meta( $post->ID, self::META_START, true ),
-			'end'         => (string) get_post_meta( $post->ID, self::META_END, true ),
+			'start'       => $start,
+			'end'         => $end,
 			'location'    => (string) get_post_meta( $post->ID, self::META_LOCATION, true ),
 			'link'        => (string) get_post_meta( $post->ID, self::META_LINK, true ),
 			'all_day'     => (bool) get_post_meta( $post->ID, self::META_ALL_DAY, true ),
 			'active'      => (bool) get_post_meta( $post->ID, self::META_ACTIVE, true ),
 			'details'     => (string) get_post_meta( $post->ID, self::META_DETAILS, true ),
 			'popup'       => (bool) get_post_meta( $post->ID, self::META_POPUP, true ),
+			'popup_start' => $popup_start,
+			'popup_end'   => $popup_end,
+			'popup_start_custom' => metadata_exists( 'post', $post->ID, self::META_POPUP_START ),
+			'popup_end_custom'   => metadata_exists( 'post', $post->ID, self::META_POPUP_END ),
 			'color'       => self::sanitize_color( get_post_meta( $post->ID, self::META_COLOR, true ) ),
 			'image_ids'   => $image_ids,
 			'image_id'    => $image_id,
@@ -360,7 +413,7 @@ final class Gelsensystem_Events {
 				<a class="button" href="<?php echo esc_url( home_url( '/events/' ) ); ?>" target="_blank" rel="noopener">Webseite ansehen</a>
 			</header>
 			<?php if ( $notice ) : ?>
-				<div class="notice <?php echo in_array( $notice, array( 'invalid', 'image_error', 'error' ), true ) ? 'notice-error' : 'notice-success'; ?>"><p><?php echo esc_html( self::notice_text( $notice ) ); ?></p></div>
+				<div class="notice <?php echo in_array( $notice, array( 'invalid', 'invalid_popup', 'image_error', 'error' ), true ) ? 'notice-error' : 'notice-success'; ?>"><p><?php echo esc_html( self::notice_text( $notice ) ); ?></p></div>
 			<?php endif; ?>
 			<div class="gelsensystem-events-summary">
 				<div><strong><?php echo esc_html( (string) $future ); ?></strong><span>Kommend</span></div>
@@ -376,9 +429,9 @@ final class Gelsensystem_Events {
 					<input type="hidden" name="submission_token" value="<?php echo esc_attr( $submission_token ); ?>">
 					<label class="gelsensystem-events-wide"><span>Titel *</span><input name="title" required value="<?php echo esc_attr( $edit['title'] ?? '' ); ?>" placeholder="z. B. Sommerfest"></label>
 					<div class="gelsensystem-events-field-grid">
-						<label><span>Startdatum *</span><input type="date" name="start_date" required value="<?php echo esc_attr( self::date_part( $edit['start'] ?? '' ) ); ?>"></label>
+						<label><span>Startdatum *</span><input type="date" name="start_date" data-gse-event-start required value="<?php echo esc_attr( self::date_part( $edit['start'] ?? '' ) ); ?>"></label>
 						<label><span>Startzeit</span><input type="time" name="start_time" value="<?php echo esc_attr( self::time_part( $edit['start'] ?? '', '18:00' ) ); ?>"></label>
-						<label><span>Enddatum</span><input type="date" name="end_date" value="<?php echo esc_attr( self::date_part( $edit['end'] ?? '' ) ); ?>"></label>
+						<label><span>Enddatum</span><input type="date" name="end_date" data-gse-event-end value="<?php echo esc_attr( self::date_part( $edit['end'] ?? '' ) ); ?>"></label>
 						<label><span>Endzeit</span><input type="time" name="end_time" value="<?php echo esc_attr( self::time_part( $edit['end'] ?? '', '22:00' ) ); ?>"></label>
 						<label class="gelsensystem-events-wide"><span>Ort</span><input name="location" value="<?php echo esc_attr( $edit['location'] ?? 'Die Gelsendiele' ); ?>" placeholder="Die Gelsendiele"></label>
 						<label class="gelsensystem-events-wide"><span>Kurzbeschreibung</span><textarea name="description" rows="4" placeholder="Das Wichtigste auf einen Blick"><?php echo esc_textarea( $edit['description'] ?? '' ); ?></textarea></label>
@@ -391,13 +444,18 @@ final class Gelsensystem_Events {
 								<?php endforeach; ?>
 							</div>
 						<?php endif; ?>
-						<label class="gelsensystem-events-wide"><span>Optionaler Link</span><input type="url" name="link" value="<?php echo esc_attr( $edit['link'] ?? '' ); ?>" placeholder="https://…"></label>
+						<label class="gelsensystem-events-wide"><span>Optionale Webseite</span><input type="text" inputmode="url" name="link" value="<?php echo esc_attr( $edit['link'] ?? '' ); ?>" placeholder="orf.at"><small>Domain genügt – https:// wird beim Speichern automatisch ergänzt.</small></label>
 						<label><span>Eventfarbe</span><input type="color" name="color" value="<?php echo esc_attr( $edit['color'] ?? '#149447' ); ?>"><small>Farbe für Datum, Akzente und Button.</small></label>
+						<div class="gelsensystem-events-popup-schedule gelsensystem-events-wide" data-gse-popup-schedule>
+							<div><strong>Popup-Zeitraum</strong><small>Standard: ein Tag vor dem Event bis zum Event-Enddatum.</small></div>
+							<label><span>Popup anzeigen ab *</span><input type="date" name="popup_start_date" data-gse-popup-start data-auto="<?php echo ! $edit || empty( $edit['popup_start_custom'] ) ? '1' : '0'; ?>" value="<?php echo esc_attr( self::date_part( $edit['popup_start'] ?? '' ) ); ?>"></label>
+							<label><span>Popup anzeigen bis *</span><input type="date" name="popup_end_date" data-gse-popup-end data-auto="<?php echo ! $edit || empty( $edit['popup_end_custom'] ) ? '1' : '0'; ?>" value="<?php echo esc_attr( self::date_part( $edit['popup_end'] ?? '' ) ); ?>"></label>
+						</div>
 					</div>
 					<div class="gelsensystem-events-checks">
 						<label><input type="checkbox" name="all_day" value="1" <?php checked( ! empty( $edit['all_day'] ) ); ?>> Ganztägig</label>
 						<label><input type="checkbox" name="active" value="1" <?php checked( ! $edit || ! empty( $edit['active'] ) ); ?>> Auf Webseite anzeigen</label>
-						<label><input type="checkbox" name="popup" value="1" <?php checked( ! empty( $edit['popup'] ) ); ?>> Als Popup auf der Startseite anzeigen</label>
+						<label><input type="checkbox" name="popup" value="1" data-gse-popup-enabled <?php checked( ! empty( $edit['popup'] ) ); ?>> Als Popup auf der Startseite anzeigen</label>
 					</div>
 					<button type="submit" class="button button-primary" data-gse-submit><?php echo $edit ? 'Event speichern' : 'Event anlegen'; ?></button>
 					<div class="gelsensystem-events-save-progress" data-gse-progress hidden aria-live="polite"><span>Event wird gespeichert und Bilder werden verarbeitet …</span><div><i></i></div></div>
@@ -426,6 +484,7 @@ final class Gelsensystem_Events {
 			'duplicate' => 'Das Event wurde bereits gespeichert. Ein doppelter Eintrag wurde verhindert.',
 			'deleted' => 'Event wurde gelöscht.',
 			'invalid' => 'Bitte Titel, Datum und Uhrzeit vollständig und korrekt ausfüllen.',
+			'invalid_popup' => 'Bitte für das Popup ein gültiges Start- und Enddatum auswählen.',
 			'image_error' => 'Das Event wurde gespeichert, aber das Foto konnte nicht hochgeladen werden. Bitte JPG, PNG oder WebP verwenden.',
 			'error'   => 'Das Event konnte nicht gespeichert werden.',
 		);
@@ -499,14 +558,19 @@ final class Gelsensystem_Events {
 								<h2 itemprop="name"><?php echo esc_html( $event['title'] ); ?></h2>
 								<?php if ( $event['location'] ) : ?><p class="gse-event-card__location" itemprop="location">⌖ <?php echo esc_html( $event['location'] ); ?></p><?php endif; ?>
 								<?php if ( $event['description'] ) : ?><div class="gse-event-card__description" itemprop="description"><?php echo wp_kses_post( wpautop( $event['description'] ) ); ?></div><?php endif; ?>
-								<?php if ( $event['details'] || count( $event['image_ids'] ) > 1 ) : ?>
-									<details class="gse-event-card__details">
-										<summary>Mehr anzeigen <span aria-hidden="true">⌄</span></summary>
+								<?php $has_details = $event['details'] || count( $event['image_ids'] ) > 1; ?>
+								<?php if ( $has_details || $event['link'] ) : ?>
+									<div class="gse-event-card__actions">
+										<?php if ( $has_details ) : ?><button type="button" class="gse-event-card__info-button" data-gse-details-toggle aria-expanded="false" aria-controls="gse-event-details-<?php echo esc_attr( $event['id'] ); ?>">Mehr Infos <span aria-hidden="true">↓</span></button><?php endif; ?>
+										<?php if ( $event['link'] ) : ?><a class="gse-event-card__link" href="<?php echo esc_url( $event['link'] ); ?>" target="_blank" rel="noopener">Zur Webseite <span aria-hidden="true">↗</span></a><?php endif; ?>
+									</div>
+								<?php endif; ?>
+								<?php if ( $has_details ) : ?>
+									<div class="gse-event-card__details" id="gse-event-details-<?php echo esc_attr( $event['id'] ); ?>" data-gse-details-panel hidden>
 										<?php if ( $event['details'] ) : ?><div class="gse-event-card__details-text"><?php echo wp_kses_post( wpautop( $event['details'] ) ); ?></div><?php endif; ?>
 										<?php if ( count( $event['image_ids'] ) > 1 ) : ?><div class="gse-event-card__gallery"><?php foreach ( array_slice( $event['image_ids'], 1 ) as $image_id ) { echo wp_get_attachment_image( $image_id, 'large', false, array( 'alt' => $event['title'], 'loading' => 'lazy' ) ); } ?></div><?php endif; ?>
-									</details>
+									</div>
 								<?php endif; ?>
-								<?php if ( $event['link'] ) : ?><a class="gse-event-card__link" href="<?php echo esc_url( $event['link'] ); ?>">Mehr erfahren <span aria-hidden="true">→</span></a><?php endif; ?>
 							</div>
 						</article>
 					<?php endforeach; ?>
@@ -523,16 +587,26 @@ final class Gelsensystem_Events {
 			return self::$popup_event;
 		}
 		self::$popup_event_loaded = true;
-		if ( ! is_front_page() || is_admin() ) {
+		if ( ! self::is_homepage_request() || is_admin() ) {
 			return null;
 		}
+		$now = current_datetime()->format( 'Y-m-d H:i:s' );
 		foreach ( self::get_events( true, 100, false ) as $event ) {
-			if ( $event['popup'] ) {
+			if ( $event['popup'] && $event['popup_start'] <= $now && $event['popup_end'] >= $now ) {
 				self::$popup_event = $event;
 				break;
 			}
 		}
 		return self::$popup_event;
+	}
+
+	private static function is_homepage_request() {
+		if ( is_front_page() || is_home() ) {
+			return true;
+		}
+		$request_path = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ) : '';
+		$home_path    = (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH );
+		return untrailingslashit( $request_path ) === untrailingslashit( $home_path );
 	}
 
 	public static function enqueue_homepage_popup_assets() {
@@ -549,7 +623,7 @@ final class Gelsensystem_Events {
 			return;
 		}
 		?>
-		<div class="gse-event-popup" data-gse-popup data-event-id="<?php echo esc_attr( $event['id'] ); ?>" style="--gse-accent:<?php echo esc_attr( $event['color'] ); ?>" hidden>
+		<div class="gse-event-popup" data-gse-popup data-event-id="<?php echo esc_attr( $event['id'] ); ?>" data-popup-version="<?php echo esc_attr( md5( $event['popup_start'] . '|' . $event['popup_end'] ) ); ?>" style="--gse-accent:<?php echo esc_attr( $event['color'] ); ?>" hidden>
 			<button type="button" class="gse-event-popup__backdrop" data-gse-popup-close aria-label="Popup schließen"></button>
 			<section class="gse-event-popup__dialog<?php echo $event['image_id'] ? ' has-image' : ''; ?>" role="dialog" aria-modal="true" aria-labelledby="gse-popup-title-<?php echo esc_attr( $event['id'] ); ?>">
 				<button type="button" class="gse-event-popup__close" data-gse-popup-close aria-label="Popup schließen">×</button>
