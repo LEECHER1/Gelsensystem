@@ -1,0 +1,33 @@
+.gelsensystem-events-page { min-height: 520px; padding: 64px 0 80px; background: #f5f7f4; }
+.gse-public-events { --gse-green:#149447; --gse-text:#17221b; --gse-muted:#68746c; max-width:1120px; margin:0 auto; color:var(--gse-text); font-family:inherit; }
+.gse-public-events * { box-sizing:border-box; }
+.gse-public-events__header { max-width:720px; margin-bottom:34px; }
+.gse-public-events__header>span { display:block; margin-bottom:7px; color:var(--gse-green); font-size:12px; font-weight:800; letter-spacing:.15em; text-transform:uppercase; }
+.gse-public-events__header h1 { margin:0; color:var(--gse-text); font-size:clamp(38px,6vw,72px); line-height:1; letter-spacing:-.045em; }
+.gse-public-events__header p { margin:13px 0 0; color:var(--gse-muted); font-size:18px; }
+.gse-public-events__list { display:grid; gap:16px; }
+.gse-event-card { display:grid; grid-template-columns:105px minmax(0,1fr); overflow:hidden; border:1px solid rgba(23,34,27,.12); border-radius:22px; background:#fff; box-shadow:0 10px 34px rgba(20,40,26,.06); }
+.gse-event-card__date { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:190px; padding:25px 18px; color:#fff; background:linear-gradient(150deg,#1ca552,#0d783a); text-align:center; }
+.gse-event-card__date strong { font-size:42px; line-height:.95; }
+.gse-event-card__date span { margin-top:9px; font-size:14px; font-weight:850; letter-spacing:.12em; text-transform:uppercase; }
+.gse-event-card__content { padding:27px 32px 29px; }
+.gse-event-card__time { color:var(--gse-green); font-size:12px; font-weight:800; letter-spacing:.035em; }
+.gse-event-card h2 { margin:7px 0 8px; color:var(--gse-text); font-size:clamp(23px,3vw,34px); line-height:1.12; }
+.gse-event-card__location { margin:0; color:var(--gse-muted); font-size:14px; font-weight:700; }
+.gse-event-card__description { max-width:780px; margin-top:15px; color:#455149; font-size:15px; line-height:1.65; }
+.gse-event-card__description p { margin:0 0 8px; }
+.gse-event-card__link { display:inline-flex; align-items:center; gap:8px; margin-top:14px; padding:11px 16px; border-radius:10px; color:#fff!important; background:var(--gse-green); font-weight:800; text-decoration:none!important; }
+.gse-public-events__empty { display:grid; gap:5px; padding:36px; border:1px dashed rgba(23,34,27,.2); border-radius:20px; background:#fff; text-align:center; }
+.gse-public-events__empty span { color:var(--gse-muted); }
+@media (max-width:700px) {
+  .gelsensystem-events-page { padding:34px 0 52px; }
+  .gse-public-events__header { margin-bottom:24px; }
+  .gse-public-events__header p { font-size:16px; }
+  .gse-event-card { grid-template-columns:76px minmax(0,1fr); border-radius:17px; }
+  .gse-event-card__date { min-height:100%; padding:20px 10px; }
+  .gse-event-card__date strong { font-size:31px; }
+  .gse-event-card__date span { font-size:11px; }
+  .gse-event-card__content { padding:20px 18px 22px; }
+  .gse-event-card h2 { font-size:24px; }
+  .gse-event-card__description { font-size:14px; }
+}
