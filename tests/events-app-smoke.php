@@ -26,6 +26,7 @@ events_expect( false !== strpos( $events, 'self::PREVIOUS_CONTENT' ) && false !=
 events_expect( false !== strpos( $migrator, 'Gelsensystem_Events::ensure_public_page()' ) && false !== strpos( $migrator, 'Gelsensystem_Events::schedule_route_refresh()' ), 'Event-Seite wird beim Update nicht automatisch repariert' );
 events_expect( false === strpos( $events, 'ajde_events' ) && false === strpos( $events, 'is_post_type_archive' ), 'öffentliche Event-Seite ist weiterhin von EventON abhängig' );
 events_expect( false !== strpos( $events, 'is_public_events_request' ) && false !== strpos( $events, "home_url( '/' . self::PAGE_SLUG . '/' )" ), 'pfadbasierter Event-Fallback fehlt' );
+events_expect( false !== strpos( $events, 'unabhängig von the_content()' ) && false === strpos( $events, "is_page( \$page_id ) ) {\n\t\t\treturn;" ), 'Enfold kann die direkte Event-Ausgabe weiterhin mit alten Layout-Daten übersteuern' );
 events_expect( false !== strpos( $events, 'maybe_refresh_public_routes' ) && false !== strpos( $events, 'flush_rewrite_rules( false )' ), 'Permalink-Reparatur nach der EventON-Migration fehlt' );
 events_expect( false !== strpos( $events, "current_user_can( 'gdg_manage' )" ), 'Berechtigungsprüfung fehlt' );
 events_expect( false !== strpos( $events, "check_admin_referer( 'gse_event_action', 'gse_nonce' )" ), 'Nonce-Prüfung fehlt' );
