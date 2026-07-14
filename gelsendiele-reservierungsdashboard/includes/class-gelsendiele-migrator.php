@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Führt idempotente Updates auch bei bereits aktivem Plugin aus. */
 final class Gelsendiele_Migrator {
 	const VERSION_OPTION = 'gelsendiele_migration_version';
-	const TARGET_VERSION = '2.15.3';
+	const TARGET_VERSION = '2.15.4';
 	const ERROR_OPTION   = 'gelsendiele_last_migration_error';
 
 	public static function bootstrap() {
@@ -29,6 +29,13 @@ final class Gelsendiele_Migrator {
 			Gelsendiele_Settings::maybe_initialize();
 			if ( class_exists( 'Gelsendiele_Reservierungsdashboard' ) ) {
 				Gelsendiele_Reservierungsdashboard::ensure_central_page();
+			}
+			if ( class_exists( 'Gelsensystem_Events' ) ) {
+				$events_page_id = Gelsensystem_Events::ensure_public_page();
+				if ( ! $events_page_id ) {
+					throw new RuntimeException( 'Die öffentliche Event-Seite konnte nicht erstellt werden.' );
+				}
+				Gelsensystem_Events::schedule_route_refresh();
 			}
 
 			if ( class_exists( 'GD_Reservation_Engine' ) ) {

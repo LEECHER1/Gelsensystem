@@ -8,6 +8,7 @@ $public_css = file_get_contents( $root . 'assets/public-events.css' );
 $admin_js   = file_get_contents( $root . 'assets/dashboard.js' );
 $public_js  = file_get_contents( $root . 'assets/public-events.js' );
 $wp_admin   = file_get_contents( $root . 'includes/class-gelsendiele-admin.php' );
+$migrator   = file_get_contents( $root . 'includes/class-gelsendiele-migrator.php' );
 
 function events_expect( $condition, $message ) {
 	if ( ! $condition ) {
@@ -20,7 +21,12 @@ events_expect( false !== strpos( $entry, "'events'       => 'gdg_manage'" ), 'Be
 events_expect( false !== strpos( $entry, 'Gelsensystem_Events::render_app' ), 'Event-App-Renderer wird nicht aufgerufen' );
 events_expect( false !== strpos( $entry, "add_query_arg( 'gd-section', 'events', \$dashboard )" ), 'Event-Navigation fehlt' );
 events_expect( false !== strpos( $events, "add_shortcode( self::SHORTCODE" ), 'öffentlicher Shortcode fehlt' );
-events_expect( false !== strpos( $events, "add_rewrite_rule( '^events/?$'" ), 'bestehende Enfold-Event-URL wird nicht übernommen' );
+events_expect( false !== strpos( $events, 'ensure_public_page' ) && false !== strpos( $events, "'post_content' => \$shortcode" ), 'eigenständige WordPress-Event-Seite fehlt' );
+events_expect( false !== strpos( $events, 'self::PREVIOUS_CONTENT' ) && false !== strpos( $events, 'add_post_meta' ), 'bestehender Event-Seiteninhalt wird vor der Migration nicht gesichert' );
+events_expect( false !== strpos( $migrator, 'Gelsensystem_Events::ensure_public_page()' ) && false !== strpos( $migrator, 'Gelsensystem_Events::schedule_route_refresh()' ), 'Event-Seite wird beim Update nicht automatisch repariert' );
+events_expect( false === strpos( $events, 'ajde_events' ) && false === strpos( $events, 'is_post_type_archive' ), 'öffentliche Event-Seite ist weiterhin von EventON abhängig' );
+events_expect( false !== strpos( $events, 'is_public_events_request' ) && false !== strpos( $events, "home_url( '/' . self::PAGE_SLUG . '/' )" ), 'pfadbasierter Event-Fallback fehlt' );
+events_expect( false !== strpos( $events, 'maybe_refresh_public_routes' ) && false !== strpos( $events, 'flush_rewrite_rules( false )' ), 'Permalink-Reparatur nach der EventON-Migration fehlt' );
 events_expect( false !== strpos( $events, "current_user_can( 'gdg_manage' )" ), 'Berechtigungsprüfung fehlt' );
 events_expect( false !== strpos( $events, "check_admin_referer( 'gse_event_action', 'gse_nonce' )" ), 'Nonce-Prüfung fehlt' );
 events_expect( false !== strpos( $events, "wp_trash_post" ), 'sicheres Löschen in den Papierkorb fehlt' );
@@ -47,6 +53,7 @@ events_expect( false !== strpos( $events, 'data-gse-filters' ) && false !== strp
 events_expect( false !== strpos( $events, 'data-default-date=' ) && false !== strpos( $public_js, 'let dateFilterActive = false' ), 'Kalenderfilter zeigt das aktuelle Datum nicht ohne anfängliche Filterung an' );
 events_expect( false !== strpos( $events, 'gse-event-card__image' ), 'Eventfoto fehlt in der öffentlichen Ausgabe' );
 events_expect( false !== strpos( $events, "wp_enqueue_style( 'gelsensystem-public-events'" ), 'öffentliche Stile werden nicht bedarfsgerecht geladen' );
+events_expect( false !== strpos( $events, "enqueue_public_route_assets' ), 19" ), 'Event-Assets werden für die eigenständige Seite nicht vor dem Theme geladen' );
 events_expect( false !== strpos( $wp_admin, "'gelsendiele-events'" ), 'WordPress-Untermenü für Events fehlt' );
 events_expect( false !== strpos( $admin_css, '.gelsensystem-events-editor-grid' ), 'responsives Verwaltungs-Layout fehlt' );
 events_expect( false !== strpos( $admin_css, '.gelsensystem-events-save-progress' ), 'sichtbarer Speicherfortschritt fehlt' );

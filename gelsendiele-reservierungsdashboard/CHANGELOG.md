@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.15.4
+
+- Öffentliche Event-Seite unter `/events/` vollständig von EventON entkoppelt und als echte WordPress-Seite mit Gelsensystem-Shortcode angelegt.
+- Bestehende EventON-Seiteninhalte vor der automatischen Migration als Metadatum gesichert.
+- Pfadbasierte Fallback-Ausgabe und frühes Laden der Event-Assets ergänzen Schutz vor fehlerhaften Permalinks und konkurrierenden Archivregeln.
+
 ## 2.15.3
 
 - Eigenen responsiven Mediathek-Dialog für Eventfotos ergänzt, der die WordPress-Anhangsbibliothek direkt und zuverlässig lädt.
