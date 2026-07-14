@@ -3445,7 +3445,11 @@ html[data-gd-theme="dark"] .gd-button-edit-booking {
 .gelsensystem-events-actions form { margin:0; }
 .gelsensystem-events-actions .button { min-height:36px; padding:0 10px; }
 .gelsensystem-events-actions .button-link-delete { color:var(--gd-danger); }
+.gelsensystem-events-toggle { display:inline-flex!important; align-items:center; gap:7px; }
+.gelsensystem-events-toggle i { font-style:normal; transition:transform .2s ease; }
+.gelsensystem-events-toggle[aria-expanded="true"] i { transform:rotate(180deg); }
 .gelsensystem-events-overview { grid-column:2/-1; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+.gelsensystem-events-overview[hidden] { display:none; }
 .gelsensystem-events-overview>div { display:grid; align-content:start; gap:3px; min-width:0; padding:9px 10px; border:1px solid var(--gd-border); border-radius:10px; background:#fff; }
 .gelsensystem-events-overview>div.is-wide { grid-column:span 2; }
 .gelsensystem-events-overview span { color:var(--gd-muted); font-size:8px; font-weight:850; letter-spacing:.45px; text-transform:uppercase; }
