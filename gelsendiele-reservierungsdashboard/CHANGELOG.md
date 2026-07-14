@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.15.8
+
+- Zentrale und Gastro-Seitenleisten bei Branding, Unterzeile, Online-Status, Darkmode und Benutzerbereich vereinheitlicht.
+- Bereichslisten für geringe Desktop-Höhen scrollbar gemacht, damit Darkmode und Abmeldung dauerhaft erreichbar bleiben.
+- Gemeinsame Theme-Speicherung, Online-/Offline-Umschaltung und beide Anmeldewege mit Regressionstests abgesichert.
+
 ## 2.15.7
 
 - Reservierungsformular an die gemeinsame öffentliche Designsprache von Events und Speisekarte angepasst.

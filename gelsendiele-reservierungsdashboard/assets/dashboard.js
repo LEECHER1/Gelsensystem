@@ -228,7 +228,20 @@
 
   const sidebar = document.querySelector('.gelsensystem-sidebar');
   const sidebarToggle = sidebar?.querySelector('[data-sidebar-toggle]');
+  const sidebarConnection = sidebar?.querySelector('[data-sidebar-connection]');
   const desktopSidebar = window.matchMedia('(min-width: 1025px)');
+
+  const updateSidebarConnection = () => {
+    if (!sidebarConnection) return;
+    const online = window.navigator.onLine;
+    sidebarConnection.classList.toggle('is-offline', !online);
+    const label = sidebarConnection.querySelector('span:last-child');
+    if (label) label.textContent = online ? 'Online' : 'Offline';
+  };
+
+  updateSidebarConnection();
+  window.addEventListener('online', updateSidebarConnection);
+  window.addEventListener('offline', updateSidebarConnection);
 
   function applySidebarState(collapsed, persist = false) {
     const isCollapsed = Boolean(collapsed && desktopSidebar.matches);
@@ -807,6 +820,7 @@
     themeButtons.forEach(button => {
       button.setAttribute('aria-pressed', selectedTheme === 'dark' ? 'true' : 'false');
       button.setAttribute('aria-label', selectedTheme === 'dark' ? 'Helle Darstellung aktivieren' : 'Dark Mode aktivieren');
+      button.setAttribute('title', selectedTheme === 'dark' ? 'Helle Darstellung aktivieren' : 'Dark Mode aktivieren');
     });
     if (themeColorMeta) themeColorMeta.content = selectedTheme === 'dark' ? '#111713' : '#315b2d';
     if (persist) {

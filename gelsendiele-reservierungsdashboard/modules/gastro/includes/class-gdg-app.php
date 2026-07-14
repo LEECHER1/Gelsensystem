@@ -131,7 +131,7 @@ final class GDG_App {
 			<header class="gdg-topbar">
 				<div class="gdg-brand">
 					<span class="gdg-brand-mark">GS</span>
-					<div><strong>Gelsensystem</strong><span><?php echo esc_html( $business_name . ' · ' . $labels[ $view ] ); ?></span></div>
+					<div><strong>Gelsensystem</strong><span><?php echo esc_html( $business_name ); ?></span></div>
 				</div>
 				<button type="button" class="gdg-nav-toggle" data-gdg-nav-toggle aria-label="Menü einklappen" aria-expanded="true" title="Menü ein-/ausklappen"><span aria-hidden="true">‹</span></button>
 				<nav class="gdg-nav" id="gdg-app-drawer" aria-label="Arbeitsbereiche">
