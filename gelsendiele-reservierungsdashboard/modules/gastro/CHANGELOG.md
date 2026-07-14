@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.11 – 2026-07-14
+
+- Definiert die Referenzpalette für den vereinheitlichten Darkmode aller Gelsensystem-Bereiche.
+
 ## 2.15.10 – 2026-07-14
 
 - Verwendet gemeinsam mit allen zentralen Bereichen denselben neutralen hellgrauen Hintergrund.

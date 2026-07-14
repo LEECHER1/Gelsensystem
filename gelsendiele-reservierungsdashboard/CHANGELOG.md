@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.11
+
+- Vereinheitlicht die Darkmode-Palette aller zentralen Bereiche mit Service: Hintergrund, Karten, Sekundärflächen, Rahmen, Text und Eingabefelder.
+
 ## 2.15.10
 
 - Vereinheitlicht den hellen Hintergrund aller zentralen Bereiche mit dem neutralen Service-Grau.
