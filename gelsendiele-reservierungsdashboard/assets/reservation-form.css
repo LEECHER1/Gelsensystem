@@ -38,3 +38,105 @@
   .gdrf-form { padding: 18px; }
   .gdrf-head { margin-bottom: 18px; }
 }
+
+/* Gemeinsame öffentliche Designsprache für Reservierung, Events und Speisekarte. */
+.gdrf-shell {
+  --gd-accent: #149447;
+  --gd-bg: #fff;
+  --gd-text: #17221b;
+  --gd-muted: #68746c;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1120px !important;
+  margin: 0 auto;
+  color: var(--gd-text);
+}
+.gdrf-shell *, .gdrf-shell *::before, .gdrf-shell *::after { box-sizing: border-box; }
+.gdrf-form {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.gdrf-head { max-width: 760px; margin: 0 0 28px; }
+.gdrf-eyebrow {
+  margin-bottom: 7px;
+  color: var(--gd-accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.gdrf-head h2 {
+  margin: 0;
+  color: var(--gd-text);
+  font-size: clamp(38px, 6vw, 72px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.045em;
+}
+.gdrf-head p { margin: 13px 0 0; color: var(--gd-muted); font-size: 18px; line-height: 1.45; }
+.gdrf-panel {
+  padding: clamp(24px, 4vw, 44px);
+  border: 1px solid rgba(23, 34, 27, .12);
+  border-radius: 22px;
+  background: var(--gd-bg);
+  box-shadow: 0 14px 40px rgba(23, 34, 27, .06);
+}
+.gdrf-grid { gap: 20px 22px; }
+.gdrf-grid label { gap: 7px; color: var(--gd-text); font-weight: 700; }
+.gdrf-grid label > span { font-size: 14px; line-height: 1.35; }
+.gdrf-form input,
+.gdrf-form select,
+.gdrf-form textarea,
+.gdrf-picker-button,
+.gdrf-option {
+  min-height: 50px;
+  padding: 12px 14px;
+  border: 1px solid rgba(23, 34, 27, .14);
+  border-radius: 11px;
+  background: #f7f9f7;
+  color: var(--gd-text);
+}
+.gdrf-form textarea { min-height: 112px; line-height: 1.5; }
+.gdrf-form input:hover,
+.gdrf-form select:hover,
+.gdrf-form textarea:hover,
+.gdrf-picker-button:hover { border-color: rgba(20, 148, 71, .5); }
+.gdrf-form input:focus,
+.gdrf-form select:focus,
+.gdrf-form textarea:focus,
+.gdrf-picker-button:focus {
+  border-color: var(--gd-accent);
+  background: #fff;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--gd-accent) 14%, transparent);
+}
+.gdrf-field-note { color: var(--gd-muted); font-size: 12px; line-height: 1.45; }
+.gdrf-consent { margin: 22px 0 18px; color: var(--gd-muted); font-size: 14px; line-height: 1.45; }
+.gdrf-consent input { width: 20px; height: 20px; min-height: 20px; padding: 0; accent-color: var(--gd-accent); }
+.gdrf-submit {
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: 11px;
+  background: var(--gd-accent);
+  box-shadow: none;
+  transition: transform .18s ease, filter .18s ease;
+}
+.gdrf-submit:hover { filter: brightness(.94); transform: translateY(-1px); }
+.gdrf-calendar { border-color: rgba(23, 34, 27, .14); box-shadow: 0 22px 55px rgba(20, 40, 30, .14); }
+
+@media (max-width: 700px) {
+  .gdrf-shell { margin: 0 auto; }
+  .gdrf-head { margin-bottom: 24px; }
+  .gdrf-head h2 { font-size: clamp(34px, 11vw, 48px); }
+  .gdrf-head p { font-size: 16px; }
+  .gdrf-panel { padding: 22px 18px; border-radius: 17px; }
+  .gdrf-grid { grid-template-columns: 1fr; gap: 16px; }
+  .gdrf-wide { grid-column: auto; }
+  .gdrf-form { padding: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gdrf-submit { transition: none; }
+}

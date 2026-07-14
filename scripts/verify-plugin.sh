@@ -47,6 +47,11 @@ if ! grep -Fq '.gdrf-theme-light' "$PLUGIN/assets/reservation-form.css"; then
   exit 1
 fi
 
+if ! grep -Fq 'class="gdrf-panel"' "$PLUGIN/includes/class-gd-reservation-engine.php" || ! grep -Fq 'max-width: 1120px !important' "$PLUGIN/assets/reservation-form.css" || ! grep -Fq 'font-size: clamp(38px, 6vw, 72px)' "$PLUGIN/assets/reservation-form.css"; then
+  echo "Das Reservierungsformular verwendet nicht die gemeinsame öffentliche Designsprache." >&2
+  exit 1
+fi
+
 if ! grep -Fq 'api.github.com/repos/LEECHER1/Gelsensystem/releases/latest' "$PLUGIN/includes/class-gelsendiele-github-updater.php"; then
   echo "Die vertrauenswürdige GitHub-Releasequelle fehlt." >&2
   exit 1

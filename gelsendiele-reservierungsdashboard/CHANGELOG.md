@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.15.7
+
+- Reservierungsformular an die gemeinsame öffentliche Designsprache von Events und Speisekarte angepasst.
+- Kopfbereich aus der Formularkarte herausgelöst und responsive Breite, Typografie, Felder, Abstände, Radien und Schatten vereinheitlicht.
+
 ## 2.15.6
 
 - Popup-Verlinkung auf einen stabilen Anker des exakten Events auf `/events/` umgestellt.
