@@ -55,6 +55,21 @@
     });
   }
 
+  document.querySelectorAll('[data-gse-event-overview-toggle]').forEach((button) => {
+    const panelId = button.getAttribute('aria-controls') || '';
+    const panel = panelId ? document.getElementById(panelId) : null;
+    const card = button.closest('[data-gse-admin-event-card]');
+    if (!panel) return;
+
+    button.addEventListener('click', () => {
+      const expanded = button.getAttribute('aria-expanded') === 'true';
+      button.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+      button.setAttribute('aria-label', expanded ? 'Eventdetails anzeigen' : 'Eventdetails schließen');
+      panel.hidden = expanded;
+      card?.classList.toggle('is-expanded', !expanded);
+    });
+  });
+
   const centralSectionShell = document.querySelector('.gd-dashboard-shell[data-app-section]:not([data-default-view])');
   if (centralSectionShell) {
     const centralSystemDarkMode = window.matchMedia('(prefers-color-scheme: dark)');

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.15.6
+
+- Popup-Verlinkung auf einen stabilen Anker des exakten Events auf `/events/` umgestellt.
+- Event-Kurzübersichten in der Zentrale standardmäßig eingeklappt und mit zugänglicher Detail-Schaltfläche ergänzt.
+
 ## 2.15.5
 
 - Öffentliche `/events/`-Ausgabe vom Enfold-Layout-Builder entkoppelt, damit dort gespeicherte EventON-Codeblöcke die migrierte WordPress-Seite nicht übersteuern.

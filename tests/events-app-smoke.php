@@ -68,12 +68,17 @@ events_expect( false !== strpos( $events, 'placeholder="www.*"' ) && false === s
 events_expect( false !== strpos( $events, 'data-gse-page-picker-toggle' ) && false !== strpos( $events, 'get_linkable_pages' ), 'WordPress-Seitenauswahl fehlt' );
 events_expect( false !== strpos( $events, 'data-gse-all-day' ) && false !== strpos( $admin_js, 'applyAllDayState' ), 'Ganztägig-Schalter deaktiviert die Zeitfelder nicht' );
 events_expect( false !== strpos( $events, 'gelsensystem-events-overview' ) && false !== strpos( $events, 'Startseiten-Popup' ) && false !== strpos( $events, 'Weitere Informationen' ), 'vollständige Event-Kurzübersicht fehlt' );
+events_expect( false !== strpos( $events, 'data-gse-event-overview-toggle' ) && false !== strpos( $events, 'aria-expanded="false"' ) && false !== strpos( $events, 'data-gse-event-overview hidden' ), 'standardmäßig eingeklappte Event-Kurzübersicht fehlt' );
+events_expect( false !== strpos( $admin_js, "querySelectorAll('[data-gse-event-overview-toggle]')" ) && false !== strpos( $admin_js, 'panel.hidden = expanded' ), 'Aufklappfunktion für Backend-Events fehlt' );
+events_expect( false !== strpos( $admin_css, '.gelsensystem-events-overview[hidden]' ) && false !== strpos( $admin_css, '.gelsensystem-events-toggle[aria-expanded="true"]' ), 'Stile für eingeklappte Backend-Events fehlen' );
 events_expect( strpos( $events, 'gelsensystem-events-color-field' ) > strpos( $events, 'gelsensystem-events-checks' ), 'Eventfarbe steht nicht am Ende des Formulars' );
 events_expect( false !== strpos( $events, 'usort(' ) && false !== strpos( $events, '$by_start = strcmp' ), 'Events werden nach einer nachträglichen Datumsänderung nicht erneut chronologisch sortiert' );
 events_expect( false !== strpos( $admin_js, 'popupSchedule.hidden = !enabled' ) && false !== strpos( $admin_css, '.gelsensystem-events-popup-schedule[hidden]' ), 'Popup-Zeitraum wird nicht bedingt ein- und ausgeblendet' );
 events_expect( false !== strpos( $admin_css, 'html[data-gd-theme="dark"] .gelsensystem-events-form' ), 'Dark-Mode-Stile fehlen' );
 events_expect( false !== strpos( $public_css, '.gse-event-card' ), 'öffentliche Eventkarten fehlen' );
 events_expect( false !== strpos( $public_css, '.gse-event-card__image' ), 'responsive Eventfoto-Stile fehlen' );
+events_expect( false !== strpos( $events, 'id="gse-event-<?php echo esc_attr(' ) && false !== strpos( $events, "home_url( '/events/#gse-event-' . absint( \$event['id'] ) )" ), 'Popup verlinkt nicht auf das exakte Event' );
+events_expect( false !== strpos( $public_css, '.gse-event-card:target' ), 'Ziel-Event wird nach dem Popup-Link nicht hervorgehoben' );
 events_expect( false !== strpos( $public_css, '.gse-event-popup' ), 'responsive Popup-Stile fehlen' );
 events_expect( false !== strpos( $public_js, 'applyFilters' ) && false !== strpos( $public_js, 'sessionStorage' ), 'Filter- oder Popup-Interaktion fehlt' );
 events_expect( false !== strpos( $public_js, 'data-gse-details-toggle' ) && false !== strpos( $public_css, '.gse-event-card__actions' ), 'neue Mehr-Infos-Bedienung fehlt' );
