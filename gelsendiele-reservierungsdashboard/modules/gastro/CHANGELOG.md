@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.8 – 2026-07-14
+
+- Gemeinsame Patchversion mit vollständig vereinheitlichter Navigation und geprüften Konto-/Theme-Steuerelementen.
+
 ## 2.15.7 – 2026-07-14
 
 - Gemeinsame Patchversion mit vereinheitlichtem öffentlichen Reservierungsdesign.

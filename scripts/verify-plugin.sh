@@ -17,6 +17,7 @@ test -f "$ROOT/tests/tables-app-smoke.php"
 test -f "$ROOT/tests/central-url-responsive-smoke.php"
 test -f "$ROOT/tests/public-menu-smoke.php"
 test -f "$ROOT/tests/events-app-smoke.php"
+test -f "$ROOT/tests/navigation-consistency-smoke.php"
 test -f "$PLUGIN/includes/class-gelsensystem-events.php"
 test -f "$PLUGIN/assets/public-events.css"
 
@@ -99,6 +100,7 @@ if command -v php >/dev/null 2>&1; then
   php "$ROOT/tests/central-url-responsive-smoke.php" >/dev/null
   php "$ROOT/tests/public-menu-smoke.php" >/dev/null
   php "$ROOT/tests/events-app-smoke.php" >/dev/null
+  php "$ROOT/tests/navigation-consistency-smoke.php" >/dev/null
 else
   echo "Hinweis: PHP ist lokal nicht verfügbar; PHP-Lint wird in GitHub Actions ausgeführt." >&2
 fi
