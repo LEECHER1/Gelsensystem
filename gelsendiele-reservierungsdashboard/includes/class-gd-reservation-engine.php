@@ -137,13 +137,12 @@ final class GD_Reservation_Engine {
         $branding        = Gelsendiele_Settings::get( 'branding', null, array() );
         $fields          = isset( $form_settings['fields'] ) ? $form_settings['fields'] : Gelsendiele_Settings::form_field_defaults();
         $brand_primary   = ! empty( $form_settings['primary_color'] ) ? $form_settings['primary_color'] : $branding['primary_color'];
-        $brand_secondary = $branding['secondary_color'];
         $theme_mode      = 'inherit' === $form_settings['theme_mode'] ? $branding['theme_mode'] : $form_settings['theme_mode'];
         $surface_color   = ! empty( $form_settings['surface_color'] ) ? $form_settings['surface_color'] : ( 'dark' === $theme_mode ? $branding['dark_surface_color'] : $branding['surface_color'] );
         $text_color      = ! empty( $form_settings['text_color'] ) ? $form_settings['text_color'] : ( 'dark' === $theme_mode ? '#f4f7f5' : '#17221b' );
         wp_add_inline_style(
             'gd-reservation-form',
-            '.gdrf-form{border-radius:var(--gelsendiele-radius,24px)}.gdrf-submit{background:linear-gradient(135deg,' . esc_attr( $brand_primary ) . ',' . esc_attr( $brand_secondary ) . ')}'
+            '.gdrf-panel{border-radius:var(--gelsendiele-radius,22px)}.gdrf-submit{background:' . esc_attr( $brand_primary ) . '}'
         );
         wp_localize_script('gd-reservation-form','GDReservationForm',array(
             'ajaxUrl'=>admin_url('admin-ajax.php'),
@@ -186,6 +185,7 @@ final class GD_Reservation_Engine {
         ob_start(); ?>
         <div class="gdrf-shell<?php echo esc_attr( $theme_class ); ?>" style="<?php echo esc_attr( $form_style ); ?>"><form class="gdrf-form" data-gdrf-form novalidate>
           <div class="gdrf-head"><span class="gdrf-eyebrow"><?php echo esc_html( $business_name ); ?></span><h2><?php echo esc_html( $form_settings['headline'] ); ?></h2><p><?php echo esc_html( $form_settings['intro'] ); ?></p></div>
+          <div class="gdrf-panel">
           <div class="gdrf-grid">
             <label class="gdrf-date-field"><span><?php echo esc_html( $label( 'date' ) . $marker( 'date' ) ); ?></span>
               <input type="hidden" name="date" required>
@@ -213,6 +213,7 @@ final class GD_Reservation_Engine {
           <input type="text" name="website" class="gdrf-hp" tabindex="-1" autocomplete="off">
           <button type="submit" class="gdrf-submit"><?php echo esc_html( $form_settings['button_text'] ); ?></button>
           <div class="gdrf-message" data-gdrf-message aria-live="polite"></div>
+          </div>
         </form></div><?php return ob_get_clean();
     }
 

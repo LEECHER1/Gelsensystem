@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.7 – 2026-07-14
+
+- Gemeinsame Patchversion mit vereinheitlichtem öffentlichen Reservierungsdesign.
+
 ## 2.15.6 – 2026-07-14
 
 - Gemeinsame Patchversion mit zielgenauer Event-Verlinkung und kompakter Event-Übersicht.
