@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.4 – 2026-07-14
+
+- Gemeinsame Patchversion mit vollständig EventON-unabhängiger öffentlicher Event-Seite.
+
 ## 2.15.3 – 2026-07-13
 
 - Gemeinsame Patchversion mit zuverlässigem WordPress-Mediathek-Dialog für Eventfotos.

@@ -14,8 +14,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Gelsensystem_Events {
 	const POST_TYPE        = 'gelsensystem_event';
 	const SHORTCODE        = 'gelsensystem_events';
-	const ROUTE_QUERY_VAR  = 'gelsensystem_events_page';
-	const ROUTE_VERSION    = '1';
+	const PAGE_OPTION      = 'gse_events_page_id';
+	const PAGE_SLUG        = 'events';
+	const PREVIOUS_CONTENT = '_gse_previous_event_page_content';
+	const ROUTE_REFRESH    = 'gse_events_refresh_routes';
 	const META_START       = '_gse_start';
 	const META_END         = '_gse_end';
 	const META_LOCATION    = '_gse_location';
@@ -36,9 +38,10 @@ final class Gelsensystem_Events {
 
 	public static function bootstrap() {
 		add_action( 'init', array( __CLASS__, 'register' ), 20 );
-		add_filter( 'query_vars', array( __CLASS__, 'register_query_var' ) );
+		add_action( 'init', array( __CLASS__, 'maybe_refresh_public_routes' ), 99 );
 		add_action( 'template_redirect', array( __CLASS__, 'handle_actions' ), 0 );
 		add_action( 'template_redirect', array( __CLASS__, 'render_public_route' ), 2 );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_public_route_assets' ), 19 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_homepage_popup_assets' ), 20 );
 		add_action( 'wp_footer', array( __CLASS__, 'render_homepage_popup' ), 5 );
 		add_action( 'wp_ajax_gse_media_library', array( __CLASS__, 'ajax_media_library' ) );
@@ -129,17 +132,77 @@ final class Gelsensystem_Events {
 		);
 
 		add_shortcode( self::SHORTCODE, array( __CLASS__, 'render_public_events' ) );
-		add_rewrite_rule( '^events/?$', 'index.php?' . self::ROUTE_QUERY_VAR . '=1', 'top' );
-
-		if ( self::ROUTE_VERSION !== (string) get_option( 'gse_route_version', '' ) ) {
-			flush_rewrite_rules( false );
-			update_option( 'gse_route_version', self::ROUTE_VERSION, false );
-		}
 	}
 
-	public static function register_query_var( $query_vars ) {
-		$query_vars[] = self::ROUTE_QUERY_VAR;
-		return $query_vars;
+	/**
+	 * Legt eine echte WordPress-Seite für die Events an. Vorhandene Inhalte
+	 * (beispielsweise ein EventON-Shortcode) werden einmalig als Metadatum
+	 * gesichert, bevor die Seite auf die Gelsensystem-Ausgabe umgestellt wird.
+	 */
+	public static function ensure_public_page() {
+		$page_id = (int) get_option( self::PAGE_OPTION, 0 );
+		$page    = $page_id ? get_post( $page_id ) : null;
+		if ( ! $page || 'page' !== $page->post_type ) {
+			$page    = get_page_by_path( self::PAGE_SLUG, OBJECT, 'page' );
+			$page_id = $page ? (int) $page->ID : 0;
+		}
+
+		$shortcode = '[' . self::SHORTCODE . ']';
+		if ( $page_id ) {
+			$content = (string) $page->post_content;
+			if ( ! has_shortcode( $content, self::SHORTCODE ) && '' !== trim( $content ) && ! metadata_exists( 'post', $page_id, self::PREVIOUS_CONTENT ) ) {
+				add_post_meta( $page_id, self::PREVIOUS_CONTENT, $content, true );
+			}
+
+			$update = array( 'ID' => $page_id );
+			if ( 'Events' !== $page->post_title ) {
+				$update['post_title'] = 'Events';
+			}
+			if ( self::PAGE_SLUG !== $page->post_name ) {
+				$update['post_name'] = self::PAGE_SLUG;
+			}
+			if ( 'publish' !== $page->post_status ) {
+				$update['post_status'] = 'publish';
+			}
+			if ( ! has_shortcode( $content, self::SHORTCODE ) || trim( $content ) !== $shortcode ) {
+				$update['post_content'] = $shortcode;
+			}
+			if ( count( $update ) > 1 ) {
+				wp_update_post( $update );
+				self::schedule_route_refresh();
+			}
+		} else {
+			$page_id = wp_insert_post(
+				array(
+					'post_title'   => 'Events',
+					'post_name'    => self::PAGE_SLUG,
+					'post_status'  => 'publish',
+					'post_type'    => 'page',
+					'post_content' => $shortcode,
+				),
+				true
+			);
+			if ( is_wp_error( $page_id ) ) {
+				return 0;
+			}
+			self::schedule_route_refresh();
+		}
+
+		update_option( self::PAGE_OPTION, (int) $page_id, false );
+		return (int) $page_id;
+	}
+
+	public static function schedule_route_refresh() {
+		update_option( self::ROUTE_REFRESH, 1, false );
+	}
+
+	public static function maybe_refresh_public_routes() {
+		if ( ! get_option( self::ROUTE_REFRESH, 0 ) ) {
+			return;
+		}
+		flush_rewrite_rules( false );
+		delete_option( self::ROUTE_REFRESH );
+		delete_option( 'gse_route_version' );
 	}
 
 	public static function handle_actions() {
@@ -677,6 +740,11 @@ final class Gelsensystem_Events {
 		return $date . ' · ' . $start_time . ( $end_time ? '–' . $end_time . ' Uhr' : ' Uhr' );
 	}
 
+	private static function enqueue_public_assets() {
+		wp_enqueue_style( 'gelsensystem-public-events', GELSENDIELE_URL . 'assets/public-events.css', array(), GELSENDIELE_VERSION );
+		wp_enqueue_script( 'gelsensystem-public-events', GELSENDIELE_URL . 'assets/public-events.js', array(), GELSENDIELE_VERSION, true );
+	}
+
 	public static function render_public_events( $attributes = array() ) {
 		$attributes = shortcode_atts( array( 'limit' => 100, 'show_past' => 'filter' ), $attributes, self::SHORTCODE );
 		$mode       = strtolower( (string) $attributes['show_past'] );
@@ -687,8 +755,7 @@ final class Gelsensystem_Events {
 		$today      = self::date_part( $now );
 		$upcoming   = count( array_filter( $events, static function ( $event ) use ( $now ) { return $event['end'] >= $now; } ) );
 		$past       = count( $events ) - $upcoming;
-		wp_enqueue_style( 'gelsensystem-public-events', GELSENDIELE_URL . 'assets/public-events.css', array(), GELSENDIELE_VERSION );
-		wp_enqueue_script( 'gelsensystem-public-events', GELSENDIELE_URL . 'assets/public-events.js', array(), GELSENDIELE_VERSION, true );
+		self::enqueue_public_assets();
 
 		ob_start();
 		?>
@@ -769,12 +836,24 @@ final class Gelsensystem_Events {
 		return untrailingslashit( $request_path ) === untrailingslashit( $home_path );
 	}
 
+	private static function is_public_events_request() {
+		$request_path = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ) : '';
+		$events_path  = (string) wp_parse_url( home_url( '/' . self::PAGE_SLUG . '/' ), PHP_URL_PATH );
+		return untrailingslashit( $request_path ) === untrailingslashit( $events_path );
+	}
+
+	public static function enqueue_public_route_assets() {
+		$page_id = (int) get_option( self::PAGE_OPTION, 0 );
+		if ( self::is_public_events_request() || ( $page_id && is_page( $page_id ) ) ) {
+			self::enqueue_public_assets();
+		}
+	}
+
 	public static function enqueue_homepage_popup_assets() {
 		if ( ! self::get_homepage_popup_event() ) {
 			return;
 		}
-		wp_enqueue_style( 'gelsensystem-public-events', GELSENDIELE_URL . 'assets/public-events.css', array(), GELSENDIELE_VERSION );
-		wp_enqueue_script( 'gelsensystem-public-events', GELSENDIELE_URL . 'assets/public-events.js', array(), GELSENDIELE_VERSION, true );
+		self::enqueue_public_assets();
 	}
 
 	public static function render_homepage_popup() {
@@ -795,15 +874,17 @@ final class Gelsensystem_Events {
 	}
 
 	public static function render_public_route() {
-		if ( is_admin() ) {
-			return;
-		}
-		$is_route = (bool) get_query_var( self::ROUTE_QUERY_VAR );
-		$is_eventon_archive = function_exists( 'is_post_type_archive' ) && is_post_type_archive( 'ajde_events' );
-		if ( ! $is_route && ! $is_eventon_archive ) {
+		if ( is_admin() || ! self::is_public_events_request() ) {
 			return;
 		}
 
+		$page_id = (int) get_option( self::PAGE_OPTION, 0 );
+		if ( $page_id && is_page( $page_id ) ) {
+			return;
+		}
+
+		// Fallback: Selbst wenn Permalinks oder ein fremdes Archiv die Adresse
+		// abfangen, liefert /events/ weiterhin ausschließlich Gelsensystem-Events.
 		status_header( 200 );
 		nocache_headers();
 		get_header();
