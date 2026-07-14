@@ -659,6 +659,13 @@ html[data-gd-theme="dark"] .gd-main-content {
   background: var(--gd-bg) !important;
 }
 
+/* Die helle Branding-Oberfläche wird inline auf dem Shell-Element gesetzt.
+   Im Darkmode muss die dunkle Branding-Oberfläche diese Inline-Variable
+   auf Desktop, Tablet und Smartphone zuverlässig überstimmen. */
+html[data-gd-theme="dark"] body.gd-standalone-app .gd-dashboard-shell {
+  --gd-bg: var(--gelsendiele-dark-surface, #08110b) !important;
+}
+
 html[data-gd-theme="dark"] .gd-theme-icon-moon { display: none; }
 html[data-gd-theme="dark"] .gd-theme-icon-sun { display: block; }
 
