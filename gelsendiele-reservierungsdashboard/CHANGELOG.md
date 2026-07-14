@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.9
+
+- Überlauf der zentralen Desktop-Seitenleiste korrigiert, damit der herausragende Einklapp-Button vollständig sichtbar und bedienbar bleibt.
+
 ## 2.15.8
 
 - Zentrale und Gastro-Seitenleisten bei Branding, Unterzeile, Online-Status, Darkmode und Benutzerbereich vereinheitlicht.

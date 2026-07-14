@@ -2129,7 +2129,7 @@ html[data-gd-theme="dark"] .gelsensystem-user-card small { color:#aab7ac; }
   .gd-dashboard-shell.gd-has-central-nav>.gd-automation-panel,
   .gd-dashboard-shell.gd-has-central-nav>.gd-toolbar,
   .gd-dashboard-shell.gd-has-central-nav>.gd-main-content { width:min(100%,1380px);margin-left:auto;margin-right:auto; }
-  .gelsensystem-sidebar { position:fixed;inset:0 auto 0 0;z-index:900;display:flex;width:250px;height:100vh;height:100dvh;padding:24px 16px 18px;overflow:hidden;flex-direction:column;color:#e8f0e9;background:linear-gradient(180deg,#101b13,#08110b);box-shadow:12px 0 40px rgba(8,17,11,.13); }
+  .gelsensystem-sidebar { position:fixed;inset:0 auto 0 0;z-index:900;display:flex;width:250px;height:100vh;height:100dvh;padding:24px 16px 18px;overflow:visible;flex-direction:column;color:#e8f0e9;background:linear-gradient(180deg,#101b13,#08110b);box-shadow:12px 0 40px rgba(8,17,11,.13); }
   .gelsensystem-sidebar-brand { display:flex;align-items:center;gap:11px;margin:0 4px 28px;color:#fff;text-decoration:none; }
   .gelsensystem-sidebar-brand>span { display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px;border-radius:13px;color:#102114;background:#c9e6c5;font-size:13px;font-weight:900;letter-spacing:.5px; }
   .gelsensystem-sidebar-brand strong,.gelsensystem-sidebar-brand small { display:block; }
