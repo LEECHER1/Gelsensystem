@@ -2,7 +2,7 @@
 Contributors: Andreas Schwarz / OpenAI
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.15.12
+Stable tag: 2.15.13
 
 Zentrales Reservierungs-, Service-, Küchen-, Schank- und Zahlungsgrundsystem für Gastronomiebetriebe.
 
@@ -40,6 +40,10 @@ Das Zahlungsmodul dokumentiert Bar- und Kartenzahlungen, ist aber noch keine RKS
 Installierbare ZIP-Dateien werden aus einem geprüften Git-Tag erstellt. Vor jedem Produktivupdate sind WordPress-Dateien und Datenbank vollständig zu sichern.
 
 == Changelog ==
+
+= 2.15.13 =
+* Primär-, Sekundär-, Akzent- und Flächenfarben werden in Zentrale, Gastro-App, Events, Speisekarte und Reservierungsformular konsistent übernommen.
+* Fest codierte grüne Navigations-, Filter-, Kalender- und Fokusfarben wurden durch die gespeicherten Branding-Werte ersetzt.
 
 = 2.15.12 =
 * Verhindert, dass die helle Branding-Oberfläche den Darkmode-Hintergrund auf Desktop, Tablet oder Smartphone überschreibt.

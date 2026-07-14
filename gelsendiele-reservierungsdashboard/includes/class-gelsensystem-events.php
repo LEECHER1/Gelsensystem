@@ -760,7 +760,7 @@ final class Gelsensystem_Events {
 
 		ob_start();
 		?>
-		<section class="gse-public-events" aria-labelledby="gse-events-title">
+		<section class="gse-public-events" style="<?php echo esc_attr( Gelsendiele_Settings::css_variables() ); ?>" aria-labelledby="gse-events-title">
 			<header class="gse-public-events__header"><span>Die Gelsendiele</span><h1 id="gse-events-title">Events</h1><p>Was bei uns als Nächstes los ist.</p></header>
 			<?php if ( $filterable && $events ) : ?>
 				<div class="gse-public-events__filters" data-gse-filters>
@@ -863,7 +863,7 @@ final class Gelsensystem_Events {
 			return;
 		}
 		?>
-		<div class="gse-event-popup" data-gse-popup data-event-id="<?php echo esc_attr( $event['id'] ); ?>" data-popup-version="<?php echo esc_attr( md5( $event['popup_start'] . '|' . $event['popup_end'] ) ); ?>" style="--gse-accent:<?php echo esc_attr( $event['color'] ); ?>" hidden>
+		<div class="gse-event-popup" data-gse-popup data-event-id="<?php echo esc_attr( $event['id'] ); ?>" data-popup-version="<?php echo esc_attr( md5( $event['popup_start'] . '|' . $event['popup_end'] ) ); ?>" style="<?php echo esc_attr( Gelsendiele_Settings::css_variables() ); ?>--gse-accent:<?php echo esc_attr( $event['color'] ); ?>" hidden>
 			<button type="button" class="gse-event-popup__backdrop" data-gse-popup-close aria-label="Popup schließen"></button>
 			<section class="gse-event-popup__dialog<?php echo $event['image_id'] ? ' has-image' : ''; ?>" role="dialog" aria-modal="true" aria-labelledby="gse-popup-title-<?php echo esc_attr( $event['id'] ); ?>">
 				<button type="button" class="gse-event-popup__close" data-gse-popup-close aria-label="Popup schließen">×</button>

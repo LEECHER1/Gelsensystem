@@ -89,7 +89,9 @@
         button.setAttribute('title', centralTheme === 'dark' ? 'Helle Darstellung aktivieren' : 'Dark Mode aktivieren');
       });
       const centralThemeColor = document.getElementById('gd-theme-color');
-      if (centralThemeColor) centralThemeColor.content = centralTheme === 'dark' ? '#111713' : '#315b2d';
+      if (centralThemeColor) centralThemeColor.content = centralTheme === 'dark'
+        ? (window.GDReservations?.themeColors?.dark || '#08110b')
+        : (window.GDReservations?.themeColors?.primary || '#315b2d');
       if (persist) {
         try { window.localStorage.setItem('gd-dashboard-theme', centralTheme); } catch (error) {}
       }
@@ -822,7 +824,9 @@
       button.setAttribute('aria-label', selectedTheme === 'dark' ? 'Helle Darstellung aktivieren' : 'Dark Mode aktivieren');
       button.setAttribute('title', selectedTheme === 'dark' ? 'Helle Darstellung aktivieren' : 'Dark Mode aktivieren');
     });
-    if (themeColorMeta) themeColorMeta.content = selectedTheme === 'dark' ? '#111713' : '#315b2d';
+    if (themeColorMeta) themeColorMeta.content = selectedTheme === 'dark'
+      ? (window.GDReservations?.themeColors?.dark || '#08110b')
+      : (window.GDReservations?.themeColors?.primary || '#315b2d');
     if (persist) {
       try { window.localStorage.setItem('gd-dashboard-theme', selectedTheme); } catch (error) {}
     }

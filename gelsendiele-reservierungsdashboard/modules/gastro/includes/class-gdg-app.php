@@ -176,7 +176,7 @@ final class GDG_App {
 			'pollInterval' => max( 3, min( 30, (int) get_option( 'gdg_poll_interval', 5 ) ) ) * 1000,
 			'themeMode' => Gelsendiele_Settings::get( 'branding', 'theme_mode', 'auto' ),
 			'themeColors' => array(
-				'light' => '#f3f5f7',
+				'light' => Gelsendiele_Settings::get( 'branding', 'primary_color', '#087cff' ),
 				'dark'  => Gelsendiele_Settings::get( 'branding', 'dark_surface_color', '#08110b' ),
 			),
 			'locale' => get_locale(),

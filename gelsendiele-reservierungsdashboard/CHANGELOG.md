@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.15.13
+
+- Reicht die gespeicherten Branding-Farben an alle zentralen, gastronomischen und öffentlichen Oberflächen durch.
+- Entfernt feste grüne Markenfarben aus Navigation, Events-Filtern, Formularen, Kalendern und Fokuszuständen.
+
 ## 2.15.12
 
 - Verhindert, dass die inline gesetzte helle Branding-Oberfläche den Darkmode-Hintergrund auf Desktop, Tablet und Smartphone überschreibt.
