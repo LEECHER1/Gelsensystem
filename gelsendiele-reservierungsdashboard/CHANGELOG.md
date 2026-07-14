@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.10
+
+- Vereinheitlicht den hellen Hintergrund aller zentralen Bereiche mit dem neutralen Service-Grau.
+
 ## 2.15.9
 
 - Überlauf der zentralen Desktop-Seitenleiste korrigiert, damit der herausragende Einklapp-Button vollständig sichtbar und bedienbar bleibt.
