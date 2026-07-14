@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.10 – 2026-07-14
+
+- Verwendet gemeinsam mit allen zentralen Bereichen denselben neutralen hellgrauen Hintergrund.
+
 ## 2.15.9 – 2026-07-14
 
 - Gemeinsame Patchversion mit vollständig sichtbarem Seitenleisten-Schalter.
