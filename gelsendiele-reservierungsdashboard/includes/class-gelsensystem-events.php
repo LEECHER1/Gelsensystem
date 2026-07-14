@@ -878,13 +878,9 @@ final class Gelsensystem_Events {
 			return;
 		}
 
-		$page_id = (int) get_option( self::PAGE_OPTION, 0 );
-		if ( $page_id && is_page( $page_id ) ) {
-			return;
-		}
-
-		// Fallback: Selbst wenn Permalinks oder ein fremdes Archiv die Adresse
-		// abfangen, liefert /events/ weiterhin ausschließlich Gelsensystem-Events.
+		// Die Ausgabe erfolgt absichtlich unabhängig von the_content(). Enfold
+		// speichert den Advanced Layout Builder separat und könnte sonst trotz
+		// migriertem Seiteninhalt weiterhin einen alten EventON-Block ausgeben.
 		status_header( 200 );
 		nocache_headers();
 		get_header();

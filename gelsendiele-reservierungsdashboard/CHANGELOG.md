@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.5
+
+- Öffentliche `/events/`-Ausgabe vom Enfold-Layout-Builder entkoppelt, damit dort gespeicherte EventON-Codeblöcke die migrierte WordPress-Seite nicht übersteuern.
+
 ## 2.15.4
 
 - Öffentliche Event-Seite unter `/events/` vollständig von EventON entkoppelt und als echte WordPress-Seite mit Gelsensystem-Shortcode angelegt.

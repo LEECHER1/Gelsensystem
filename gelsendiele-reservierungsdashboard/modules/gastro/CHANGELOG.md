@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.5 – 2026-07-14
+
+- Gemeinsame Patchversion mit direkter, Enfold-unabhängiger Event-Ausgabe.
+
 ## 2.15.4 – 2026-07-14
 
 - Gemeinsame Patchversion mit vollständig EventON-unabhängiger öffentlicher Event-Seite.
