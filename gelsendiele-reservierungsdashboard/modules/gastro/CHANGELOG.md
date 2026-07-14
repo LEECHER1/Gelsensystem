@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.12 – 2026-07-14
+
+- Synchronisiert den zentralen Darkmode-Hintergrund zuverlässig mit der dunklen Branding-Oberfläche.
+
 ## 2.15.11 – 2026-07-14
 
 - Definiert die Referenzpalette für den vereinheitlichten Darkmode aller Gelsensystem-Bereiche.

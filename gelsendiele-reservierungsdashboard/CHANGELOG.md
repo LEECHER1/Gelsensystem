@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.12
+
+- Verhindert, dass die inline gesetzte helle Branding-Oberfläche den Darkmode-Hintergrund auf Desktop, Tablet und Smartphone überschreibt.
+
 ## 2.15.11
 
 - Vereinheitlicht die Darkmode-Palette aller zentralen Bereiche mit Service: Hintergrund, Karten, Sekundärflächen, Rahmen, Text und Eingabefelder.
