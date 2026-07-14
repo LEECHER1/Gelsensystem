@@ -3,7 +3,7 @@
  * Plugin Name: Gelsensystem
  * Plugin URI: https://github.com/LEECHER1/Gelsensystem
  * Description: Zentrales Reservierungs-, Service-, Küchen- und Kassensystem für Gastronomiebetriebe.
- * Version: 2.15.12
+ * Version: 2.15.13
  * Author: Andreas Schwarz / Gelsensystem
  * Text Domain: gelsendiele-dashboard
  * Requires at least: 6.0
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.15.12' );
+defined( 'GELSENDIELE_VERSION' ) || define( 'GELSENDIELE_VERSION', '2.15.13' );
 defined( 'GELSENDIELE_FILE' ) || define( 'GELSENDIELE_FILE', __FILE__ );
 defined( 'GELSENDIELE_DIR' ) || define( 'GELSENDIELE_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'GELSENDIELE_URL' ) || define( 'GELSENDIELE_URL', plugin_dir_url( __FILE__ ) );
@@ -439,6 +439,11 @@ final class Gelsendiele_Reservierungsdashboard {
             'tableCount'          => $this->get_table_count(),
             'tableDefaultCapacity'=> $this->get_table_default_capacity(),
             'tableCapacityOverrides' => $this->get_table_capacity_overrides(),
+            'themeColors'      => array(
+                'primary' => Gelsendiele_Settings::get( 'branding', 'primary_color', '#315b2d' ),
+                'surface' => Gelsendiele_Settings::get( 'branding', 'surface_color', '#f3f5f7' ),
+                'dark'    => Gelsendiele_Settings::get( 'branding', 'dark_surface_color', '#08110b' ),
+            ),
             'today'            => current_datetime()->format( 'Y-m-d' ),
             'openWeekdays'     => $this->get_open_weekdays(),
             'dateExceptions'   => $this->get_date_exceptions(),

@@ -41,8 +41,10 @@
 
 /* Gemeinsame öffentliche Designsprache für Reservierung, Events und Speisekarte. */
 .gdrf-shell {
-  --gd-accent: #149447;
-  --gd-bg: #fff;
+  --gd-accent: var(--gelsendiele-primary, #149447);
+  --gd-secondary: var(--gelsendiele-secondary, #0b5d38);
+  --gd-brand-accent: var(--gelsendiele-accent, #d9a441);
+  --gd-bg: var(--gelsendiele-surface, #fff);
   --gd-text: #17221b;
   --gd-muted: #68746c;
   box-sizing: border-box;
@@ -119,7 +121,7 @@
   min-height: 48px;
   padding: 0 20px;
   border-radius: 11px;
-  background: var(--gd-accent);
+  background: linear-gradient(135deg, var(--gd-accent), var(--gd-secondary));
   box-shadow: none;
   transition: transform .18s ease, filter .18s ease;
 }

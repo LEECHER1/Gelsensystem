@@ -156,7 +156,7 @@ final class GD_Reservation_Engine {
                 'weekdays'=>array('Mo','Di','Mi','Do','Fr','Sa','So')
             )
         ));
-        $form_style = '--gd-accent:' . $brand_primary . ';--gd-bg:' . $surface_color . ';--gd-text:' . $text_color . ';--gd-dark-bg:' . $branding['dark_surface_color'] . ';--gelsendiele-radius:' . absint( $branding['border_radius'] ) . 'px;max-width:' . absint( $form_settings['width'] ) . 'px;';
+        $form_style = Gelsendiele_Settings::css_variables() . '--gd-accent:' . $brand_primary . ';--gd-secondary:' . $branding['secondary_color'] . ';--gd-bg:' . $surface_color . ';--gd-text:' . $text_color . ';--gd-dark-bg:' . $branding['dark_surface_color'] . ';max-width:' . absint( $form_settings['width'] ) . 'px;';
         $areas = array();
         $tables = array();
         if ( class_exists( 'GDG_DB' ) ) {

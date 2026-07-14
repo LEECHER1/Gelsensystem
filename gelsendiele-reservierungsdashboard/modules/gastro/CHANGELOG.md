@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.15.13 – 2026-07-14
+
+- Verwendet Primär- und Sekundärfarbe auch für die Desktop- und Mobilnavigation sowie dynamische Fokuszustände.
+
 ## 2.15.12 – 2026-07-14
 
 - Synchronisiert den zentralen Darkmode-Hintergrund zuverlässig mit der dunklen Branding-Oberfläche.
